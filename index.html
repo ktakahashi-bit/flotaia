@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FlotaIA El Tambo</title>
+<meta name="description" content="Prototipo de FlotaIA: mantenimiento predictivo e impacto ambiental de la flota de recolección de residuos de El Tambo (Huancayo).">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #eef2f0; --surface: #ffffff; --ink: #15201d; --muted: #56625e; --line: #d3dbd8;
+  --accent: #0b6b5d; --accent-soft: #e2f0ec; --good: #1d8549; --warn: #a06c05; --crit: #bf3326;
+  --good-soft: #e3f3e8; --warn-soft: #fbf1dc; --crit-soft: #fbe5e2;
+  --ia: #5b3fb5; --ia-soft: #eeeafb; --auto: #0b6b5d; --auto-soft: #e2f0ec; --sim: #8a5a0b; --sim-soft: #f8eedb;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1514; --surface: #172020; --ink: #e5ece9; --muted: #9aa8a3; --line: #2a3634;
+  --accent: #46c2a8; --accent-soft: #163a33; --good: #4cc27c; --warn: #e2b04a; --crit: #ef7468;
+  --good-soft: #15301f; --warn-soft: #36290f; --crit-soft: #3a1b18;
+  --ia: #b4a2ff; --ia-soft: #2a2347; --auto: #46c2a8; --auto-soft: #163a33; --sim: #e2b04a; --sim-soft: #36290f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1514; --surface: #172020; --ink: #e5ece9; --muted: #9aa8a3; --line: #2a3634;
+  --accent: #46c2a8; --accent-soft: #163a33; --good: #4cc27c; --warn: #e2b04a; --crit: #ef7468;
+  --good-soft: #15301f; --warn-soft: #36290f; --crit-soft: #3a1b18;
+  --ia: #b4a2ff; --ia-soft: #2a2347; --auto: #46c2a8; --auto-soft: #163a33; --sim: #e2b04a; --sim-soft: #36290f; color-scheme: dark }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; border-bottom: 2px solid var(--ink); padding-bottom: 12px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 2.3rem; line-height: 1; margin: 0; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.sub { color: var(--muted); margin: 4px 0 0; max-width: 64ch; }
+.tag { font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+h2 { font-family: var(--display); font-weight: 600; font-size: 1.35rem; margin: 0; letter-spacing: .02em; text-transform: uppercase; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: grid; gap: 2px; align-content: start; }
+.kpi .v { font-family: var(--mono); font-size: 1.8rem; font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.kpi .l { font-size: .82rem; color: var(--muted); }
+.kpi .m { font-size: .76rem; font-family: var(--mono); color: var(--muted); }
+.ok { color: var(--good); } .bad { color: var(--crit); } .mid { color: var(--warn); }
+.grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 18px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: .68rem; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.b-ia { background: var(--ia-soft); color: var(--ia); } .b-auto { background: var(--auto-soft); color: var(--auto); } .b-sim { background: var(--sim-soft); color: var(--sim); }
+.legend3 { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .82rem; color: var(--muted); align-items: center; }
+.unit { display: grid; grid-template-columns: 14px 52px minmax(0, 1fr); gap: 2px 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line); }
+.unit:first-of-type { border-top: 0; }
+.dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 5px; display: inline-block; }
+.dot.g { background: var(--good); } .dot.a { background: var(--warn); } .dot.r { background: var(--crit); }
+.uid { font-family: var(--mono); font-weight: 500; }
+.ustate { font-size: .9rem; }
+.sens { grid-column: 3; display: flex; flex-wrap: wrap; gap: 2px 14px; font-family: var(--mono); font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.flash { animation: fl 1.4s ease-out; }
+@keyframes fl { from { background: var(--accent-soft); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
+button { font: inherit; font-size: .88rem; font-weight: 600; border-radius: 4px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--surface); }
+button.ghost { background: transparent; color: var(--accent); }
+button.warn { border-color: var(--crit); background: transparent; color: var(--crit); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+form { display: grid; gap: 10px; margin: 0; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+label { display: grid; gap: 4px; font-size: .8rem; color: var(--muted); }
+select, textarea, input { font: inherit; font-size: .92rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; }
+textarea { min-height: 70px; resize: vertical; width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: .76rem; border: 1px dashed var(--line); background: transparent; color: var(--muted); padding: 4px 8px; font-weight: 500; border-radius: 3px; }
+.status { font-size: .85rem; color: var(--muted); min-height: 1.3em; margin: 0; }
+.status.err { color: var(--crit); }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+th { text-align: left; font-weight: 600; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 2px solid var(--line); padding: 6px 8px; }
+td { border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill { display: inline-block; font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.alta { background: var(--crit-soft); color: var(--crit); } .pill.media { background: var(--warn-soft); color: var(--warn); } .pill.baja { background: var(--good-soft); color: var(--good); }
+.pill.ej { background: var(--sim-soft); color: var(--sim); }
+.closer { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.closer input { width: 74px; padding: 5px 6px; }
+.closer button { padding: 5px 10px; }
+.amb { border-top: 3px solid var(--good); }
+.amb-k { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.amb .kpi { background: var(--bg); }
+details summary { cursor: pointer; font-size: .86rem; font-weight: 600; color: var(--accent); }
+details[open] summary { margin-bottom: 10px; }
+.sup input { width: 120px; }
+.guide { border-left: 4px solid var(--accent); }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.steps li.done { color: var(--muted); }
+.steps li.done::marker { color: var(--good); }
+.steps li.now { font-weight: 600; }
+.note { font-size: .78rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; max-width: 100ch; display: grid; gap: 6px; }
+.note p { margin: 0; }
+.toast { min-height: 1.4em; font-size: .9rem; }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .amb-k { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .kpi .v { font-size: 1.45rem; } .amb-k { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="tag">Prototipo de prueba de concepto · Producto Integrador UCV · Gestión e Innovación Tecnológica</div>
+      <h1>Flota<span>IA</span> · Compactadoras de El Tambo</h1>
+      <p class="sub">Mantenimiento predictivo e impacto ambiental de la flota de recolección. Los datos son de demostración: no corresponden a la operación real de la municipalidad.</p>
+    </div>
+    <div class="actions">
+      <button type="button" id="btnGuia">Demostración guiada C-03</button>
+      <button type="button" class="warn" id="btnReset">Reiniciar demostración</button>
+    </div>
+  </header>
+
+  <section class="panel" aria-labelledby="hTipos">
+    <h2 id="hTipos" style="font-size:1.05rem">Qué es real y qué es simulado</h2>
+    <div class="legend3">
+      <span><span class="badge b-ia">IA</span> modelo de bosque aleatorio entrenado con datos experimentales reales (Helwig et al., 2015); se ejecuta en este navegador</span>
+      <span><span class="badge b-auto">Automatización</span> reglas programadas (clasificación de reportes, órdenes automáticas, indicadores)</span>
+      <span><span class="badge b-sim">Simulación</span> asignación de ciclos de laboratorio a las compactadoras, órdenes de ejemplo y supuestos ambientales</span>
+    </div>
+  </section>
+
+  <section class="panel guide" id="guia" hidden aria-labelledby="hGuia">
+    <div class="panel-head"><h2 id="hGuia">Demostración guiada: fuga hidráulica en C-03</h2><button type="button" class="ghost" id="btnGuiaCerrar">Cerrar guía</button></div>
+    <ol class="steps" id="guiaPasos"></ol>
+    <p class="toast" id="guiaMsg" role="status"></p>
+    <div class="row"><button type="button" id="btnPaso">Ejecutar paso 1</button></div>
+  </section>
+
+  <section class="kpis" aria-label="Indicadores de mantenimiento">
+    <div class="kpi"><span class="l">Rutas de recolección atendidas hoy</span><span class="v" id="kRutas">–</span><span class="m">meta: cobertura ≥ 98 %</span></div>
+    <div class="kpi"><span class="l">Disponibilidad de flota (mes)</span><span class="v" id="kDisp">–</span><span class="m">meta ≥ 90 %</span></div>
+    <div class="kpi"><span class="l">MTBF (horas entre fallas)</span><span class="v" id="kMtbf">–</span><span class="m">meta +25 % vs. línea base</span></div>
+    <div class="kpi"><span class="l">MTTR (horas de reparación)</span><span class="v" id="kMttr">–</span><span class="m">meta −20 % vs. línea base</span></div>
+    <div class="kpi"><span class="l">Órdenes abiertas</span><span class="v" id="kOt">–</span><span class="m" id="kOtM">&nbsp;</span></div>
+  </section>
+
+  <section class="panel amb" aria-labelledby="hAmb">
+    <div class="panel-head"><h2 id="hAmb">Impacto ambiental estimado</h2><span><span class="badge b-auto">Automatización</span> <span class="badge b-sim">Supuestos</span></span></div>
+    <div class="amb-k">
+      <div class="kpi"><span class="l">Residuos sin recoger hoy</span><span class="v" id="aSin">–</span><span class="m" id="aSinM">meta: 0 t</span></div>
+      <div class="kpi"><span class="l">Diésel de la flota hoy</span><span class="v" id="aDie">–</span><span class="m" id="aDieM">&nbsp;</span></div>
+      <div class="kpi"><span class="l">CO₂ emitido (proyección mensual)</span><span class="v" id="aCo2">–</span><span class="m">diésel × 2,68 kg CO₂/L × 30 días</span></div>
+      <div class="kpi"><span class="l">CO₂ evitado con FlotaIA (mensual)</span><span class="v" id="aEvi">–</span><span class="m" id="aEviM">meta: −10 % vs. línea base</span></div>
+    </div>
+    <details>
+      <summary>Supuestos del cálculo (editables)</summary>
+      <div class="row sup">
+        <label for="sTon">Residuos generados (t/día)<input id="sTon" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label for="sLit">Diésel por compactadora (L/día)<input id="sLit" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label for="sAho">Ahorro de diésel por mantenimiento (%)<input id="sAho" type="number" min="0" max="50" step="1" inputmode="decimal"></label>
+        <button type="button" class="ghost" id="sReset">Valores por defecto</button>
+      </div>
+      <p class="status" id="supMsg"></p>
+      <p class="status">191 t/día es la generación del distrito reportada por la prensa (HYTimes, 2026), sin documento oficial publicado. Los 35 L de diésel por unidad y día son un valor de trabajo, y el 10 % de ahorro es la meta de la Tabla 14. Los tres deben reemplazarse con los datos que entregue la municipalidad (Anexo B).</p>
+    </details>
+  </section>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="hFlota">
+      <div class="panel-head"><h2 id="hFlota">Semáforo de la flota</h2><span class="badge b-ia">IA</span></div>
+      <div class="row">
+        <label for="cUnidad">Unidad<select id="cUnidad"></select></label>
+        <button type="button" class="ghost" id="btnCiclo">Leer un ciclo de sensores</button>
+      </div>
+      <p class="status">Cada lectura toma un ciclo real del banco de pruebas que el modelo no vio al entrenarse y lo asigna a la unidad elegida <span class="badge b-sim">Simulación</span>. El modelo clasifica la fuga interna de la bomba.</p>
+      <div class="legend3"><span><i class="dot g"></i> Sin fuga</span><span><i class="dot a"></i> Fuga débil: programar revisión</span><span><i class="dot r"></i> Fuga severa: orden automática, no sale a ruta</span></div>
+      <div id="units"></div>
+      <p class="status" id="cicloMsg" role="status"></p>
+    </section>
+
+    <div style="display:grid;gap:18px;min-width:0">
+      <section class="panel" aria-labelledby="hReg">
+        <div class="panel-head"><h2 id="hReg">Reportar una falla</h2><span class="badge b-auto">Automatización</span></div>
+        <form id="otForm" novalidate>
+          <div class="row">
+            <label for="fUnidad">Unidad<select id="fUnidad"></select></label>
+            <label for="fQuien">Reporta<select id="fQuien"><option>Chofer</option><option>Mecánico</option><option>Supervisor</option></select></label>
+          </div>
+          <label for="fTexto">Describa la falla como la contaría por radio o WhatsApp
+            <textarea id="fTexto" maxlength="400" placeholder="Ej.: la prensa pierde fuerza y se escucha un silbido en la bomba"></textarea></label>
+          <div class="chips" aria-label="Ejemplos">
+            <button type="button" class="chip" data-t="La prensa pierde fuerza y se escucha un silbido en la bomba">Prensa sin fuerza</button>
+            <button type="button" class="chip" data-t="Sale humo negro del escape y el motor no levanta en subida">Humo en el motor</button>
+            <button type="button" class="chip" data-t="Fuga de aceite en el cilindro de la compuerta, la unidad no puede salir a ruta">Fuga, no sale</button>
+          </div>
+          <div class="row"><button id="btnOt" type="submit">Crear orden de trabajo</button></div>
+          <p class="status" id="otMsg" role="status"></p>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="hOts">
+        <div class="panel-head"><h2 id="hOts">Órdenes de trabajo</h2><span class="tag" id="otCount"></span></div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Orden</th><th>Unidad</th><th>Falla y acción</th><th>Prioridad</th><th>Estado</th></tr></thead>
+          <tbody id="otBody"></tbody>
+        </table></div>
+      </section>
+    </div>
+  </div>
+
+  <details class="panel">
+    <summary>Cómo usar este prototipo</summary>
+    <ol class="steps">
+      <li>Revise el semáforo y los indicadores del estado inicial.</li>
+      <li>Reporte una falla con sus propias palabras o con un ejemplo: las reglas asignan sistema, prioridad y acción.</li>
+      <li>Elija una unidad y pulse «Leer un ciclo de sensores»: el modelo de IA clasifica la bomba. Si detecta fuga severa, se crea una orden automática y la unidad sale de ruta.</li>
+      <li>Observe cómo cambian las rutas atendidas, la disponibilidad y los residuos sin recoger.</li>
+      <li>Cierre una orden con sus horas de reparación y fuera de servicio: el MTTR y la disponibilidad se recalculan.</li>
+      <li>Use «Reiniciar demostración» para volver al estado inicial. Los cambios se guardan solo en este navegador.</li>
+    </ol>
+  </details>
+
+  <div class="note">
+    <p><b>Cómo se calcula.</b> Horas programadas del mes = 7 compactadoras × 30 días × 8 h = 1 680 h. Disponibilidad = (horas programadas − horas fuera de servicio) / horas programadas; una orden de prioridad alta abierta cuenta 8 h fuera de servicio. MTBF = horas operadas / número de fallas (órdenes de prioridad media o alta). MTTR = promedio de horas de reparación de las órdenes cerradas. Residuos sin recoger = toneladas del día × unidades fuera de ruta / 7. Diésel: las unidades sin fuga logran el ahorro de la meta, las de fuga débil consumen como la línea base y las de fuga severa no salen. CO₂ = litros de diésel × 2,68 kg/L (IPCC, 2006).</p>
+    <p><b>Modelo de IA.</b> Bosque aleatorio de 25 árboles (profundidad máxima 6) con 8 variables estadísticas de los sensores de eficiencia (SE), caudal (FS1), potencia del motor (EPS1) y presión (PS1, PS3). Exactitud de 98,1 % en validación agrupada por corridas de ensayo (2 205 ciclos) y de 98,4 % en las 441 lecturas apartadas de las que salen los ciclos de esta demostración. Clasifica la condición actual de la bomba en un banco de pruebas de laboratorio; no predice cuándo fallará una compactadora real y debe reentrenarse con datos de las unidades de El Tambo.</p>
+    <p>Fuente de datos: Helwig, N., Pignanelli, E. y Schütze, A. (2015). <i>Condition monitoring of hydraulic systems</i> [Conjunto de datos]. UCI Machine Learning Repository (CC BY 4.0).</p>
+  </div>
+</div>
+
+<script>
+const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","FS1_desv","SE_max","EPS1_media","PS1_max","PS3_media"],"classes":[0,1,2],"trees":[{"f":[5,2,1,5,1,-2,-2,-2,-2,1,6,1,-2,-2,7,4,-2,-2,-2,-2,7,5,4,6,6,-2,-2,-2,6,0,-2,-2,-2,2,4,7,-2,-2,-2,-2,7,5,-2,5,-2,-2,-2],"t":[2550.25391,23.47972,6.40276,2410.70093,6.28363,-2.0,-2.0,-2.0,-2.0,6.48196,189.88499,4.31401,-2.0,-2.0,1.67528,85.387,-2.0,-2.0,-2.0,-2.0,1.93219,2624.84363,91.586,191.385,191.37,-2.0,-2.0,-2.0,190.175,34.93662,-2.0,-2.0,-2.0,25.41723,68.329,0.87328,-2.0,-2.0,-2.0,-2.0,1.98039,2555.39978,-2.0,2560.57019,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,-1,-1,-1,-1,10,11,12,-1,-1,15,16,-1,-1,-1,-1,21,22,23,24,25,-1,-1,-1,29,30,-1,-1,-1,34,35,36,-1,-1,-1,-1,41,42,-1,44,-1,-1,-1],"r":[20,9,8,7,6,-1,-1,-1,-1,19,14,13,-1,-1,18,17,-1,-1,-1,-1,40,33,28,27,26,-1,-1,-1,32,31,-1,-1,-1,39,38,37,-1,-1,-1,-1,46,43,-1,45,-1,-1,-1],"v":[[0.6083,0.199,0.1927],[0.7339,0.1469,0.1192],[0.0,0.5203,0.4797],[0.0,0.1951,0.8049],[0.0,0.8889,0.1111],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.9636,0.03,0.0064],[0.0,0.825,0.175],[0.0,0.1667,0.8333],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.9412,0.0588],[0.0,0.6667,0.3333],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.0436,0.433,0.5234],[0.0303,0.3447,0.625],[0.0376,0.4839,0.4785],[0.0,0.0345,0.9655],[0.0,0.0118,0.9882],[0.0,0.0,1.0],[0.0,0.2,0.8],[0.0,1.0,0.0],[0.0707,0.8788,0.0505],[0.0,0.9457,0.0543],[0.0,0.9775,0.0225],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.0128,0.0128,0.9744],[0.2,0.2,0.6],[0.0,0.25,0.75],[0.0,0.0,1.0],[0.0,0.5,0.5],[1.0,0.0,0.0],[0.0,0.0,1.0],[0.1053,0.8421,0.0526],[0.0,0.9412,0.0588],[0.0,1.0,0.0],[0.0,0.7692,0.2308],[0.0,0.0,1.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[2,4,0,2,3,1,-2,-2,-2,-2,-2,3,0,1,2,-2,-2,-2,2,3,-2,-2,-2,-2,6,0,0,-2,5,4,-2,-2,6,-2,-2,0,7,-2,5,-2,-2,3,-2,6,-2,-2,4,0,-2,-2,2,5,-2,-2,2,5,-2,-2,5,-2,-2],"t":[23.47972,75.748,56.7616,23.25569,2.80254,2.0712,-2.0,-2.0,-2.0,-2.0,-2.0,2.9657,56.79911,6.43633,23.41379,-2.0,-2.0,-2.0,22.88287,2.92514,-2.0,-2.0,-2.0,-2.0,190.16499,30.41839,29.60078,-2.0,2621.00049,91.456,-2.0,-2.0,190.0,-2.0,-2.0,30.75453,1.12329,-2.0,2626.63379,-2.0,-2.0,2.89714,-2.0,189.8,-2.0,-2.0,76.799,38.46459,-2.0,-2.0,23.52029,2507.87646,-2.0,-2.0,23.6307,2502.4657,-2.0,-2.0,2630.61206,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,-1,-1,-1,12,13,14,15,-1,-1,-1,19,20,-1,-1,-1,-1,25,26,27,-1,29,30,-1,-1,33,-1,-1,36,37,-1,39,-1,-1,42,-1,44,-1,-1,47,48,-1,-1,51,52,-1,-1,55,56,-1,-1,59,-1,-1],"r":[24,11,10,9,8,7,-1,-1,-1,-1,-1,23,18,17,16,-1,-1,-1,22,21,-1,-1,-1,-1,46,35,28,-1,32,31,-1,-1,34,-1,-1,41,38,-1,40,-1,-1,43,-1,45,-1,-1,50,49,-1,-1,54,53,-1,-1,58,57,-1,-1,60,-1,-1],"v":[[0.5901,0.2115,0.1984],[0.0,0.4816,0.5184],[0.0,0.1233,0.8767],[0.0,0.0943,0.9057],[0.0,0.0154,0.9846],[0.0,0.3,0.7],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0,0.745,0.255],[0.0,0.6021,0.3979],[0.0,0.0533,0.9467],[0.0,0.0139,0.9861],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0,0.9569,0.0431],[0.0,0.375,0.625],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.8348,0.0994,0.0658],[0.0,0.5525,0.4475],[0.0,0.2222,0.7778],[0.0,0.0,1.0],[0.0,0.3571,0.6429],[0.0,0.8261,0.1739],[0.0,0.0,1.0],[0.0,0.95,0.05],[0.0,0.0303,0.9697],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.8791,0.1209],[0.0,0.7742,0.2258],[0.0,1.0,0.0],[0.0,0.3636,0.6364],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.9333,0.0667],[0.0,0.0,1.0],[0.0,0.9492,0.0508],[0.0,0.0,1.0],[0.0,0.9655,0.0345],[0.9765,0.0225,0.0009],[0.25,0.75,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.9848,0.0142,0.0009],[0.5,0.5,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.9913,0.0077,0.001],[0.9657,0.0343,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.9976,0.0012,0.0012],[0.9988,0.0012,0.0],[0.0,0.0,1.0]]},{"f":[4,2,6,0,4,-2,-2,-2,-2,7,0,2,-2,1,-2,-2,-2,1,-2,2,-2,7,-2,-2,1,5,2,-2,6,-2,3,-2,-2,-2,-2],"t":[76.907,22.82542,191.46,19.44819,66.246,-2.0,-2.0,-2.0,-2.0,1.74369,56.12008,23.34631,-2.0,2.58747,-2.0,-2.0,-2.0,6.3988,-2.0,23.44943,-2.0,1.88071,-2.0,-2.0,6.53395,2624.84363,22.85914,-2.0,189.76,-2.0,3.67268,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,-1,-1,-1,-1,10,11,12,-1,14,-1,-1,-1,18,-1,20,-1,22,-1,-1,25,26,27,-1,29,-1,31,-1,-1,-1,-1],"r":[24,9,8,7,6,-1,-1,-1,-1,17,16,13,-1,15,-1,-1,-1,19,-1,21,-1,23,-1,-1,34,33,28,-1,30,-1,32,-1,-1,-1,-1],"v":[[0.5952,0.2058,0.199],[0.0085,0.3647,0.6268],[0.0,0.0113,0.9887],[0.0,0.0057,0.9943],[0.0,0.25,0.75],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0172,0.7241,0.2586],[0.0156,0.3594,0.625],[0.0244,0.0,0.9756],[0.0,0.0,1.0],[0.5,0.0,0.5],[1.0,0.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0182,0.9364,0.0455],[0.0,0.0,1.0],[0.019,0.981,0.0],[0.0,1.0,0.0],[0.2857,0.7143,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.741,0.1663,0.0927],[0.0419,0.6152,0.3429],[0.053,0.7781,0.1689],[0.0,0.0,1.0],[0.0573,0.8423,0.1004],[0.0,0.0,1.0],[0.0597,0.8769,0.0634],[0.0236,0.9094,0.0669],[0.7143,0.2857,0.0],[0.0,0.0,1.0],[1.0,0.0,0.0]]},{"f":[2,4,7,4,4,-2,-2,6,-2,-2,1,-2,-2,7,5,6,-2,-2,0,-2,6,-2,-2,0,-2,-2,1,0,3,1,1,-2,-2,1,-2,-2,7,-2,2,-2,-2,5,5,0,-2,-2,1,-2,-2,-2,-2],"t":[23.50954,75.73,1.92732,67.267,66.507,-2.0,-2.0,191.395,-2.0,-2.0,6.44531,-2.0,-2.0,1.73933,2413.43298,189.785,-2.0,-2.0,56.84628,-2.0,190.665,-2.0,-2.0,58.36097,-2.0,-2.0,6.49751,30.43551,3.5781,3.25682,2.67527,-2.0,-2.0,3.26556,-2.0,-2.0,1.10243,-2.0,29.38263,-2.0,-2.0,2629.3772,2602.39697,56.31548,-2.0,-2.0,3.38027,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,-1,-1,8,-1,-1,11,-1,-1,14,15,16,-1,-1,19,-1,21,-1,-1,24,-1,-1,27,28,29,30,31,-1,-1,34,-1,-1,37,-1,39,-1,-1,42,43,44,-1,-1,47,-1,-1,-1,-1],"r":[26,13,10,7,6,-1,-1,9,-1,-1,12,-1,-1,23,18,17,-1,-1,20,-1,22,-1,-1,25,-1,-1,50,41,36,33,32,-1,-1,35,-1,-1,38,-1,40,-1,-1,49,46,45,-1,-1,48,-1,-1,-1,-1],"v":[[0.6015,0.2029,0.1956],[0.0042,0.4863,0.5095],[0.0,0.1238,0.8762],[0.0,0.0279,0.9721],[0.0,0.3333,0.6667],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0118,0.9882],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.6774,0.3226],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0076,0.7757,0.2167],[0.0,0.43,0.57],[0.0,0.9535,0.0465],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0351,0.9649],[0.0,0.0,1.0],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0123,0.9877,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.8203,0.0991,0.0806],[0.0492,0.5246,0.4262],[0.0088,0.2124,0.7788],[0.0106,0.1383,0.8511],[0.0256,0.0,0.9744],[1.0,0.0,0.0],[0.0,0.0,1.0],[0.0,0.2364,0.7636],[0.0,0.625,0.375],[0.0,0.0769,0.9231],[0.0,0.5789,0.4211],[0.0,1.0,0.0],[0.0,0.1111,0.8889],[0.0,0.0,1.0],[0.0,0.5,0.5],[0.084,0.7939,0.1221],[0.0873,0.8254,0.0873],[0.1698,0.6226,0.2075],[0.3103,0.3103,0.3793],[0.0,1.0,0.0],[0.0274,0.9726,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.0,0.0,1.0],[1.0,0.0,0.0]]},{"f":[6,1,5,-2,7,4,2,-2,-2,-2,-2,5,2,-2,1,6,-2,-2,-2,-2,1,1,5,2,-2,-2,6,0,-2,-2,-2,6,-2,-2,-2],"t":[190.21,3.29125,2618.99243,-2.0,1.06784,95.6455,24.41522,-2.0,-2.0,-2.0,-2.0,2627.70593,22.9691,-2.0,6.45609,189.8,-2.0,-2.0,-2.0,-2.0,6.53708,6.43592,2474.60571,22.97122,-2.0,-2.0,190.48,30.65099,-2.0,-2.0,-2.0,190.505,-2.0,-2.0,-2.0],"l":[1,2,3,-1,5,6,7,-1,-1,-1,-1,12,13,-1,15,16,-1,-1,-1,-1,21,22,23,24,-1,-1,27,28,-1,-1,-1,32,-1,-1,-1],"r":[20,11,4,-1,10,9,8,-1,-1,-1,-1,19,14,-1,18,17,-1,-1,-1,-1,34,31,26,25,-1,-1,30,29,-1,-1,-1,33,-1,-1,-1],"v":[[0.5799,0.2171,0.2029],[0.0103,0.4931,0.4966],[0.0,0.1416,0.8584],[0.0,1.0,0.0],[0.0,0.0396,0.9604],[0.0,0.2667,0.7333],[0.0,0.1538,0.8462],[0.0,0.3333,0.6667],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0169,0.7175,0.2655],[0.0185,0.784,0.1975],[0.0,0.0,1.0],[0.0214,0.9071,0.0714],[0.0,0.927,0.073],[0.0,0.0,1.0],[0.0,0.9549,0.0451],[1.0,0.0,0.0],[0.0,0.0,1.0],[0.692,0.1628,0.1452],[0.0462,0.5042,0.4496],[0.0538,0.1231,0.8231],[0.0,0.5818,0.4182],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0683,0.0,0.9317],[0.8235,0.0,0.1765],[0.4,0.0,0.6],[1.0,0.0,0.0],[0.0,0.0,1.0],[0.037,0.963,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[1,0,0,2,5,-2,0,-2,-2,6,7,-2,-2,4,-2,-2,4,2,-2,-2,7,3,-2,-2,-2,1,0,4,1,-2,-2,1,-2,-2,-2,7,-2,-2,0,-2,-2],"t":[6.53395,56.62288,47.23806,29.54679,2619.25818,-2.0,30.50814,-2.0,-2.0,190.175,1.3041,-2.0,-2.0,96.31,-2.0,-2.0,76.3785,23.25569,-2.0,-2.0,1.73743,2.9358,-2.0,-2.0,-2.0,6.3727,57.04432,76.7975,6.29425,-2.0,-2.0,6.33871,-2.0,-2.0,-2.0,1.68827,-2.0,-2.0,57.64361,-2.0,-2.0],"l":[1,2,3,4,5,-1,7,-1,-1,10,11,-1,-1,14,-1,-1,17,18,-1,-1,21,22,-1,-1,-1,26,27,28,29,-1,-1,32,-1,-1,-1,36,-1,-1,39,-1,-1],"r":[38,25,16,9,6,-1,8,-1,-1,13,12,-1,-1,15,-1,-1,20,19,-1,-1,24,23,-1,-1,-1,35,34,31,30,-1,-1,33,-1,-1,-1,37,-1,-1,40,-1,-1],"v":[[0.5862,0.2177,0.1961],[0.0254,0.512,0.4626],[0.026,0.2857,0.6883],[0.0612,0.4643,0.4745],[0.0089,0.25,0.7411],[0.0,1.0,0.0],[0.0106,0.1064,0.883],[0.011,0.0879,0.9011],[0.0,0.6667,0.3333],[0.131,0.75,0.119],[0.0,0.875,0.125],[0.0,0.9394,0.0606],[0.0,0.1667,0.8333],[0.9167,0.0,0.0833],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.0,0.1541,0.8459],[0.0,0.0524,0.9476],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.5357,0.4643],[0.0,0.1333,0.8667],[0.0,0.4,0.6],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0245,0.8776,0.0979],[0.0,0.6316,0.3684],[0.0,0.2821,0.7179],[0.0,0.6,0.4],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0833,0.9167],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0333,0.9667,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.999,0.001,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[0,5,0,-2,2,-2,1,0,-2,-2,-2,3,1,6,5,-2,-2,-2,-2,1,5,6,-2,-2,2,-2,-2,4,5,-2,-2,3,-2,-2,2,-2,-2],"t":[57.95949,2480.17261,56.3429,-2.0,22.95635,-2.0,6.39762,56.73952,-2.0,-2.0,-2.0,2.96896,6.44676,190.51,2722.34717,-2.0,-2.0,-2.0,-2.0,3.29425,2618.86523,189.785,-2.0,-2.0,29.20735,-2.0,-2.0,98.2425,2627.70593,-2.0,-2.0,3.67167,-2.0,-2.0,23.42494,-2.0,-2.0],"l":[1,2,3,-1,5,-1,7,8,-1,-1,-1,12,13,14,15,-1,-1,-1,-1,20,21,22,-1,-1,25,-1,-1,28,29,-1,-1,32,-1,-1,35,-1,-1],"r":[34,11,4,-1,6,-1,10,9,-1,-1,-1,19,18,17,16,-1,-1,-1,-1,27,24,23,-1,-1,26,-1,-1,31,30,-1,-1,33,-1,-1,36,-1,-1],"v":[[0.6117,0.2109,0.1774],[0.0116,0.5328,0.4556],[0.0,0.7647,0.2353],[0.0,0.0,1.0],[0.0,0.8626,0.1374],[0.0,0.0,1.0],[0.0,0.9945,0.0055],[0.0,0.9808,0.0192],[0.0,0.8889,0.1111],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0178,0.4098,0.5724],[0.009,0.2036,0.7873],[0.0111,0.0222,0.9667],[0.2222,0.4444,0.3333],[0.3333,0.6667,0.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0263,0.6096,0.364],[0.0,0.2118,0.7882],[0.0,0.9412,0.0588],[0.0,0.8,0.2],[0.0,1.0,0.0],[0.0,0.0294,0.9706],[0.0,0.0,1.0],[0.0,0.0714,0.9286],[0.042,0.8462,0.1119],[0.0,0.8855,0.1145],[0.0,0.928,0.072],[0.0,0.0,1.0],[0.5,0.4167,0.0833],[0.0,1.0,0.0],[0.8571,0.0,0.1429],[0.9944,0.0056,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[0,1,3,4,1,7,-2,-2,-2,5,7,-2,-2,5,-2,-2,2,1,-2,6,-2,-2,1,-2,6,-2,-2,-2,-2],"t":[57.94783,6.43372,3.5746,76.1495,2.55294,0.86568,-2.0,-2.0,-2.0,2618.3407,1.70056,-2.0,-2.0,2621.72449,-2.0,-2.0,30.42558,3.28046,-2.0,189.795,-2.0,-2.0,3.36349,-2.0,190.085,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,-1,10,11,-1,-1,14,-1,-1,17,18,-1,20,-1,-1,23,-1,25,-1,-1,-1,-1],"r":[28,27,16,9,8,7,-1,-1,-1,13,12,-1,-1,15,-1,-1,22,19,-1,21,-1,-1,24,-1,26,-1,-1,-1,-1],"v":[[0.6043,0.2109,0.1848],[0.0197,0.5225,0.4579],[0.0275,0.332,0.6405],[0.0,0.2457,0.7543],[0.0,0.015,0.985],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.4645,0.5355],[0.0,0.6879,0.3121],[0.0,0.9459,0.0541],[0.0,0.403,0.597],[0.0,0.0143,0.9857],[0.0,0.125,0.875],[0.0,0.0,1.0],[0.1429,0.6939,0.1633],[0.0,0.8171,0.1829],[0.0,0.0,1.0],[0.0,0.859,0.141],[0.0,0.1667,0.8333],[0.0,0.9167,0.0833],[0.875,0.0625,0.0625],[0.0,1.0,0.0],[0.9333,0.0,0.0667],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[4,1,5,5,-2,-2,0,7,4,-2,-2,4,-2,-2,6,-2,-2,7,-2,-2,7,5,1,3,-2,-2,1,-2,5,-2,-2,-2,5,7,1,2,-2,-2,-2,5,0,-2,-2,3,-2,-2,2,-2,-2],"t":[76.9065,6.43357,2410.79871,2395.66321,-2.0,-2.0,56.79203,0.97586,66.337,-2.0,-2.0,76.386,-2.0,-2.0,190.39,-2.0,-2.0,1.98422,-2.0,-2.0,1.67443,2624.84363,3.38027,3.53282,-2.0,-2.0,3.85024,-2.0,2395.01843,-2.0,-2.0,-2.0,2550.41187,1.76951,6.50368,22.97515,-2.0,-2.0,-2.0,2549.4082,57.5428,-2.0,-2.0,2.97508,-2.0,-2.0,23.3167,-2.0,-2.0],"l":[1,2,3,4,-1,-1,7,8,9,-1,-1,12,-1,-1,15,-1,-1,18,-1,-1,21,22,23,24,-1,-1,27,-1,29,-1,-1,-1,33,34,35,36,-1,-1,-1,40,41,-1,-1,44,-1,-1,47,-1,-1],"r":[20,17,6,5,-1,-1,14,11,10,-1,-1,13,-1,-1,16,-1,-1,19,-1,-1,32,31,26,25,-1,-1,28,-1,30,-1,-1,-1,46,39,38,37,-1,-1,-1,43,42,-1,-1,45,-1,-1,48,-1,-1],"v":[[0.6037,0.2075,0.1888],[0.0085,0.387,0.6045],[0.004,0.1331,0.8629],[0.0,0.9583,0.0417],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0045,0.0446,0.9509],[0.0046,0.0275,0.9679],[0.0769,0.3846,0.5385],[0.0,0.0,1.0],[0.1429,0.7143,0.1429],[0.0,0.0049,0.9951],[0.0,0.0,1.0],[0.0,0.1111,0.8889],[0.0,0.6667,0.3333],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0189,0.9811,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.7532,0.1624,0.0844],[0.0283,0.5377,0.434],[0.0435,0.8261,0.1304],[0.0,0.9388,0.0612],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.15,0.55,0.3],[1.0,0.0,0.0],[0.0,0.6471,0.3529],[0.0,1.0,0.0],[0.0,0.4286,0.5714],[0.0,0.0,1.0],[0.8815,0.096,0.0225],[0.8955,0.0816,0.0229],[0.75,0.1928,0.0572],[0.0,0.7712,0.2288],[0.0,0.0,1.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.9929,0.0071,0.0],[0.9986,0.0014,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.5556,0.4444,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.0952,0.9048,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[4,1,5,3,-2,-2,3,7,7,-2,-2,3,-2,-2,4,0,-2,-2,2,-2,-2,0,-2,-2,1,0,5,2,-2,-2,5,3,-2,-2,-2,7,0,6,-2,-2,5,-2,-2,-2,1,6,-2,-2,-2],"t":[76.9485,6.43307,2410.8186,2.87784,-2.0,-2.0,2.95701,1.27295,0.86568,-2.0,-2.0,2.94082,-2.0,-2.0,76.239,56.37119,-2.0,-2.0,23.15768,-2.0,-2.0,58.27062,-2.0,-2.0,6.53395,30.41923,2618.87109,28.96798,-2.0,-2.0,2621.72449,3.55246,-2.0,-2.0,-2.0,1.7373,31.56418,189.79,-2.0,-2.0,2463.32422,-2.0,-2.0,-2.0,6.53708,190.87,-2.0,-2.0,-2.0],"l":[1,2,3,4,-1,-1,7,8,9,-1,-1,12,-1,-1,15,16,-1,-1,19,-1,-1,22,-1,-1,25,26,27,28,-1,-1,31,32,-1,-1,-1,36,37,38,-1,-1,41,-1,-1,-1,45,46,-1,-1,-1],"r":[24,21,6,5,-1,-1,14,11,10,-1,-1,13,-1,-1,18,17,-1,-1,20,-1,-1,23,-1,-1,44,35,30,29,-1,-1,34,33,-1,-1,-1,43,40,39,-1,-1,42,-1,-1,-1,48,47,-1,-1,-1],"v":[[0.593,0.1961,0.2109],[0.008,0.3846,0.6074],[0.0039,0.112,0.8842],[0.0,0.9375,0.0625],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0041,0.0576,0.9383],[0.0047,0.0237,0.9716],[0.1,0.4,0.5],[0.0,0.0,1.0],[0.2,0.8,0.0],[0.0,0.005,0.995],[0.0,0.0,1.0],[0.0,0.025,0.975],[0.0,0.2812,0.7188],[0.0,0.0435,0.9565],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.8889,0.1111],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0169,0.9831,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.752,0.1449,0.1031],[0.0419,0.5587,0.3994],[0.0,0.2035,0.7965],[0.0,0.9048,0.0952],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0435,0.9565],[0.0,0.1905,0.8095],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0612,0.7224,0.2163],[0.1056,0.5211,0.3732],[0.0172,0.931,0.0517],[0.0,0.0,1.0],[0.0179,0.9643,0.0179],[0.1667,0.2381,0.5952],[0.3077,0.6538,0.0385],[0.1034,0.0517,0.8448],[0.0,1.0,0.0],[0.999,0.001,0.0],[0.6667,0.3333,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[1,3,1,0,7,5,-2,-2,4,-2,-2,-2,-2,7,2,7,5,-2,-2,4,-2,-2,6,7,-2,-2,4,-2,-2,0,-2,0,-2,-2,0,-2,-2],"t":[6.531,2.95401,6.42756,57.11703,1.70143,2410.87024,-2.0,-2.0,76.1785,-2.0,-2.0,-2.0,-2.0,1.72929,29.34341,1.64274,2615.88269,-2.0,-2.0,79.781,-2.0,-2.0,190.18,1.12683,-2.0,-2.0,96.31,-2.0,-2.0,55.74361,-2.0,58.26628,-2.0,-2.0,57.66503,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,9,-1,-1,-1,-1,14,15,16,17,-1,-1,20,-1,-1,23,24,-1,-1,27,-1,-1,30,-1,32,-1,-1,35,-1,-1],"r":[34,13,12,11,8,7,-1,-1,10,-1,-1,-1,-1,29,22,19,18,-1,-1,21,-1,-1,26,25,-1,-1,28,-1,-1,31,-1,33,-1,-1,36,-1,-1],"v":[[0.6026,0.2024,0.195],[0.0386,0.4876,0.4738],[0.0031,0.2844,0.7125],[0.0037,0.1365,0.8598],[0.004,0.0602,0.9357],[0.0189,0.2453,0.7358],[0.0,0.7647,0.2353],[0.0278,0.0,0.9722],[0.0,0.0102,0.9898],[0.0,0.0,1.0],[0.0,0.0645,0.9355],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0677,0.6541,0.2782],[0.1159,0.4348,0.4493],[0.0659,0.1538,0.7802],[0.0,0.2029,0.7971],[0.0,1.0,0.0],[0.0,0.0678,0.9322],[0.2727,0.0,0.7273],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.1552,0.6552,0.1897],[0.0,0.7917,0.2083],[0.0,0.9792,0.0208],[0.0,0.6042,0.3958],[0.9,0.0,0.1],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.0156,0.8906,0.0938],[0.0,0.0,1.0],[0.0172,0.9828,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.9971,0.0029,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[1,2,3,3,-2,-2,1,-2,-2,4,7,6,5,-2,-2,1,-2,-2,4,-2,0,-2,-2,2,1,0,-2,-2,-2,2,7,-2,-2,0,-2,-2,-2],"t":[6.53708,22.82787,2.80254,2.7471,-2.0,-2.0,6.46369,-2.0,-2.0,80.546,1.7379,190.5,2413.43298,-2.0,-2.0,6.39179,-2.0,-2.0,74.769,-2.0,55.18184,-2.0,-2.0,29.34341,4.90759,29.91448,-2.0,-2.0,-2.0,30.43741,1.12407,-2.0,-2.0,35.51262,-2.0,-2.0,-2.0],"l":[1,2,3,4,-1,-1,7,-1,-1,10,11,12,13,-1,-1,16,-1,-1,19,-1,21,-1,-1,24,25,26,-1,-1,-1,30,31,-1,-1,34,-1,-1,-1],"r":[36,9,6,5,-1,-1,8,-1,-1,23,18,15,14,-1,-1,17,-1,-1,20,-1,22,-1,-1,29,28,27,-1,-1,-1,33,32,-1,-1,35,-1,-1,-1],"v":[[0.6009,0.2075,0.1916],[0.0356,0.5014,0.463],[0.0,0.028,0.972],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0144,0.9856],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0504,0.6977,0.2519],[0.0118,0.85,0.1382],[0.0465,0.4767,0.4767],[0.0816,0.7755,0.1429],[0.0,1.0,0.0],[0.3636,0.0,0.6364],[0.0,0.0811,0.9189],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.9764,0.0236],[0.0,0.0,1.0],[0.0,0.988,0.012],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.125,0.4034,0.4716],[0.1154,0.0769,0.8077],[0.0,0.087,0.913],[0.0,0.1935,0.8065],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.1327,0.6633,0.2041],[0.0,0.7683,0.2317],[0.0,1.0,0.0],[0.0,0.5778,0.4222],[0.8125,0.125,0.0625],[0.9286,0.0714,0.0],[0.0,0.5,0.5],[1.0,0.0,0.0]]},{"f":[1,3,4,7,5,-2,-2,-2,3,-2,2,-2,-2,1,5,-2,2,0,-2,-2,5,-2,-2,6,0,-2,-2,-2,-2],"t":[6.53708,2.91212,76.1435,0.88475,2724.19421,-2.0,-2.0,-2.0,2.89561,-2.0,22.96798,-2.0,-2.0,6.43372,2465.67261,-2.0,29.20478,56.33935,-2.0,-2.0,2624.84363,-2.0,-2.0,190.505,57.60992,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,-1,-1,-1,9,-1,11,-1,-1,14,15,-1,17,18,-1,-1,21,-1,-1,24,25,-1,-1,-1,-1],"r":[28,13,8,7,6,-1,-1,-1,10,-1,12,-1,-1,23,16,-1,20,19,-1,-1,22,-1,-1,27,26,-1,-1,-1,-1],"v":[[0.5924,0.2035,0.2041],[0.0218,0.4884,0.4898],[0.0,0.1295,0.8705],[0.0,0.0194,0.9806],[0.0,0.2,0.8],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.4444,0.5556],[0.0,0.0,1.0],[0.0,0.5926,0.4074],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0268,0.5721,0.401],[0.0251,0.3769,0.598],[0.0,1.0,0.0],[0.029,0.2812,0.6899],[0.0,0.0704,0.9296],[0.0,0.0163,0.9837],[0.0,0.4138,0.5862],[0.0758,0.6212,0.303],[0.1,0.82,0.08],[0.0,0.0,1.0],[0.0303,0.9646,0.0051],[0.8571,0.0,0.1429],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[0,0,2,5,7,0,-2,-2,-2,2,0,-2,-2,-2,1,1,2,-2,-2,5,-2,-2,7,2,-2,-2,-2,3,2,-2,-2,6,-2,-2,3,7,-2,-2,-2],"t":[57.9993,56.74617,23.14654,2566.10156,1.93628,56.67249,-2.0,-2.0,-2.0,22.92265,19.36509,-2.0,-2.0,-2.0,3.29476,3.26276,25.41723,-2.0,-2.0,2618.99243,-2.0,-2.0,1.72709,30.43741,-2.0,-2.0,-2.0,2.91163,22.9989,-2.0,-2.0,191.585,-2.0,-2.0,2.95406,1.73144,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,-1,10,11,-1,-1,-1,15,16,17,-1,-1,20,-1,-1,23,24,-1,-1,-1,28,29,-1,-1,32,-1,-1,35,36,-1,-1,-1],"r":[34,27,14,9,8,7,-1,-1,-1,13,12,-1,-1,-1,22,19,18,-1,-1,21,-1,-1,26,25,-1,-1,-1,31,30,-1,-1,33,-1,-1,38,37,-1,-1,-1],"v":[[0.5799,0.2109,0.2092],[0.025,0.4888,0.4862],[0.0277,0.3137,0.6587],[0.0,0.0528,0.9472],[0.0,0.0144,0.9856],[0.0,0.0097,0.9903],[0.0,0.0,1.0],[0.0,0.1667,0.8333],[0.0,1.0,0.0],[0.0,0.193,0.807],[0.0,0.08,0.92],[0.0,0.6667,0.3333],[0.0,0.0426,0.9574],[0.0,1.0,0.0],[0.0542,0.5632,0.3827],[0.0091,0.1636,0.8273],[0.0233,0.0,0.9767],[1.0,0.0,0.0],[0.0,0.0,1.0],[0.0,0.2687,0.7313],[0.0,1.0,0.0],[0.0,0.0577,0.9423],[0.0838,0.8263,0.0898],[0.125,0.7411,0.1339],[0.0,0.8542,0.1458],[0.875,0.0625,0.0625],[0.0,1.0,0.0],[0.0184,0.9263,0.0553],[0.0,0.5385,0.4615],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0209,0.9791,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.999,0.001,0.0],[0.5,0.5,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[1,3,6,2,-2,1,2,-2,-2,-2,1,-2,7,5,-2,-2,-2,2,7,-2,-2,7,2,1,-2,-2,3,-2,-2,3,4,-2,-2,5,-2,-2,-2],"t":[6.53395,2.90731,189.895,21.10249,-2.0,6.27274,22.44732,-2.0,-2.0,-2.0,4.17655,-2.0,1.70572,2410.87024,-2.0,-2.0,-2.0,22.83612,1.93581,-2.0,-2.0,1.74064,29.62678,6.3401,-2.0,-2.0,3.66392,-2.0,-2.0,2.92494,74.441,-2.0,-2.0,2564.42664,-2.0,-2.0,-2.0],"l":[1,2,3,4,-1,6,7,-1,-1,-1,11,-1,13,14,-1,-1,-1,18,19,-1,-1,22,23,24,-1,-1,27,-1,-1,30,31,-1,-1,34,-1,-1,-1],"r":[36,17,10,5,-1,9,8,-1,-1,-1,12,-1,16,15,-1,-1,-1,21,20,-1,-1,29,26,25,-1,-1,28,-1,-1,33,32,-1,-1,35,-1,-1,-1],"v":[[0.5873,0.2143,0.1984],[0.0162,0.5108,0.473],[0.008,0.112,0.88],[0.0,0.6154,0.3846],[0.0,0.0,1.0],[0.0,0.8,0.2],[0.0,0.6,0.4],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0089,0.0536,0.9375],[1.0,0.0,0.0],[0.0,0.0541,0.9459],[0.0,0.15,0.85],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0179,0.5919,0.3902],[0.0,0.0458,0.9542],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0227,0.7397,0.2376],[0.0414,0.5414,0.4173],[0.0166,0.4199,0.5635],[0.0,0.2222,0.7778],[0.0545,0.8727,0.0727],[0.0941,0.8,0.1059],[0.0,0.9412,0.0588],[0.4706,0.2353,0.2941],[0.0,0.9817,0.0183],[0.0,0.8889,0.1111],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.99,0.01],[0.0,1.0,0.0],[0.0,0.6667,0.3333],[1.0,0.0,0.0]]},{"f":[2,1,5,2,-2,-2,2,7,0,-2,-2,3,-2,-2,-2,-2,0,2,2,4,-2,-2,2,-2,4,-2,-2,1,6,-2,-2,0,-2,1,-2,-2,-2],"t":[23.49771,6.43322,2410.79871,22.82222,-2.0,-2.0,23.43583,0.88475,19.36509,-2.0,-2.0,2.96903,-2.0,-2.0,-2.0,-2.0,57.41965,29.57482,25.65008,72.7615,-2.0,-2.0,29.13198,-2.0,95.1055,-2.0,-2.0,3.37181,189.79,-2.0,-2.0,35.40146,-2.0,4.31401,-2.0,-2.0,-2.0],"l":[1,2,3,4,-1,-1,7,8,9,-1,-1,12,-1,-1,-1,-1,17,18,19,20,-1,-1,23,-1,25,-1,-1,28,29,-1,-1,32,-1,34,-1,-1,-1],"r":[16,15,6,5,-1,-1,14,11,10,-1,-1,13,-1,-1,-1,-1,36,27,22,21,-1,-1,24,-1,26,-1,-1,31,30,-1,-1,33,-1,35,-1,-1,-1],"v":[[0.6003,0.2024,0.1973],[0.0,0.4828,0.5172],[0.0,0.1579,0.8421],[0.0,0.9756,0.0244],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0304,0.9696],[0.0,0.0078,0.9922],[0.0,0.5,0.5],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.0039,0.9961],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.8345,0.093,0.0725],[0.0455,0.5364,0.4182],[0.0068,0.4189,0.5743],[0.027,0.973,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.2342,0.7658],[0.0,0.0,1.0],[0.0,0.3467,0.6533],[0.0,0.5111,0.4889],[0.0,0.1,0.9],[0.125,0.7778,0.0972],[0.0,0.9455,0.0545],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.5294,0.2353,0.2353],[1.0,0.0,0.0],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[0,2,2,1,5,-2,-2,-2,3,2,-2,6,-2,-2,-2,5,4,1,-2,-2,6,1,-2,-2,4,-2,-2,0,7,3,-2,-2,-2,0,-2,-2,3,0,-2,-2,-2],"t":[57.95949,22.83116,22.76067,2.0814,2722.34717,-2.0,-2.0,-2.0,2.98593,22.80449,-2.0,191.46,-2.0,-2.0,-2.0,2621.58398,76.1945,6.41541,-2.0,-2.0,189.78,3.2682,-2.0,-2.0,98.6545,-2.0,-2.0,30.44738,1.08437,3.56983,-2.0,-2.0,-2.0,30.50579,-2.0,-2.0,2.95406,58.9714,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,-1,-1,-1,9,10,-1,12,-1,-1,-1,16,17,18,-1,-1,21,22,-1,-1,25,-1,-1,28,29,30,-1,-1,-1,34,-1,-1,37,38,-1,-1,-1],"r":[36,15,8,7,6,-1,-1,-1,14,11,-1,13,-1,-1,-1,27,20,19,-1,-1,24,23,-1,-1,26,-1,-1,33,32,31,-1,-1,-1,35,-1,-1,40,39,-1,-1,-1],"v":[[0.6117,0.1905,0.1978],[0.0187,0.4806,0.5007],[0.0,0.014,0.986],[0.0,0.0054,0.9946],[0.0,0.0667,0.9333],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.0,1.0],[0.0,0.0645,0.9355],[0.0,0.0333,0.9667],[0.0,0.0,1.0],[0.0,0.1,0.9],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.027,0.6888,0.2842],[0.0318,0.8068,0.1614],[0.0,0.4507,0.5493],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0385,0.8817,0.0799],[0.0,0.1667,0.8333],[0.0,0.0,1.0],[0.0,0.5,0.5],[0.0399,0.908,0.0521],[0.0127,0.9331,0.0541],[0.75,0.25,0.0],[0.0,0.0274,0.9726],[0.0,0.0147,0.9853],[0.0,0.0526,0.9474],[0.0,0.0,1.0],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,0.2,0.8],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.9991,0.0009,0.0],[0.8889,0.1111,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0]]},{"f":[6,5,3,1,0,-2,-2,-2,0,0,4,-2,-2,0,-2,-2,-2,7,2,-2,-2,-2,1,0,6,7,-2,1,-2,-2,-2,4,6,-2,-2,-2,-2],"t":[190.21,2624.76501,2.90088,6.32632,56.80117,-2.0,-2.0,-2.0,58.53677,34.98424,91.586,-2.0,-2.0,39.1909,-2.0,-2.0,-2.0,0.88475,21.12602,-2.0,-2.0,-2.0,6.53708,56.51467,191.4,1.12835,-2.0,6.44759,-2.0,-2.0,-2.0,80.3575,190.68,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,-1,-1,-1,9,10,11,-1,-1,14,-1,-1,-1,18,19,-1,-1,-1,23,24,25,26,-1,28,-1,-1,-1,32,33,-1,-1,-1,-1],"r":[22,17,8,7,6,-1,-1,-1,16,13,12,-1,-1,15,-1,-1,-1,21,20,-1,-1,-1,36,31,30,27,-1,29,-1,-1,-1,35,34,-1,-1,-1,-1],"v":[[0.5816,0.2205,0.1978],[0.0214,0.5571,0.4214],[0.0293,0.7512,0.2195],[0.0,0.129,0.871],[0.0,0.0357,0.9643],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0345,0.8621,0.1034],[0.0,0.8929,0.1071],[0.0,0.951,0.049],[0.0,0.0,1.0],[0.0,0.9898,0.0102],[0.0,0.803,0.197],[0.0,0.0,1.0],[0.0,0.9636,0.0364],[1.0,0.0,0.0],[0.0,0.0267,0.9733],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.6873,0.157,0.1557],[0.0453,0.4794,0.4753],[0.0397,0.1468,0.8135],[0.0446,0.0402,0.9152],[1.0,0.0,0.0],[0.0,0.0421,0.9579],[0.0,0.0049,0.9951],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0513,0.8376,0.1111],[0.0,0.8829,0.1171],[0.0,0.0,1.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0]]},{"f":[0,1,6,1,5,4,-2,-2,1,-2,-2,2,-2,2,-2,-2,0,2,-2,-2,5,4,-2,-2,3,-2,-2,6,-2,-2,0,1,-2,-2,1,-2,-2],"t":[57.95949,6.4329,190.465,3.29454,2621.00049,91.7495,-2.0,-2.0,2.57619,-2.0,-2.0,22.93492,-2.0,30.83666,-2.0,-2.0,56.55408,23.39659,-2.0,-2.0,2467.75513,78.1305,-2.0,-2.0,2.93413,-2.0,-2.0,190.34,-2.0,-2.0,57.96816,6.51737,-2.0,-2.0,6.50244,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,9,-1,-1,12,-1,14,-1,-1,17,18,-1,-1,21,22,-1,-1,25,-1,-1,28,-1,-1,31,32,-1,-1,35,-1,-1],"r":[30,27,16,11,8,7,-1,-1,10,-1,-1,13,-1,15,-1,-1,20,19,-1,-1,24,23,-1,-1,26,-1,-1,29,-1,-1,34,33,-1,-1,36,-1,-1],"v":[[0.5867,0.1933,0.22],[0.0109,0.4605,0.5286],[0.0144,0.2908,0.6948],[0.028,0.4755,0.4965],[0.0083,0.1667,0.825],[0.0,0.95,0.05],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.01,0.01,0.98],[0.0833,0.0833,0.8333],[0.0,0.0,1.0],[0.0422,0.6988,0.259],[0.0,0.0,1.0],[0.0496,0.8227,0.1277],[0.0147,0.8529,0.1324],[1.0,0.0,0.0],[0.0,0.0959,0.9041],[0.0,0.0172,0.9828],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.5789,0.4211],[0.0,0.375,0.625],[0.0,0.0625,0.9375],[0.0,1.0,0.0],[0.0,0.9286,0.0714],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.9944,0.0056],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.9971,0.0029,0.0],[0.5,0.5,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.9981,0.0019,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[2,7,6,1,5,0,-2,-2,1,-2,-2,-2,6,1,-2,-2,-2,2,-2,2,-2,-2,6,4,6,6,-2,5,-2,-2,5,2,-2,-2,-2,6,-2,-2,0,7,5,-2,7,-2,-2,-2,-2],"t":[23.51163,1.93044,191.125,6.40161,2410.79871,56.40852,-2.0,-2.0,2.0814,-2.0,-2.0,-2.0,191.4,6.4619,-2.0,-2.0,-2.0,22.61588,-2.0,23.43672,-2.0,-2.0,190.115,96.8085,189.815,189.795,-2.0,2622.86658,-2.0,-2.0,2626.22192,29.20478,-2.0,-2.0,-2.0,189.945,-2.0,-2.0,57.41317,1.43814,2627.16858,-2.0,1.02522,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,9,-1,-1,-1,13,14,-1,-1,-1,18,-1,20,-1,-1,23,24,25,26,-1,28,-1,-1,31,32,-1,-1,-1,36,-1,-1,39,40,41,-1,43,-1,-1,-1,-1],"r":[22,17,12,11,8,7,-1,-1,10,-1,-1,-1,16,15,-1,-1,-1,19,-1,21,-1,-1,38,35,30,27,-1,29,-1,-1,34,33,-1,-1,-1,37,-1,-1,46,45,42,-1,44,-1,-1,-1,-1],"v":[[0.585,0.1961,0.2188],[0.0055,0.4636,0.5309],[0.0,0.3798,0.6202],[0.0,0.4609,0.5391],[0.0,0.1992,0.8008],[0.0,0.902,0.098],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0105,0.9895],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.1111,0.8889],[0.0,0.0103,0.9897],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0357,0.9286,0.0357],[0.0,0.0,1.0],[0.037,0.963,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.8476,0.075,0.0774],[0.0,0.4103,0.5897],[0.0,0.3406,0.6594],[0.0,0.0179,0.9821],[0.0,0.0,1.0],[0.0,0.0909,0.9091],[0.0,0.5,0.5],[0.0,0.0,1.0],[0.0,0.561,0.439],[0.0,0.8679,0.1321],[0.0,0.6154,0.3846],[0.0,0.95,0.05],[0.0,0.0,1.0],[0.0,0.9444,0.0556],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.9726,0.0255,0.0019],[0.2368,0.7105,0.0526],[0.8182,0.0,0.1818],[1.0,0.0,0.0],[0.3333,0.0,0.6667],[1.0,0.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[3,2,7,2,7,-2,-2,-2,-2,2,0,-2,3,2,-2,-2,-2,-2,0,3,6,-2,2,-2,-2,2,3,2,-2,-2,3,-2,-2,6,-2,2,-2,-2,-2],"t":[2.96504,22.82697,1.94165,21.8285,0.87067,-2.0,-2.0,-2.0,-2.0,24.00897,56.09649,-2.0,2.91163,22.95623,-2.0,-2.0,-2.0,-2.0,57.9539,3.14893,190.645,-2.0,22.53818,-2.0,-2.0,29.62678,3.53235,29.2345,-2.0,-2.0,3.58894,-2.0,-2.0,189.805,-2.0,30.83666,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,-1,-1,-1,-1,10,11,-1,13,14,-1,-1,-1,-1,19,20,21,-1,23,-1,-1,26,27,28,-1,-1,31,-1,-1,34,-1,36,-1,-1,-1],"r":[18,9,8,7,6,-1,-1,-1,-1,17,12,-1,16,15,-1,-1,-1,-1,38,25,22,-1,24,-1,-1,33,30,29,-1,-1,32,-1,-1,35,-1,37,-1,-1,-1],"v":[[0.5754,0.2194,0.2052],[0.0307,0.3656,0.6038],[0.0,0.0096,0.9904],[0.0,0.0048,0.9952],[0.0,0.2,0.8],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0602,0.7083,0.2315],[0.0,0.7537,0.2463],[0.0,0.0,1.0],[0.0,0.9563,0.0437],[0.0,0.75,0.25],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.7478,0.1731,0.0791],[0.0088,0.6804,0.3109],[0.0,0.951,0.049],[0.0,0.0,1.0],[0.0,0.9645,0.0355],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0152,0.4848,0.5],[0.0,0.3023,0.6977],[0.0,0.0714,0.9286],[0.0,0.0,1.0],[0.0,0.3,0.7],[0.0,0.4138,0.5862],[0.0,0.541,0.459],[0.0,0.1154,0.8846],[0.0435,0.8261,0.1304],[0.0,0.0,1.0],[0.05,0.95,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0]]},{"f":[0,7,0,3,2,-2,5,-2,-2,0,7,-2,-2,6,-2,-2,7,3,2,-2,-2,5,-2,-2,-2,-2,7,4,-2,-2,1,-2,-2],"t":[57.95949,1.93219,56.63077,3.54223,23.20077,-2.0,2614.03345,-2.0,-2.0,30.44119,1.10933,-2.0,-2.0,189.8,-2.0,-2.0,1.74043,2.9118,22.96384,-2.0,-2.0,2465.39197,-2.0,-2.0,-2.0,-2.0,1.69287,79.133,-2.0,-2.0,6.50437,-2.0,-2.0],"l":[1,2,3,4,5,-1,7,-1,-1,10,11,-1,-1,14,-1,-1,17,18,19,-1,-1,22,-1,-1,-1,-1,27,28,-1,-1,31,-1,-1],"r":[26,25,16,9,6,-1,8,-1,-1,13,12,-1,-1,15,-1,-1,24,21,20,-1,-1,23,-1,-1,-1,-1,30,29,-1,-1,32,-1,-1],"v":[[0.5862,0.22,0.1939],[0.0068,0.526,0.4672],[0.0079,0.4535,0.5386],[0.0117,0.2459,0.7424],[0.0,0.0839,0.9161],[0.0,0.0,1.0],[0.0,0.3289,0.6711],[0.0,0.9259,0.0741],[0.0,0.0,1.0],[0.0388,0.6202,0.3411],[0.0,0.2979,0.7021],[0.0,0.7778,0.2222],[0.0,0.0,1.0],[0.061,0.8049,0.1341],[0.0,0.0,1.0],[0.0676,0.8919,0.0405],[0.0,0.8798,0.1202],[0.0,0.6377,0.3623],[0.0,0.3214,0.6786],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.8537,0.1463],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.9971,0.0029,0.0],[0.8667,0.1333,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0],[0.999,0.001,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[2,7,0,6,4,0,-2,-2,-2,-2,3,2,-2,-2,-2,1,-2,-2,6,0,5,6,-2,2,-2,-2,-2,6,-2,2,5,-2,-2,-2,1,6,3,4,-2,-2,-2,-2,-2],"t":[23.47972,1.92997,56.79267,191.41,77.7455,37.19302,-2.0,-2.0,-2.0,-2.0,2.90951,22.9989,-2.0,-2.0,-2.0,6.43846,-2.0,-2.0,190.16,30.43551,2622.86658,189.785,-2.0,29.13264,-2.0,-2.0,-2.0,189.8,-2.0,29.76208,2628.84839,-2.0,-2.0,-2.0,6.48155,190.555,3.63728,80.9045,-2.0,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,-1,-1,11,12,-1,-1,-1,16,-1,-1,19,20,21,22,-1,24,-1,-1,-1,28,-1,30,31,-1,-1,-1,35,36,37,38,-1,-1,-1,-1,-1],"r":[18,15,10,9,8,7,-1,-1,-1,-1,14,13,-1,-1,-1,17,-1,-1,34,27,26,23,-1,25,-1,-1,-1,29,-1,33,32,-1,-1,-1,42,41,40,39,-1,-1,-1,-1,-1],"v":[[0.6026,0.2103,0.1871],[0.0,0.4939,0.5061],[0.0,0.3718,0.6282],[0.0,0.052,0.948],[0.0,0.0327,0.9673],[0.0,0.0166,0.9834],[0.0,1.0,0.0],[0.0,0.0084,0.9916],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0,0.9429,0.0571],[0.0,0.5294,0.4706],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0,0.9608,0.0392],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.8357,0.1006,0.0637],[0.0,0.5659,0.4341],[0.0,0.1875,0.8125],[0.0,0.6818,0.3182],[0.0,0.0,1.0],[0.0,0.8824,0.1176],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.8627,0.1373],[0.0,0.0,1.0],[0.0,0.967,0.033],[0.0,0.9143,0.0857],[0.0,0.9412,0.0588],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.9752,0.0229,0.0018],[0.25,0.6944,0.0556],[0.8182,0.0,0.1818],[0.3333,0.0,0.6667],[1.0,0.0,0.0],[0.0,0.0,1.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[1,7,1,7,5,4,-2,-2,4,-2,-2,2,-2,-2,7,-2,-2,6,-2,-2,-2],"t":[6.53804,1.93035,6.43357,1.70201,2621.2572,76.06,-2.0,-2.0,97.852,-2.0,-2.0,23.26941,-2.0,-2.0,1.73887,-2.0,-2.0,191.325,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,9,-1,-1,12,-1,-1,15,-1,-1,18,-1,-1,-1],"r":[20,17,14,11,8,7,-1,-1,10,-1,-1,13,-1,-1,16,-1,-1,19,-1,-1,-1],"v":[[0.5924,0.1888,0.2188],[0.0323,0.4482,0.5195],[0.0368,0.3758,0.5874],[0.0184,0.2762,0.7053],[0.0365,0.4526,0.5109],[0.0538,0.6398,0.3065],[0.0,0.0,1.0],[0.0662,0.7881,0.1457],[0.0,0.0568,0.9432],[0.0,0.0349,0.9651],[0.0,1.0,0.0],[0.0,0.0967,0.9033],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.1284,0.8716,0.0],[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.967,0.033],[0.0,0.0,1.0],[0.0,1.0,0.0],[1.0,0.0,0.0]]},{"f":[2,4,2,2,0,7,-2,-2,-2,6,-2,-2,-2,1,5,6,-2,-2,-2,-2,0,0,5,-2,6,2,-2,-2,-2,4,6,-2,1,-2,-2,6,0,-2,-2,-2,-2],"t":[23.45162,75.73,23.25569,22.78153,19.45515,0.87328,-2.0,-2.0,-2.0,191.395,-2.0,-2.0,-2.0,6.39942,2413.33521,189.81499,-2.0,-2.0,-2.0,-2.0,57.43707,30.42759,2618.87109,-2.0,190.235,29.21211,-2.0,-2.0,-2.0,98.2405,189.8,-2.0,6.4562,-2.0,-2.0,190.085,34.97929,-2.0,-2.0,-2.0,-2.0],"l":[1,2,3,4,5,6,-1,-1,-1,10,-1,-1,-1,14,15,16,-1,-1,-1,-1,21,22,23,-1,25,26,-1,-1,-1,30,31,-1,33,-1,-1,36,37,-1,-1,-1,-1],"r":[20,13,12,9,8,7,-1,-1,-1,11,-1,-1,-1,19,18,17,-1,-1,-1,-1,40,29,24,-1,28,27,-1,-1,-1,35,32,-1,34,-1,-1,39,38,-1,-1,-1,-1],"v":[[0.6111,0.1933,0.1956],[0.0,0.4858,0.5142],[0.0,0.108,0.892],[0.0,0.0594,0.9406],[0.0,0.0066,0.9934],[0.0,0.2,0.8],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,0.2157,0.7843],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,1.0,0.0],[0.0,0.7742,0.2258],[0.0,0.3942,0.6058],[0.0,0.8723,0.1277],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.0,1.0,0.0],[0.8475,0.0802,0.0723],[0.0537,0.4976,0.4488],[0.0104,0.2083,0.7812],[0.0,1.0,0.0],[0.0123,0.0617,0.9259],[0.0,0.0625,0.9375],[0.0,0.0,1.0],[0.0,0.1923,0.8077],[1.0,0.0,0.0],[0.0917,0.7523,0.156],[0.0111,0.8222,0.1667],[0.0,0.0,1.0],[0.0122,0.9024,0.0854],[0.0123,0.9136,0.0741],[0.0,0.0,1.0],[0.4737,0.4211,0.1053],[0.0,0.8,0.2],[0.0,1.0,0.0],[0.0,0.3333,0.6667],[1.0,0.0,0.0],[1.0,0.0,0.0]]}]},"ciclos":[{"id":1053,"x":[60.1224,6.6764,24.1522,3.0723,81.674,2452.0884,191.03,1.7907],"bomba":0,"acum":130,"enfr":20},{"id":2066,"x":[58.9789,6.6832,23.5937,2.9882,77.313,2539.886,191.7,1.9891],"bomba":0,"acum":90,"enfr":100},{"id":1802,"x":[59.3496,6.7045,23.7676,3.013,78.885,2532.9422,191.63,2.0042],"bomba":0,"acum":115,"enfr":100},{"id":1905,"x":[58.8039,6.6983,23.6823,3.0705,78.99,2542.5291,191.65,1.9967],"bomba":0,"acum":115,"enfr":100},{"id":1759,"x":[58.148,6.6621,24.2382,3.0631,79.821,2539.2766,191.65,1.9824],"bomba":0,"acum":130,"enfr":100},{"id":697,"x":[59.153,6.5298,24.5185,2.9954,80.37,2370.2948,190.25,1.7165],"bomba":0,"acum":90,"enfr":3},{"id":2047,"x":[59.0897,6.6928,23.6647,3.0281,78.258,2537.0737,191.63,1.9919],"bomba":0,"acum":100,"enfr":100},{"id":342,"x":[59.7597,6.5893,24.0346,3.0008,81.222,2396.954,190.68,1.7678],"bomba":0,"acum":115,"enfr":3},{"id":1464,"x":[59.8945,6.6649,23.9582,2.9954,78.704,2460.6673,191.2,1.7979],"bomba":0,"acum":90,"enfr":20},{"id":1051,"x":[60.0844,6.6749,24.1424,3.0742,81.652,2452.4136,191.11,1.8001],"bomba":0,"acum":130,"enfr":20},{"id":2050,"x":[59.0127,6.6884,23.6556,3.0223,78.542,2537.84,191.63,2.0015],"bomba":0,"acum":100,"enfr":100},{"id":2072,"x":[58.9308,6.6807,23.5888,2.9865,77.277,2540.7435,191.82,2.004],"bomba":0,"acum":90,"enfr":100},{"id":446,"x":[59.4075,6.5738,24.0624,3.025,81.641,2387.8634,190.38,1.744],"bomba":0,"acum":115,"enfr":3},{"id":334,"x":[60.1262,6.6164,24.1397,2.9956,80.761,2403.7343,190.48,1.7681],"bomba":0,"acum":115,"enfr":3},{"id":2052,"x":[59.1663,6.6991,23.6952,3.0374,78.377,2536.2911,191.66,2.0001],"bomba":0,"acum":100,"enfr":100},{"id":2065,"x":[58.9185,6.6804,23.5689,2.9941,76.932,2541.1325,191.68,1.9835],"bomba":0,"acum":90,"enfr":100},{"id":1767,"x":[58.1156,6.6645,24.2735,3.0729,79.575,2539.6312,191.63,1.9955],"bomba":0,"acum":130,"enfr":100},{"id":2044,"x":[59.0958,6.696,23.6509,3.0457,78.004,2538.7694,191.67,1.9984],"bomba":0,"acum":100,"enfr":100},{"id":2024,"x":[58.1203,6.6593,24.2957,3.0657,78.767,2538.8714,191.65,2.0006],"bomba":0,"acum":100,"enfr":100},{"id":591,"x":[60.0698,6.5664,24.1417,2.9794,81.731,2369.8793,190.33,1.6944],"bomba":0,"acum":100,"enfr":3},{"id":2004,"x":[57.2159,6.5128,22.9142,2.9693,76.068,2544.9707,191.38,1.941],"bomba":1,"acum":100,"enfr":100},{"id":394,"x":[56.4891,6.324,23.4228,2.9363,79.144,2393.8574,189.93,1.6623],"bomba":1,"acum":115,"enfr":3},{"id":2008,"x":[57.1477,6.5132,22.8847,2.9696,75.841,2547.3114,191.44,1.9443],"bomba":1,"acum":100,"enfr":100},{"id":2146,"x":[57.004,6.5001,22.8024,2.9389,75.0,2550.0384,191.46,1.9442],"bomba":1,"acum":90,"enfr":100},{"id":1254,"x":[56.5362,6.4262,23.4642,2.9624,76.87,2479.9835,190.85,1.7473],"bomba":1,"acum":100,"enfr":20},{"id":393,"x":[29.9393,3.3006,29.3689,3.6035,97.334,2622.1855,189.83,1.1208],"bomba":1,"acum":115,"enfr":3},{"id":1881,"x":[57.0993,6.5206,22.8918,2.9459,76.501,2552.9708,191.49,1.9609],"bomba":1,"acum":115,"enfr":100},{"id":1407,"x":[57.7057,6.4587,23.0991,2.9388,76.378,2470.5514,190.84,1.7588],"bomba":1,"acum":90,"enfr":20},{"id":389,"x":[19.0103,2.0813,20.8968,2.7504,67.426,2722.5409,189.93,0.8987],"bomba":1,"acum":115,"enfr":3},{"id":2132,"x":[56.6134,6.4838,22.9373,2.9311,75.214,2550.9911,191.49,1.9369],"bomba":1,"acum":90,"enfr":100},{"id":1258,"x":[56.686,6.4271,23.6997,2.9728,77.472,2472.8975,190.89,1.7445],"bomba":1,"acum":100,"enfr":20},{"id":543,"x":[31.303,3.3451,30.0562,3.6161,95.712,2605.6808,189.92,1.0808],"bomba":1,"acum":100,"enfr":3},{"id":1253,"x":[56.6261,6.4308,23.3652,2.9609,76.966,2479.8442,190.89,1.754],"bomba":1,"acum":100,"enfr":20},{"id":2012,"x":[57.149,6.5121,22.8865,2.9596,75.978,2547.6912,191.52,1.9361],"bomba":1,"acum":100,"enfr":100},{"id":1259,"x":[56.6325,6.4301,23.6541,2.9832,77.392,2476.8755,190.89,1.7476],"bomba":1,"acum":100,"enfr":20},{"id":1989,"x":[56.0957,6.4659,23.3293,2.9731,76.03,2547.7822,191.43,1.9345],"bomba":1,"acum":100,"enfr":100},{"id":1861,"x":[56.6938,6.508,22.8558,2.9851,76.389,2552.4743,191.41,1.9491],"bomba":1,"acum":115,"enfr":100},{"id":288,"x":[57.7013,6.3575,23.055,2.8734,76.954,2404.6412,190.17,1.6914],"bomba":1,"acum":130,"enfr":3},{"id":1992,"x":[56.1737,6.4725,23.2558,2.9693,75.982,2549.0776,191.52,1.9345],"bomba":1,"acum":100,"enfr":100},{"id":287,"x":[57.6511,6.3503,23.031,2.8729,76.757,2404.3623,190.18,1.69],"bomba":1,"acum":130,"enfr":3},{"id":1713,"x":[55.8724,6.4378,22.4796,2.9206,75.482,2575.088,191.38,1.9228],"bomba":2,"acum":130,"enfr":100},{"id":2094,"x":[55.2328,6.3764,22.4748,2.9032,73.644,2562.6102,191.33,1.9027],"bomba":2,"acum":90,"enfr":100},{"id":944,"x":[55.3539,6.3252,23.198,2.9485,76.954,2476.9067,190.55,1.7102],"bomba":2,"acum":130,"enfr":20},{"id":1944,"x":[54.8828,6.3782,22.783,2.9363,74.342,2565.1806,191.36,1.9124],"bomba":2,"acum":100,"enfr":100},{"id":489,"x":[29.8702,3.2671,28.7776,3.535,92.667,2633.7408,189.69,1.0685],"bomba":2,"acum":100,"enfr":3},{"id":1360,"x":[56.3165,6.3573,22.6296,2.9268,74.789,2481.4963,190.8,1.7435],"bomba":2,"acum":90,"enfr":20},{"id":1825,"x":[55.7119,6.4081,22.4332,2.9596,75.369,2556.1112,191.28,1.9181],"bomba":2,"acum":115,"enfr":100},{"id":1942,"x":[54.8466,6.3813,22.7714,2.9379,74.296,2567.4886,191.2,1.9074],"bomba":2,"acum":100,"enfr":100},{"id":1362,"x":[55.9724,6.3459,22.6131,2.8921,74.542,2485.2205,190.7,1.7361],"bomba":2,"acum":90,"enfr":20},{"id":1963,"x":[55.9839,6.413,22.4275,2.9331,74.692,2556.107,191.27,1.9228],"bomba":2,"acum":100,"enfr":100},{"id":2085,"x":[55.5482,6.3939,22.3465,2.9115,73.767,2562.4152,191.25,1.8956],"bomba":2,"acum":90,"enfr":100},{"id":2092,"x":[55.4439,6.3923,22.3364,2.9033,73.89,2565.1046,191.33,1.8976],"bomba":2,"acum":90,"enfr":100},{"id":1821,"x":[55.5638,6.4065,22.3834,2.9516,75.046,2558.3345,191.24,1.9118],"bomba":2,"acum":115,"enfr":100},{"id":495,"x":[29.9423,3.271,28.9226,3.543,94.946,2634.8413,189.77,1.0713],"bomba":2,"acum":100,"enfr":3},{"id":2086,"x":[55.4609,6.3911,22.3939,2.8945,73.831,2562.9454,191.31,1.9047],"bomba":2,"acum":90,"enfr":100},{"id":1843,"x":[56.0964,6.4222,22.5314,2.9078,75.375,2556.0485,191.23,1.9264],"bomba":2,"acum":115,"enfr":100},{"id":642,"x":[30.1719,3.2572,28.9758,3.4812,91.127,2621.6,189.73,1.1078],"bomba":2,"acum":90,"enfr":3},{"id":1710,"x":[55.733,6.4237,22.3936,2.9112,75.579,2572.7372,191.35,1.9135],"bomba":2,"acum":130,"enfr":100},{"id":2111,"x":[55.7211,6.4008,22.2951,2.8885,73.779,2564.1814,191.41,1.9153],"bomba":2,"acum":90,"enfr":100},{"id":236,"x":[56.6172,6.2746,22.5927,2.8806,74.616,2417.1307,190.01,1.6445],"bomba":2,"acum":130,"enfr":3}]};
+(function () {
+  'use strict';
+  const UNITS = ['C-01', 'C-02', 'C-03', 'C-04', 'C-05', 'C-06', 'C-07'];
+  const H_PROG = 7 * 30 * 8;
+  const SUP0 = { ton: 191, lit: 35, aho: 10 };
+  const CLS = ['sin fuga', 'fuga débil', 'fuga severa'];
+  const KEY = 'flotaia-demo-v3';
+  const M = MODELO_FLOTAIA.modelo, CICLOS = MODELO_FLOTAIA.ciclos;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fecha = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }); };
+  const fmt = (n, d = 1) => Number.isFinite(n) ? n.toLocaleString('es-PE', { minimumFractionDigits: d, maximumFractionDigits: d }) : '–';
+
+  // ---------- modelo de IA: bosque aleatorio exportado desde scikit-learn ----------
+  // cada árbol devuelve la proporción de clases de su hoja; el bosque promedia (igual que predict_proba de scikit-learn)
+  function arbol(t, x) { let n = 0; while (t.l[n] !== -1) n = x[t.f[n]] <= t.t[n] ? t.l[n] : t.r[n]; return t.v[n]; }
+  function predecir(x) {
+    const p = [0, 0, 0];
+    M.trees.forEach(t => { arbol(t, x).forEach((v, i) => { p[M.classes[i]] += v / M.trees.length; }); });
+    const c = p.indexOf(Math.max(...p));
+    return { clase: c, confianza: p[c] };
+  }
+  const porClase = c => CICLOS.filter(k => k.bomba === c);
+  function cicloDe(c, salto) { const L = porClase(c); return L[Math.abs(salto) % L.length]; }
+
+  // ---------- estado ----------
+  function estadoInicial() {
+    const unidades = {};
+    UNITS.forEach((u, i) => { const k = cicloDe(0, i); unidades[u] = { ciclo: k.id, pred: predecir(k.x) }; });
+    const hoy = new Date(); const d = n => new Date(hoy.getTime() - n * 864e5).toISOString();
+    return {
+      unidades, n: 0, sup: { ...SUP0 },
+      ots: [
+        { id: 'e1', codigo: 'OT-EJ-01', unidad: 'C-02', origen: 'Chofer', sistema: 'Motor', sintoma: 'Recalentamiento en subida', prioridad: 'media', accion: 'Revisar radiador y termostato', estado: 'cerrada', horasReparacion: 3, horasParada: 4, creada: d(9), ejemplo: true, motor: 'reglas' },
+        { id: 'e2', codigo: 'OT-EJ-02', unidad: 'C-05', origen: 'Mecánico', sistema: 'Eléctrico', sintoma: 'Luces traseras sin funcionar', prioridad: 'baja', accion: 'Cambiar fusible y revisar cableado', estado: 'cerrada', horasReparacion: 1, horasParada: 0, creada: d(6), ejemplo: true, motor: 'reglas' },
+        { id: 'e3', codigo: 'OT-EJ-03', unidad: 'C-06', origen: 'Supervisor', sistema: 'Hidráulico', sintoma: 'Goteo en manguera de la pala', prioridad: 'media', accion: 'Cambiar manguera hidráulica', estado: 'cerrada', horasReparacion: 5, horasParada: 6, creada: d(3), ejemplo: true, motor: 'reglas' },
+      ],
+    };
+  }
+  let S = estadoInicial();
+  try { const g = JSON.parse(localStorage.getItem(KEY) || 'null'); if (g && g.unidades && Array.isArray(g.ots)) S = g; } catch (e) {}
+  function guardar() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  const ciclo = id => CICLOS.find(k => k.id === id);
+  const nivel = u => S.unidades[u].pred.clase; // 0 verde, 1 ámbar, 2 rojo
+
+  // ---------- render ----------
+  function abiertas() { return S.ots.filter(o => o.estado !== 'cerrada'); }
+  function fuera() { const ab = abiertas(); return UNITS.filter(u => nivel(u) === 2 || ab.some(o => o.unidad === u && o.prioridad === 'alta')); }
+  function horasParada(o) { return o.estado === 'cerrada' ? (Number(o.horasParada) || 0) : (o.prioridad === 'alta' ? 8 : 0); }
+
+  function renderUnits(flash) {
+    $('units').innerHTML = UNITS.map(u => {
+      const st = S.unidades[u], k = ciclo(st.ciclo), c = st.pred.clase;
+      const txt = c === 0 ? 'Bomba sin fuga' : c === 1 ? 'Fuga interna débil: programar revisión' : 'Fuga interna severa: retirar de ruta';
+      return `<div class="unit${flash === u ? ' flash' : ''}"><i class="dot ${['g', 'a', 'r'][c]}" aria-hidden="true"></i>
+        <span class="uid">${u}</span><span class="ustate">${txt} <span class="tag" style="text-transform:none;letter-spacing:0">(probabilidad ${fmt(st.pred.confianza * 100, 0)} %)</span></span>
+        <span class="sens"><span>Ciclo de ensayo n.° ${k.id}</span><span>Eficiencia SE ${fmt(k.x[0], 1)} %</span><span>Caudal FS1 ${fmt(k.x[1], 2)} L/min</span><span>Condición registrada: ${CLS[k.bomba]}</span></span></div>`;
+    }).join('');
+    const opts = UNITS.map(u => `<option>${u}</option>`).join('');
+    const keep = (id, v) => { $(id).innerHTML = v; };
+    const a = $('cUnidad').value, b = $('fUnidad').value;
+    keep('cUnidad', opts); keep('fUnidad', opts + '<option>B-01</option>');
+    if (a) $('cUnidad').value = a; if (b) $('fUnidad').value = b;
+  }
+
+  function renderKpis() {
+    const comp = S.ots.filter(o => o.unidad !== 'B-01');
+    const parada = comp.reduce((s, o) => s + horasParada(o), 0);
+    const disp = (H_PROG - parada) / H_PROG * 100;
+    const fallas = comp.filter(o => o.prioridad !== 'baja').length;
+    const cerr = S.ots.filter(o => o.estado === 'cerrada' && Number(o.horasReparacion) > 0);
+    const mttr = cerr.length ? cerr.reduce((s, o) => s + Number(o.horasReparacion), 0) / cerr.length : null;
+    const F = fuera(), cub = UNITS.length - F.length, ab = abiertas();
+    $('kRutas').textContent = `${cub} de ${UNITS.length}`;
+    $('kRutas').className = 'v ' + (cub === UNITS.length ? 'ok' : cub === UNITS.length - 1 ? 'mid' : 'bad');
+    $('kDisp').textContent = fmt(disp, 1) + ' %';
+    $('kDisp').className = 'v ' + (disp >= 90 ? 'ok' : disp >= 85 ? 'mid' : 'bad');
+    $('kMtbf').textContent = fallas ? fmt((H_PROG - parada) / fallas, 0) + ' h' : '–';
+    $('kMttr').textContent = mttr == null ? '–' : fmt(mttr, 1) + ' h';
+    $('kOt').textContent = ab.length;
+    const c = p => ab.filter(o => o.prioridad === p).length;
+    $('kOtM').textContent = `${c('alta')} alta · ${c('media')} media · ${c('baja')} baja`;
+    renderAmb(F);
+  }
+
+  function renderAmb(F) {
+    const s = S.sup, tGen = s.ton, operan = UNITS.filter(u => !F.includes(u));
+    const tRec = tGen * operan.length / UNITS.length, tSin = tGen - tRec;
+    const diesel = operan.reduce((a, u) => a + s.lit * (nivel(u) === 0 ? 1 - s.aho / 100 : 1), 0);
+    const base = operan.length * s.lit;
+    const co2 = diesel * 2.68 * 30 / 1000, co2b = base * 2.68 * 30 / 1000, ev = co2b - co2;
+    $('aSin').textContent = fmt(tSin, 1) + ' t';
+    $('aSin').className = 'v ' + (tSin < 0.05 ? 'ok' : F.length === 1 ? 'mid' : 'bad');
+    $('aSinM').textContent = `de ${fmt(tGen, 0)} t/día · meta 0 t`;
+    $('aDie').textContent = fmt(diesel, 0) + ' L';
+    $('aDieM').textContent = tRec > 0 ? `${fmt(diesel / tRec, 2)} L por tonelada recolectada` : 'sin recolección';
+    $('aCo2').textContent = fmt(co2, 1) + ' t';
+    $('aEvi').textContent = fmt(ev, 2) + ' t';
+    const pct = co2b ? ev / co2b * 100 : 0;
+    $('aEvi').className = 'v ' + (pct >= s.aho - 0.01 && s.aho > 0 ? 'ok' : pct > 0 ? 'mid' : 'bad');
+    $('aEviM').textContent = `${fmt(pct, 1)} % vs. línea base · meta −${fmt(s.aho, 0)} %`;
+  }
+
+  function renderOts() {
+    const L = [...S.ots].sort((a, b) => (a.estado === 'cerrada') - (b.estado === 'cerrada') || String(b.creada).localeCompare(String(a.creada)));
+    $('otCount').textContent = `${S.ots.length} registradas · ${S.ots.filter(o => o.ejemplo).length} de ejemplo`;
+    if (!L.length) { $('otBody').innerHTML = '<tr><td colspan="5" class="status">No hay órdenes registradas.</td></tr>'; return; }
+    $('otBody').innerHTML = L.map(o => `<tr>
+      <td class="num">${esc(o.codigo)}<br><span class="tag">${esc(fecha(o.creada))}</span></td>
+      <td class="num">${esc(o.unidad)}<br><span class="tag">${esc(o.origen)}</span></td>
+      <td><strong>${esc(o.sistema)}</strong> · ${esc(o.sintoma)}<br><span class="tag" style="text-transform:none;letter-spacing:0">Acción: ${esc(o.accion)}</span><br>
+        ${o.motor === 'modelo' ? '<span class="badge b-ia">IA</span>' : '<span class="badge b-auto">Reglas</span>'}${o.ejemplo ? ' <span class="pill ej">ejemplo</span>' : ''}</td>
+      <td><span class="pill ${esc(o.prioridad)}">${esc(o.prioridad)}</span></td>
+      <td>${o.estado === 'cerrada'
+        ? `Cerrada<br><span class="tag" style="text-transform:none;letter-spacing:0">${fmt(Number(o.horasReparacion), 1)} h reparación · ${fmt(Number(o.horasParada), 1)} h fuera de servicio</span>`
+        : `<div class="closer"><input type="number" min="0" step="0.5" inputmode="decimal" aria-label="Horas de reparación de ${esc(o.codigo)}" placeholder="h rep." id="rep-${esc(o.id)}"><input type="number" min="0" step="0.5" inputmode="decimal" aria-label="Horas fuera de servicio de ${esc(o.codigo)}" placeholder="h fuera" id="par-${esc(o.id)}"><button type="button" data-close="${esc(o.id)}">Cerrar</button></div><span class="status" id="msg-${esc(o.id)}"></span>`}</td></tr>`).join('');
+  }
+  function renderAll(flash) { renderUnits(flash); renderKpis(); renderOts(); }
+
+  // ---------- automatización: clasificación por reglas del reporte ----------
+  function reglas(t) {
+    const x = t.toLowerCase();
+    const sistema = /bomba|prensa|hidr|aceite|cilindro|compuerta|fuga|acumulador|enfriador|pala|manguera/.test(x) ? 'Hidráulico'
+      : /motor|humo|escape|arranca|temperatura|recalienta|turbo/.test(x) ? 'Motor'
+      : /luz|luces|bater|eléctr|electr|tablero|alternador|fusible/.test(x) ? 'Eléctrico'
+      : /llanta|neum|freno|suspens|dirección|direccion/.test(x) ? 'Chasis' : 'Por confirmar';
+    const prioridad = /no (puede )?sal|no arranca|varad|detenid|no funciona|no sale|sin frenos/.test(x) ? 'alta'
+      : /pierde|ruido|silbido|fuga|humo|recalienta|goteo/.test(x) ? 'media' : 'baja';
+    const acc = { 'Hidráulico': 'Inspeccionar bomba, mangueras y cilindros; medir presión del sistema', 'Motor': 'Diagnóstico del motor por el mecánico de turno', 'Eléctrico': 'Revisar fusibles, batería y cableado', 'Chasis': 'Revisar frenos, dirección y neumáticos', 'Por confirmar': 'Inspección general por el mecánico de turno' }[sistema];
+    return { sistema, prioridad, accion: acc };
+  }
+  function nuevaOt(o) {
+    S.n = (S.n || 0) + 1;
+    o.id = 'o' + Date.now().toString(36) + S.n;
+    o.codigo = 'OT-' + String(S.n).padStart(3, '0');
+    o.creada = new Date().toISOString(); o.estado = 'abierta'; o.horasReparacion = 0; o.horasParada = 0; o.ejemplo = false;
+    S.ots.push(o); guardar(); return o;
+  }
+  function crearReporte(unidad, origen, texto) {
+    const c = reglas(texto);
+    return nuevaOt({ unidad, origen, sistema: c.sistema, sintoma: texto.trim().slice(0, 140), prioridad: c.prioridad, accion: c.accion, motor: 'reglas' });
+  }
+  $('otForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const t = $('fTexto').value.trim();
+    if (t.length < 8) { $('otMsg').textContent = 'Escriba una descripción de al menos 8 caracteres.'; $('otMsg').className = 'status err'; $('fTexto').focus(); return; }
+    const o = crearReporte($('fUnidad').value, $('fQuien').value, t);
+    $('otMsg').className = 'status';
+    $('otMsg').textContent = `${o.codigo} creada por reglas: sistema ${o.sistema}, prioridad ${o.prioridad}.`;
+    $('fTexto').value = ''; renderAll();
+  });
+  document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { $('fTexto').value = b.dataset.t; $('fTexto').focus(); }));
+
+  // ---------- cierre de órdenes ----------
+  function cerrarOt(id, rep, par) {
+    const o = S.ots.find(x => x.id === id); if (!o || o.estado === 'cerrada') return null;
+    Object.assign(o, { estado: 'cerrada', horasReparacion: rep, horasParada: par, cerrada: new Date().toISOString() });
+    // tras reparar la bomba, la siguiente lectura de la unidad es un ciclo sin fuga (simulación)
+    if (o.motor === 'modelo' && S.unidades[o.unidad]) { const k = cicloDe(0, S.n + 3); S.unidades[o.unidad] = { ciclo: k.id, pred: predecir(k.x) }; }
+    guardar(); return o;
+  }
+  $('otBody').addEventListener('click', ev => {
+    const id = ev.target && ev.target.dataset ? ev.target.dataset.close : null; if (!id) return;
+    const r = $('rep-' + id), p = $('par-' + id), msg = $('msg-' + id);
+    const rep = r.value === '' ? NaN : Number(r.value), par = p.value === '' ? rep : Number(p.value);
+    if (!(rep > 0) || rep > 720) { msg.textContent = 'Ingrese las horas de reparación (mayor que 0).'; msg.className = 'status err'; r.focus(); return; }
+    if (!(par >= 0) || par > 720) { msg.textContent = 'Las horas fuera de servicio deben ser 0 o más.'; msg.className = 'status err'; p.focus(); return; }
+    const o = cerrarOt(id, rep, par); renderAll(o && o.unidad);
+  });
+
+  // ---------- IA: lectura de un ciclo de ensayo ----------
+  function leerCiclo(u, forzarClase) {
+    const c = forzarClase != null ? forzarClase : [0, 0, 1, 2][(S.n + Math.floor(Math.random() * 4)) % 4];
+    const k = cicloDe(c, Math.floor(Math.random() * 1000));
+    const pred = predecir(k.x);
+    S.unidades[u] = { ciclo: k.id, pred };
+    let msg = `${u}: el modelo clasifica «${CLS[pred.clase]}» (probabilidad ${fmt(pred.confianza * 100, 0)} %); condición registrada en el ensayo: «${CLS[k.bomba]}».`;
+    const ya = S.ots.some(o => o.unidad === u && o.motor === 'modelo' && o.estado !== 'cerrada');
+    let ot = null;
+    if (pred.clase === 2 && !ya) {
+      ot = nuevaOt({ unidad: u, origen: 'Sensor', sistema: 'Hidráulico', sintoma: 'Fuga interna severa de la bomba detectada por el modelo', prioridad: 'alta', accion: 'Retirar de ruta; inspeccionar bomba y sellos; medir caudal y presión', motor: 'modelo' });
+      msg += ` Se generó ${ot.codigo} de prioridad alta y la unidad sale de ruta.`;
+    } else if (pred.clase === 1) msg += ' Se recomienda programar una revisión.';
+    guardar(); return { msg, ot, pred, k };
+  }
+  $('btnCiclo').addEventListener('click', () => { const u = $('cUnidad').value; const r = leerCiclo(u); $('cicloMsg').textContent = r.msg; renderAll(u); });
+
+  // ---------- supuestos ambientales ----------
+  function syncSup() { $('sTon').value = S.sup.ton; $('sLit').value = S.sup.lit; $('sAho').value = S.sup.aho; }
+  [['sTon', 'ton', 0, 5000], ['sLit', 'lit', 0, 500], ['sAho', 'aho', 0, 50]].forEach(([id, k, mn, mx]) => $(id).addEventListener('input', () => {
+    const raw = $(id).value, v = Number(raw);
+    if (raw === '' || !Number.isFinite(v) || v < mn || v > mx) { $('supMsg').textContent = `Valor no válido: use un número entre ${mn} y ${mx}. Se mantiene el último valor válido.`; $('supMsg').className = 'status err'; return; }
+    $('supMsg').textContent = ''; S.sup[k] = v; guardar(); renderKpis();
+  }));
+  $('sReset').addEventListener('click', () => { S.sup = { ...SUP0 }; syncSup(); $('supMsg').textContent = ''; guardar(); renderKpis(); });
+
+  // ---------- reinicio ----------
+  let confirmar = false;
+  $('btnReset').addEventListener('click', () => {
+    if (!confirmar) { confirmar = true; $('btnReset').textContent = '¿Confirmar reinicio?'; setTimeout(() => { confirmar = false; $('btnReset').textContent = 'Reiniciar demostración'; }, 4000); return; }
+    confirmar = false; $('btnReset').textContent = 'Reiniciar demostración';
+    S = estadoInicial(); guardar(); syncSup(); guia.paso = 0; pintarGuia(); $('cicloMsg').textContent = ''; $('otMsg').textContent = ''; renderAll();
+  });
+
+  // ---------- demostración guiada C-03 ----------
+  const guia = { paso: 0, ot1: null, ot2: null };
+  const PASOS = [
+    ['Estado inicial de la flota', () => { S = estadoInicial(); guardar(); syncSup(); renderAll(); return 'Flota reiniciada: 7 de 7 rutas atendidas y ninguna orden abierta. Observe los indicadores de partida.'; }],
+    ['El chofer de C-03 reporta la falla', () => { const o = crearReporte('C-03', 'Chofer', 'La prensa pierde fuerza y hay fuga de aceite en la bomba hidráulica'); guia.ot1 = o.id; renderAll('C-03'); return `${o.codigo}: las reglas la clasifican como sistema ${o.sistema} con prioridad ${o.prioridad}. La unidad sigue en ruta.`; }],
+    ['Lectura de sensores: deterioro hidráulico', () => { const r = leerCiclo('C-03', 2); guia.ot2 = r.ot ? r.ot.id : null; $('cicloMsg').textContent = r.msg; renderAll('C-03'); return r.msg; }],
+    ['Efecto en los indicadores y en el ambiente', () => { renderAll('C-03'); const F = fuera(); return `Rutas atendidas: ${UNITS.length - F.length} de ${UNITS.length}. Residuos sin recoger estimados: ${$('aSin').textContent}. CO₂ evitado: ${$('aEvi').textContent} al mes. Son estimaciones con supuestos, no mediciones.`; }],
+    ['Reparación y cierre de las órdenes', () => { if (guia.ot2) cerrarOt(guia.ot2, 6, 8); if (guia.ot1) cerrarOt(guia.ot1, 1, 0); renderAll('C-03'); return 'Se cerraron las órdenes de C-03 (6 h de reparación y 8 h fuera de servicio para la orden de la bomba). Tras la reparación, la siguiente lectura de C-03 no muestra fuga.'; }],
+    ['Indicadores actualizados', () => { renderAll(); return `Rutas atendidas: ${$('kRutas').textContent}. Disponibilidad: ${$('kDisp').textContent}. MTTR: ${$('kMttr').textContent}. Órdenes abiertas: ${$('kOt').textContent}. Fin de la demostración.`; }],
+  ];
+  function pintarGuia() {
+    $('guiaPasos').innerHTML = PASOS.map((p, i) => `<li class="${i < guia.paso ? 'done' : i === guia.paso ? 'now' : ''}">${esc(p[0])}</li>`).join('');
+    $('btnPaso').textContent = guia.paso < PASOS.length ? `Ejecutar paso ${guia.paso + 1}` : 'Repetir la demostración';
+  }
+  $('btnGuia').addEventListener('click', () => { $('guia').hidden = false; guia.paso = 0; $('guiaMsg').textContent = 'Pulse «Ejecutar paso 1» para empezar. Cada paso modifica el tablero.'; pintarGuia(); $('guia').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  $('btnGuiaCerrar').addEventListener('click', () => { $('guia').hidden = true; });
+  $('btnPaso').addEventListener('click', () => {
+    if (guia.paso >= PASOS.length) guia.paso = 0;
+    const msg = PASOS[guia.paso][1](); $('guiaMsg').textContent = `Paso ${guia.paso + 1}: ${msg}`; guia.paso++; pintarGuia();
+  });
+
+  syncSup(); renderAll(); pintarGuia();
+  window.FlotaIA = { predecir, ciclos: CICLOS, estado: () => S };
+})();
+</script>
+</body>
+</html>
