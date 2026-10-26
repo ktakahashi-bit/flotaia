@@ -269,6 +269,13 @@ table.dt tr.hl td { background: #f7fafe; }
 .leg i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
 .params { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: end; }
 .params input { width: 100%; }
+.hc-g { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 18px; align-items: start; }
+.hc-g2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.chart .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.hc-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; align-items: end; }
+input[type=month] { background: var(--surface); border: 1px solid var(--line-2); border-radius: 7px; padding: 7px 10px; font-size: .88rem; min-width: 0; }
+.hc-note { border: 1px dashed var(--line-2); border-radius: 8px; padding: 10px 12px; font-size: .76rem; color: var(--ink-2); background: var(--surface-2); line-height: 1.5; }
+.hc-fe td, .hc-fe th { font-size: .74rem; }
 .formula { display: grid; gap: 8px; font-size: .8rem; color: var(--ink-2); }
 .formula div { padding: 8px 10px; background: var(--surface-2); border-radius: 6px; border-left: 3px solid var(--navy-100); }
 .formula code { font-family: var(--mono); font-size: .76rem; color: var(--navy-800); }
@@ -335,6 +342,8 @@ table.dt tr.hl td { background: #f7fafe; }
   .tiles { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 }
 @media (max-width: 960px) {
+  .hc-g, .hc-g2 { grid-template-columns: minmax(0, 1fr); }
+  .hc-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .app { grid-template-columns: minmax(0, 1fr); }
   .side { position: fixed; left: 0; top: 0; bottom: 0; height: auto; width: min(290px, 86vw); transform: translateX(-102%); transition: transform .25s ease; box-shadow: var(--shadow-lg); padding-top: max(20px, env(safe-area-inset-top, 0px)); }
   .side.open { transform: none; }
@@ -369,6 +378,7 @@ table.dt tr.hl td { background: #f7fafe; }
   .dialog.small { width: 100%; }
 }
 @media (max-width: 420px) {
+  .hc-form { grid-template-columns: minmax(0, 1fr); }
   .kgrid { grid-template-columns: minmax(0, 1fr); }
   .kpi .v { font-size: 1.45rem; }
   .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -393,6 +403,7 @@ table.dt tr.hl td { background: #f7fafe; }
   <symbol id="i-min" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
   <symbol id="i-max" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
   <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3.5 13.5l2.6-7.3A1.5 1.5 0 0 1 7.5 5.2h9a1.5 1.5 0 0 1 1.4 1l2.6 7.3v4.8a1.5 1.5 0 0 1-1.5 1.5h-14a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M3.5 13.5h4.6l1.4 2.4h5l1.4-2.4h4.6"/></symbol>
+  <symbol id="i-co2" viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6-1.4A4.6 4.6 0 0 0 7 18.5z"/><path d="M9.5 13.8h5"/></symbol>
   <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5c3.6 4.4 5.8 7.6 5.8 10.4a5.8 5.8 0 0 1-11.6 0c0-2.8 2.2-6 5.8-10.4z"/></symbol>
 </svg>
 
@@ -411,6 +422,7 @@ table.dt tr.hl td { background: #f7fafe; }
       <div class="nav-l">Inteligencia</div>
       <a href="#analisis" data-v="analisis"><svg class="i"><use href="#i-cpu"/></svg>Análisis inteligente</a>
       <a href="#ambiental" data-v="ambiental"><svg class="i"><use href="#i-leaf"/></svg>Impacto ambiental</a>
+      <a href="#huella" data-v="huella"><svg class="i"><use href="#i-co2"/></svg>Huella de carbono</a>
       <div class="nav-l">Sustentación</div>
       <a href="#demo" data-v="demo"><svg class="i"><use href="#i-play"/></svg>Demostración C-03</a>
     </nav>
@@ -623,7 +635,7 @@ table.dt tr.hl td { background: #f7fafe; }
           <div class="kpi" id="kpASin"><span class="l">Residuos sin recoger hoy</span><span class="v tone" id="aSin">–</span><span class="m" id="aSinM">&nbsp;</span></div>
           <div class="kpi"><span class="l">Consumo de diésel de la flota hoy</span><span class="v" id="aDie">–</span><span class="m" id="aDieM">&nbsp;</span></div>
           <div class="kpi"><span class="l">Combustible por tonelada recolectada</span><span class="v" id="aLpt">–</span><span class="m" id="aLptM">&nbsp;</span></div>
-          <div class="kpi"><span class="l">CO₂ emitido (proyección mensual)</span><span class="v" id="aCo2">–</span><span class="m">diésel × 2.68 kg CO₂/L × 30 días</span></div>
+          <div class="kpi"><span class="l">CO₂ emitido (proyección mensual)</span><span class="v" id="aCo2">–</span><span class="m">diésel × 2.676 kg CO₂/L × 30 días</span></div>
           <div class="kpi" id="kpAEvi"><span class="l">CO₂ evitado con FlotaIA (mensual)</span><span class="v tone" id="aEvi">–</span><span class="m" id="aEviM">&nbsp;</span></div>
           <div class="kpi"><span class="l">Residuos recolectados hoy</span><span class="v" id="aRec">–</span><span class="m" id="aRecM">&nbsp;</span></div>
         </div>
@@ -645,15 +657,80 @@ table.dt tr.hl td { background: #f7fafe; }
               <label class="f" for="sAho">Ahorro de diésel (%)<input id="sAho" type="number" min="0" max="50" step="1" inputmode="decimal"></label>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn sec sm" id="sReset">Restaurar valores por defecto</button><p class="msg" id="supMsg" role="status"></p></div>
-            <p class="foot">191 t/día es la generación del distrito reportada por la prensa (HYTimes, 2026), sin documento oficial publicado. Los 35 L de diésel por unidad y día son un valor de trabajo, y el 10 % de ahorro es la meta de la Tabla 14 del documento. Los tres deben reemplazarse con los datos reales de la municipalidad cuando se implemente la propuesta.</p>
+            <p class="foot">191 t/día es la generación del distrito reportada por la prensa (HYTimes, 2026), sin documento oficial publicado. Los 35 L de diésel por unidad y día son un valor de trabajo, y el 10 % de ahorro es la meta de combustible por tonelada de la Tabla 38 del documento. Los tres deben reemplazarse con los datos reales de la municipalidad cuando se implemente la propuesta.</p>
             <div class="formula">
               <h3>Fórmulas utilizadas</h3>
               <div>Residuos sin recoger = <code>t/día × unidades fuera de ruta ÷ 7</code></div>
               <div>Diésel = <code>L/día × (1 − ahorro)</code> en unidades sin fuga; <code>L/día</code> en unidades con fuga débil; las unidades con fuga severa no salen</div>
               <div>Referencia = <code>L/día × unidades en ruta</code>, sin ahorro</div>
-              <div>CO₂ mensual = <code>diésel × 2.68 kg/L × 30 días</code> (IPCC, 2006)</div>
+              <div>CO₂ mensual = <code>diésel × 2.676 kg CO₂/L × 30 días</code> (IPCC, 2006; mismo factor del módulo Huella de carbono)</div>
               <div>CO₂ evitado = <code>CO₂ de referencia − CO₂ con FlotaIA</code></div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= E2. HUELLA DE CARBONO DE LA FLOTA ================= -->
+      <section class="view" id="v-huella" aria-labelledby="h-hc" hidden>
+        <div class="vhead">
+          <div><div class="eyebrow">Sostenibilidad</div><h1 id="h-hc">Huella de carbono de la flota</h1><p class="lead">Emisiones estimadas por la combustión de diésel de las siete compactadoras (alcance 1, combustión móvil). No es la huella de carbono de la municipalidad ni un reporte presentado a Huella de Carbono Perú: los registros iniciales son simulados.</p></div>
+          <div class="badges"><span class="badge b-auto">Cálculo automático</span><span class="badge b-sim">Datos simulados</span></div>
+        </div>
+        <div class="filters">
+          <label class="f" for="hcPer">Periodo analizado<select id="hcPer"></select></label>
+          <button type="button" class="btn sec sm" id="hcRep">Exportar reporte (HTML)</button>
+          <button type="button" class="btn sec sm" id="hcCsv">Exportar datos (CSV)</button>
+          <p class="msg" id="hcExpMsg" role="status"></p>
+        </div>
+        <div class="akpis" id="hcK">
+          <div class="kpi"><span class="l">Emisiones de la flota</span><span class="v" id="hcT">–</span><span class="m" id="hcTM">&nbsp;</span></div>
+          <div class="kpi"><span class="l">CO₂ fósil</span><span class="v" id="hcC">–</span><span class="m" id="hcCM">&nbsp;</span></div>
+          <div class="kpi" id="kpHcI"><span class="l">Intensidad por tonelada recolectada</span><span class="v tone" id="hcI">–</span><span class="m" id="hcIM">&nbsp;</span></div>
+          <div class="kpi"><span class="l">Diésel registrado</span><span class="v" id="hcL">–</span><span class="m" id="hcLM">&nbsp;</span></div>
+          <div class="kpi"><span class="l">Mayor intensidad</span><span class="v" id="hcMx">–</span><span class="m" id="hcMxM">&nbsp;</span></div>
+          <div class="kpi"><span class="l">Reducción del escenario hipotético</span><span class="v" id="hcE">–</span><span class="m" id="hcEM">&nbsp;</span></div>
+        </div>
+        <div class="hc-g2">
+          <div class="card" id="cHcEvo">
+            <div class="card-h"><div><h2>Evolución mensual de las emisiones</h2><p>t CO₂e por mes y kg CO₂e por tonelada recolectada</p></div><span class="badge b-auto">Cálculo</span></div>
+            <div id="hcEvo"></div>
+          </div>
+          <div class="card" id="cHcCmpC">
+            <div class="card-h"><div><h2>Comparación entre compactadoras</h2><p id="hcCmpSub">kg CO₂e por tonelada recolectada en el periodo</p></div><span class="badge b-auto">Cálculo</span></div>
+            <div id="hcCmp"></div>
+            <p class="foot">Las barras ámbar superan en más de 10 % la intensidad media de la flota (línea punteada): es una señal para revisar la unidad (mantenimiento, ralentí, ruta), no un diagnóstico.</p>
+          </div>
+        </div>
+        <div class="card" id="cHcForm">
+          <div class="card-h"><div><h2>Registrar combustible</h2><p>Un registro por compactadora y mes; si ya existe, se reemplaza. La tabla muestra el periodo analizado.</p></div><span class="badge b-auto">Registro</span></div>
+          <form id="hcForm" novalidate>
+            <div class="hc-form">
+              <label class="f" for="hcU">Compactadora<select id="hcU"></select></label>
+              <label class="f" for="hcM">Periodo (mes)<input id="hcM" type="month" min="2020-01" max="2035-12"></label>
+              <label class="f" for="hcLi">Diésel (L)<input id="hcLi" type="number" min="1" max="20000" step="1" inputmode="decimal"></label>
+              <label class="f" for="hcTo">Residuos recolectados (t)<input id="hcTo" type="number" min="0" max="5000" step="0.1" inputmode="decimal"></label>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px"><button type="submit" class="btn" id="btnHc">Registrar</button><p class="msg" id="hcMsg" role="status"></p></div>
+          </form>
+          <div class="tw"><table class="dt cards" id="hcTabla"><thead><tr><th scope="col">Unidad</th><th scope="col">Periodo</th><th scope="col">Diésel (L)</th><th scope="col">Recolectado (t)</th><th scope="col">CO₂e (t)</th><th scope="col">Intensidad (kg CO₂e/t)</th><th scope="col">Origen</th><th scope="col"><span class="sr">Acción</span></th></tr></thead><tbody id="hcBody"></tbody></table></div>
+        </div>
+        <div class="hc-g">
+          <div class="card" id="cHcEsc">
+            <div class="card-h"><div><h2>Escenario hipotético de reducción</h2><p>Menos diésel por mantenimiento oportuno, menos ralentí y menos unidades varadas</p></div><span class="badge b-sim">Hipotético</span></div>
+            <label class="f" for="hcRed" style="max-width:260px">Reducción supuesta del consumo de diésel (%)<input id="hcRed" type="number" min="0" max="30" step="1" inputmode="decimal"></label>
+            <div class="cmp" id="hcEsc"></div>
+            <p class="foot">La meta del proyecto es −10 % de combustible por tonelada (Tabla 38 del documento). El escenario no es un resultado medido: solo podrá verificarse con vales de combustible y pesaje reales frente a la línea base.</p>
+          </div>
+          <div class="card" id="cHcMet">
+            <div class="card-h"><div><h2>Metodología y factores</h2><p>Criterios de referencia de la herramienta Huella de Carbono Perú (MINAM)</p></div><span class="badge b-auto">Fórmulas</span></div>
+            <div class="tw"><table class="dt hc-fe" id="hcFE"></table></div>
+            <div class="formula">
+              <div>Energía = <code>L × densidad × PCI</code> → <code>L × 0.84 kg/L × 43.0 TJ/Gg ÷ 10⁶</code></div>
+              <div>CO₂ (kg) = <code>L × 2.676</code> · CH₄ (kg) = <code>L × 0.000141</code> · N₂O (kg) = <code>L × 0.000141</code></div>
+              <div>CO₂e (kg) = <code>CO₂ + 28 × CH₄ + 265 × N₂O</code> = <code>L × 2.718</code></div>
+              <div>Intensidad = <code>kg CO₂e ÷ t recolectadas</code></div>
+            </div>
+            <div class="hc-note"><b>Alcance y límites.</b> Solo emisiones directas por combustión de diésel de las compactadoras C-01 a C-07; excluye el camión baranda, la electricidad, los residuos dispuestos en el botadero y las demás fuentes de la municipalidad. El cálculo trata el combustible como diésel fósil; el ajuste por la fracción de biodiésel del diésel B5 y la densidad están pendientes de validación con la herramienta oficial. FlotaIA no está certificada ni reconocida por el MINAM.</div>
           </div>
         </div>
       </section>
@@ -728,6 +805,23 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   'use strict';
   const UNITS = ['C-01', 'C-02', 'C-03', 'C-04', 'C-05', 'C-06', 'C-07'];
   const H_PROG = 7 * 30 * 8, H_U = 30 * 8;
+  // ---------- huella de carbono de la flota: factores (alcance 1, combustión móvil de diésel) ----------
+  // CO2: 74 100 kg/TJ y PCI 43.0 TJ/Gg (IPCC 2006, vol. 2); CH4 y N2O: 3.9 kg/TJ (IPCC 2006, vol. 2, cap. 3, cuadro 3.2.2);
+  // PCG AR5 a 100 años: CH4 = 28, N2O = 265. Densidad 0.84 kg/L: supuesto de trabajo pendiente de validación.
+  const FE = (() => {
+    const dens = 0.84, pci = 43.0, tjL = dens * pci / 1e6; // TJ por litro = kg/L × TJ/Gg ÷ 10^6 kg/Gg
+    const co2TJ = 74100, ch4TJ = 3.9, n2oTJ = 3.9, gwpCH4 = 28, gwpN2O = 265;
+    const co2L = co2TJ * tjL, ch4L = ch4TJ * tjL, n2oL = n2oTJ * tjL;
+    return { dens, pci, tjL, co2TJ, ch4TJ, n2oTJ, gwpCH4, gwpN2O, co2L, ch4L, n2oL, co2eL: co2L + ch4L * gwpCH4 + n2oL * gwpN2O };
+  })();
+  const HC_MESES = ['2026-07', '2026-08', '2026-09'], HC_DIAS = 26;
+  const HC_FL = [1.00, 1.04, 1.12, 0.97, 1.02, 0.95, 1.08], HC_FT = [1.02, 0.98, 0.93, 1.01, 1.00, 1.05, 0.96], HC_FM = [1.00, 0.99, 1.01];
+  function hcInicial() {
+    const reg = [];
+    HC_MESES.forEach((m, j) => UNITS.forEach((u, i) => reg.push({ id: `s${j}${i}`, unidad: u, periodo: m,
+      litros: Math.round(35 * HC_DIAS * HC_FL[i] * HC_FM[j]), toneladas: Math.round(191 * HC_DIAS / 7 * HC_FT[i] * 10) / 10, sim: true })));
+    return { reg, red: 10, per: '' };
+  }
   const SUP0 = { ton: 191, lit: 35, aho: 10 };
   const CLS = ['Sin fuga', 'Fuga débil', 'Fuga severa'];
   const CLSm = ['sin fuga', 'fuga débil', 'fuga severa'];
@@ -773,7 +867,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     UNITS.forEach((u, i) => { const k = cicloDe(0, i), pred = predecir(k.x); unidades[u] = { ciclo: k.id, pred }; hist.push({ t: t0, unidad: u, ciclo: k.id, clase: pred.clase, conf: pred.confianza, real: k.bomba, origen: 'Lectura inicial' }); });
     const ej = (id, codigo, unidad, origen, sistema, sintoma, prioridad, accion, rep, par, dias) => { const c = d(dias); return { id, codigo, unidad, origen, sistema, sintoma, prioridad, accion, estado: 'resuelta', horasReparacion: rep, horasParada: par, creada: c, inicio: c, resuelta: dh(c, Math.max(rep, par)), ejemplo: true, motor: 'reglas' }; };
     return {
-      unidades, hist, n: 0, sup: { ...SUP0 },
+      unidades, hist, n: 0, sup: { ...SUP0 }, hc: hcInicial(),
       ots: [
         ej('e1', 'OT-EJ-01', 'C-02', 'Chofer', 'Motor', 'Recalentamiento en subida', 'media', 'Revisar radiador y termostato', 3, 4, 9),
         ej('e2', 'OT-EJ-02', 'C-05', 'Mecánico', 'Eléctrico', 'Luces traseras sin funcionar', 'baja', 'Cambiar fusible y revisar cableado', 1, 0, 6),
@@ -783,6 +877,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   }
   let S = estadoInicial();
   try { const g = JSON.parse(localStorage.getItem(KEY) || 'null'); if (g && g.unidades && Array.isArray(g.ots) && Array.isArray(g.hist) && g.sup) S = g; } catch (e) {}
+  if (!S.hc || !Array.isArray(S.hc.reg)) S.hc = hcInicial();
   function guardar() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   const nivel = u => S.unidades[u].pred.clase; // 0 verde, 1 ámbar, 2 rojo
 
@@ -816,7 +911,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     const tRec = s.ton * operan.length / UNITS.length, tSin = s.ton - tRec;
     const diesel = operan.reduce((a, u) => a + s.lit * (nivel(u) === 0 ? 1 - s.aho / 100 : 1), 0);
     const base = operan.length * s.lit;
-    const co2 = diesel * 2.68 * 30 / 1000, co2b = base * 2.68 * 30 / 1000, ev = co2b - co2;
+    const co2 = diesel * FE.co2L * 30 / 1000, co2b = base * FE.co2L * 30 / 1000, ev = co2b - co2;
     return { tGen: s.ton, tRec, tSin, diesel, base, co2, co2b, ev, pct: co2b ? ev / co2b * 100 : 0, lpt: tRec > 0 ? diesel / tRec : null, lptB: tRec > 0 ? base / tRec : null, operan: operan.length };
   }
   const otsU = u => S.ots.filter(o => o.unidad === u);
@@ -1023,16 +1118,122 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     $('recBar').setAttribute('aria-label', `Recolectado ${fmt(A.tRec, 1)} t, sin recoger ${fmt(A.tSin, 1)} t`);
   }
 
+  // ---------- huella de carbono de la flota: cálculos y vista ----------
+  const mesTxt = m => { const [a, b] = String(m).split('-'); return ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic'][Number(b) - 1] + ' ' + a; };
+  const hcEm = L => ({ co2: L * FE.co2L, ch4: L * FE.ch4L, n2o: L * FE.n2oL, co2e: L * FE.co2eL }); // kg
+  function hcCalc() {
+    const H = S.hc, per = H.per, regs = H.reg.filter(r => !per || r.periodo === per);
+    const meses = [...new Set(H.reg.map(r => r.periodo))].sort();
+    const ag = rs => { const L = rs.reduce((s, r) => s + Number(r.litros), 0), T = rs.reduce((s, r) => s + Number(r.toneladas), 0), e = hcEm(L); return { L, T, ...e, int: T > 0 ? e.co2e / T : null, lpt: T > 0 ? L / T : null }; };
+    const tot = ag(regs);
+    const porU = UNITS.map(u => ({ u, ...ag(regs.filter(r => r.unidad === u)) })).filter(x => x.L > 0);
+    const porM = meses.map(m => ({ m, ...ag(H.reg.filter(r => r.periodo === m)) }));
+    const media = tot.int, red = H.red / 100;
+    return { per, regs, meses, tot, porU, porM, media, red, esc: { base: tot.co2e / 1000, con: tot.co2e * (1 - red) / 1000, ev: tot.co2e * red / 1000 } };
+  }
+  function hcEvoSvg(porM) {
+    if (!porM.length) return '<div class="empty">Sin registros de combustible.</div>';
+    const W = 600, H = 220, L = 46, B = 40, T = 24, bw = Math.min(70, (W - L - 20) / porM.length * 0.55), mx = Math.max(...porM.map(p => p.co2e / 1000)) * 1.15 || 1;
+    const x = i => L + (i + 0.5) * (W - L - 20) / porM.length, y = v => T + (H - T - B) * (1 - v / mx);
+    let g = `<line x1="${L}" y1="${H - B}" x2="${W - 10}" y2="${H - B}" stroke="var(--line-2)"/>`;
+    porM.forEach((p, i) => { const v = p.co2e / 1000; g += `<rect x="${x(i) - bw / 2}" y="${y(v)}" width="${bw}" height="${H - B - y(v)}" rx="3" fill="#2f6f9f"/><text class="vl" x="${x(i)}" y="${y(v) - 6}" text-anchor="middle">${fmt(v, 1)} t</text><text x="${x(i)}" y="${H - B + 16}" text-anchor="middle">${mesTxt(p.m)}</text><text x="${x(i)}" y="${H - B + 31}" text-anchor="middle">${p.int == null ? '–' : fmt(p.int, 1) + ' kg/t'}</text>`; });
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Emisiones mensuales: ${porM.map(p => mesTxt(p.m) + ' ' + fmt(p.co2e / 1000, 1) + ' t CO2e').join(', ')}">${g}</svg>`;
+  }
+  function hcCmpSvg(porU, media) {
+    if (!porU.length) return '<div class="empty">Sin registros en el periodo.</div>';
+    const W = 600, rowH = 28, L = 54, R = 92, H = porU.length * rowH + 22, vals = porU.map(p => p.int || 0), mx = Math.max(...vals, media || 0) * 1.08 || 1;
+    let g = '';
+    if (media) { const xm = L + (W - L - R) * media / mx; g += `<line x1="${xm}" y1="2" x2="${xm}" y2="${H - 12}" stroke="var(--ink-2)" stroke-dasharray="4 3"/><text class="halo" x="${xm}" y="${H}" text-anchor="middle">media ${fmt(media, 1)}</text>`; }
+    porU.forEach((p, i) => { const yy = 6 + i * rowH, w = (W - L - R) * (p.int || 0) / mx, alto = media && p.int > media * 1.1;
+      g += `<text class="id" x="0" y="${yy + 15}">${p.u}</text><rect x="${L}" y="${yy + 3}" width="${Math.max(w, 1)}" height="16" rx="3" fill="${alto ? 'var(--warn)' : 'var(--good)'}"/><text class="vl" x="${w > 90 ? L + w - 6 : L + w + 6}" y="${yy + 15}" text-anchor="${w > 90 ? 'end' : 'start'}" style="${w > 90 ? 'fill:#fff' : ''}">${p.int == null ? '–' : fmt(p.int, 1) + ' kg/t'}</text>`; });
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Intensidad por compactadora: ${porU.map(p => p.u + ' ' + fmt(p.int, 1) + ' kg CO2e por tonelada').join(', ')}">${g}</svg>`;
+  }
+  function renderHC() {
+    if (!$('hcPer')) return;
+    const C = hcCalc(), t = C.tot, H = S.hc;
+    const sel = $('hcPer'), opts = '<option value="">Todos los periodos</option>' + C.meses.map(m => `<option value="${m}">${mesTxt(m)}</option>`).join('');
+    if (sel.innerHTML !== opts) sel.innerHTML = opts; sel.value = C.meses.includes(H.per) ? H.per : '';
+    const etq = C.per ? mesTxt(C.per) : (C.meses.length ? `${mesTxt(C.meses[0])} a ${mesTxt(C.meses[C.meses.length - 1])}` : 'sin datos');
+    $('hcT').textContent = fmt(t.co2e / 1000, 1) + ' t CO₂e'; $('hcTM').textContent = `${etq} · ${C.porU.length} compactadoras`;
+    $('hcC').textContent = fmt(t.co2 / 1000, 1) + ' t CO₂'; $('hcCM').textContent = t.co2e ? `CH₄ y N₂O: ${fmt((t.co2e - t.co2) / t.co2e * 100, 1)} % del CO₂e` : '–';
+    $('hcI').textContent = t.int == null ? '–' : fmt(t.int, 1) + ' kg CO₂e/t'; $('hcIM').textContent = t.lpt == null ? 'sin toneladas registradas' : `${fmt(t.lpt, 2)} L de diésel por tonelada`;
+    tone($('kpHcI'), null);
+    $('hcL').textContent = fmt(t.L, 0) + ' L'; $('hcLM').textContent = `${fmt(t.T, 1)} t recolectadas`;
+    const top = C.porU.filter(p => p.int != null).sort((a, b) => b.int - a.int)[0];
+    $('hcMx').textContent = top ? top.u : '–'; $('hcMxM').textContent = top ? `${fmt(top.int, 1)} kg CO₂e/t · ${fmt(C.media ? (top.int / C.media - 1) * 100 : 0, 1)} % sobre la media` : '–';
+    $('hcE').textContent = '−' + fmt(C.esc.ev, 2) + ' t CO₂e'; $('hcEM').textContent = `hipotético: −${fmt(H.red, 0)} % de diésel en el periodo`;
+    $('hcEvo').innerHTML = hcEvoSvg(C.porM);
+    $('hcCmpSub').textContent = `kg CO₂e por tonelada recolectada · ${etq}`; $('hcCmp').innerHTML = hcCmpSvg(C.porU, C.media);
+    const regs = [...C.regs].sort((a, b) => a.periodo === b.periodo ? a.unidad.localeCompare(b.unidad) : b.periodo.localeCompare(a.periodo));
+    $('hcBody').innerHTML = regs.map(r => { const e = hcEm(Number(r.litros)); return `<tr data-hc="${esc(r.id)}"><td data-l="Unidad"><span class="code">${esc(r.unidad)}</span></td><td data-l="Periodo">${mesTxt(r.periodo)}</td><td data-l="Diésel (L)">${fmt(Number(r.litros), 0)}</td><td data-l="t recolectadas">${fmt(Number(r.toneladas), 1)}</td><td data-l="t CO₂e">${fmt(e.co2e / 1000, 2)}</td><td data-l="kg CO₂e/t">${Number(r.toneladas) > 0 ? fmt(e.co2e / Number(r.toneladas), 1) : '–'}</td><td data-l="Origen">${r.sim ? '<span class="pill p-ej">simulación</span>' : '<span class="pill p-ok">registrado</span>'}</td><td><button type="button" class="btn sec sm" data-hcdel="${esc(r.id)}" aria-label="Eliminar registro de ${esc(r.unidad)} ${mesTxt(r.periodo)}">Eliminar</button></td></tr>`; }).join('') || '<tr><td colspan="8">Sin registros en el periodo.</td></tr>';
+    if (document.activeElement !== $('hcRed')) $('hcRed').value = H.red;
+    const m = Math.max(C.esc.base, 1e-9);
+    $('hcEsc').innerHTML = `<div class="cmp-g"><h3>Emisiones del periodo (t CO₂e)</h3><div class="cb"><span>Registrado</span><span class="tr"><i style="width:100%;background:var(--faint)"></i></span><span class="pv">${fmt(C.esc.base, 1)} t</span></div><div class="cb"><span>Escenario</span><span class="tr"><i style="width:${C.esc.con / m * 100}%;background:var(--good)"></i></span><span class="pv">${fmt(C.esc.con, 1)} t</span></div></div><p class="foot">Diferencia: ${fmt(C.esc.ev, 2)} t CO₂e (${fmt(H.red, 0)} %). Intensidad en el escenario: ${t.int == null ? '–' : fmt(t.int * (1 - C.red), 1) + ' kg CO₂e/t'}.</p>`;
+    $('hcFE').innerHTML = `<thead><tr><th scope="col">Parámetro</th><th scope="col">Valor</th><th scope="col">Fuente</th></tr></thead><tbody>
+      <tr><td>Factor de CO₂ del diésel</td><td>74 100 kg/TJ</td><td>IPCC (2006), vol. 2</td></tr>
+      <tr><td>Poder calorífico neto</td><td>43.0 TJ/Gg</td><td>IPCC (2006), vol. 2</td></tr>
+      <tr><td>Factores de CH₄ y N₂O (transporte terrestre)</td><td>3.9 y 3.9 kg/TJ</td><td>IPCC (2006), vol. 2, cap. 3, cuadro 3.2.2</td></tr>
+      <tr><td>PCG a 100 años</td><td>CH₄ = 28 · N₂O = 265</td><td>IPCC AR5 (2013/2014)</td></tr>
+      <tr><td>Densidad del diésel</td><td>0.84 kg/L</td><td>Supuesto de trabajo · pendiente de validación</td></tr>
+      <tr><td>Resultado por litro</td><td>${fmt(FE.co2L, 3)} kg CO₂ · ${fmt(FE.co2eL, 3)} kg CO₂e</td><td>Cálculo propio</td></tr></tbody>`;
+  }
+  function hcLimpiarForm() { if (!$('hcMsg')) return; $('hcMsg').textContent = ''; ['hcLi', 'hcTo', 'hcM'].forEach(i => { $(i).value = ''; $(i).removeAttribute('aria-invalid'); }); }
+  function hcRegistrar(u, m, L, T) {
+    const err = (id, txt) => { $('hcMsg').textContent = txt; $('hcMsg').className = 'msg err'; if (id) $(id).setAttribute('aria-invalid', 'true'); return null; };
+    ['hcLi', 'hcTo', 'hcM'].forEach(i => $(i).removeAttribute('aria-invalid'));
+    if (!UNITS.includes(u)) return err('hcU', 'Elija una compactadora.');
+    if (!/^20\d\d-(0[1-9]|1[0-2])$/.test(m)) return err('hcM', 'Indique el periodo (mes y año).');
+    if (!(L >= 1 && L <= 20000)) return err('hcLi', 'Diésel no válido: use entre 1 y 20 000 L.');
+    if (!(T >= 0 && T <= 5000)) return err('hcTo', 'Toneladas no válidas: use entre 0 y 5 000 t.');
+    const prev = S.hc.reg.find(r => r.unidad === u && r.periodo === m);
+    if (prev) Object.assign(prev, { litros: L, toneladas: T, sim: false }); else S.hc.reg.push({ id: 'r' + Date.now().toString(36) + S.hc.reg.length, unidad: u, periodo: m, litros: L, toneladas: T, sim: false });
+    S.hc.per = m; guardar(); renderHC();
+    $('hcMsg').textContent = `${prev ? 'Registro reemplazado' : 'Registro agregado'}: ${u}, ${mesTxt(m)}, ${fmt(L, 0)} L → ${fmt(hcEm(L).co2e / 1000, 2)} t CO₂e.`; $('hcMsg').className = 'msg okm';
+    return true;
+  }
+  function descargar(nombre, tipo, txt) {
+    const b = new Blob([txt], { type: tipo }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nombre; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function hcCSV() {
+    const f = (n, d) => n.toFixed(d);
+    const rows = [['unidad', 'periodo', 'diesel_L', 'toneladas', 'kg_CO2', 'kg_CH4', 'kg_N2O', 'kg_CO2e', 'kg_CO2e_por_t', 'origen']];
+    [...S.hc.reg].sort((a, b) => a.periodo.localeCompare(b.periodo) || a.unidad.localeCompare(b.unidad)).forEach(r => { const e = hcEm(Number(r.litros)); rows.push([r.unidad, r.periodo, r.litros, r.toneladas, f(e.co2, 2), f(e.ch4, 4), f(e.n2o, 4), f(e.co2e, 2), Number(r.toneladas) > 0 ? f(e.co2e / r.toneladas, 2) : '', r.sim ? 'simulacion' : 'registrado']); });
+    return rows.map(r => r.join(',')).join('\n') + '\n';
+  }
+  function hcReporte() {
+    const C = hcCalc(), t = C.tot, etq = C.per ? mesTxt(C.per) : 'todos los periodos registrados', hoy = fechaHora(new Date().toISOString());
+    const fila = p => `<tr><td>${p.u || mesTxt(p.m)}</td><td>${fmt(p.L, 0)}</td><td>${fmt(p.T, 1)}</td><td>${fmt(p.co2 / 1000, 2)}</td><td>${fmt(p.co2e / 1000, 2)}</td><td>${p.int == null ? '–' : fmt(p.int, 1)}</td></tr>`;
+    const th = '<tr><th>Unidad / mes</th><th>Diésel (L)</th><th>t recolectadas</th><th>t CO₂</th><th>t CO₂e</th><th>kg CO₂e/t</th></tr>';
+    const simul = C.regs.some(r => r.sim);
+    return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>FlotaIA · Reporte de huella de carbono de la flota</title><style>body{font-family:Arial,sans-serif;max-width:860px;margin:24px auto;padding:0 16px;color:#0e1a2b;line-height:1.45}table{border-collapse:collapse;width:100%;margin:8px 0 16px;font-size:13px}th,td{border:1px solid #cbd3de;padding:5px 7px;text-align:left}th{background:#eef2f6}.av{border:1px solid #be3328;background:#fbe8e6;padding:8px 10px;border-radius:6px}code{background:#f2f4f7;padding:1px 4px}</style></head><body>
+<h1>Reporte de huella de carbono de la flota de compactadoras</h1>
+<p>Prototipo académico FlotaIA · Municipalidad Distrital de El Tambo (caso de estudio) · Periodo: ${etq} · Generado: ${hoy}</p>
+<p class="av"><b>Advertencia.</b> ${simul ? 'El reporte incluye registros simulados creados para la demostración; ' : ''}las cifras no son emisiones medidas de El Tambo. Es una estimación de alcance 1 (combustión de diésel de las compactadoras C-01 a C-07), no la huella de carbono de la municipalidad ni un reporte presentado a Huella de Carbono Perú. FlotaIA no está certificada ni reconocida por el MINAM.</p>
+<h2>Resultados</h2><ul><li>Emisiones: <b>${fmt(t.co2e / 1000, 2)} t CO₂e</b> (CO₂ fósil: ${fmt(t.co2 / 1000, 2)} t; CH₄: ${fmt(t.ch4, 2)} kg; N₂O: ${fmt(t.n2o, 2)} kg)</li><li>Diésel: ${fmt(t.L, 0)} L · Residuos recolectados: ${fmt(t.T, 1)} t</li><li>Intensidad: ${t.int == null ? '–' : fmt(t.int, 1)} kg CO₂e/t · ${t.lpt == null ? '–' : fmt(t.lpt, 2)} L/t</li><li>Escenario hipotético (−${fmt(S.hc.red, 0)} % de diésel): ${fmt(C.esc.con, 2)} t CO₂e; reducción de ${fmt(C.esc.ev, 2)} t CO₂e</li></ul>
+<h2>Por compactadora</h2><table>${th}${C.porU.map(fila).join('')}</table>
+<h2>Por mes (todos los periodos)</h2><table>${th}${C.porM.map(fila).join('')}</table>
+<h2>Método, factores y supuestos</h2><ul><li>Criterios de referencia: herramienta Huella de Carbono Perú (MINAM), que adecúa sus factores a los del INFOCARBONO y a las Directrices del IPCC de 2006; potenciales de calentamiento global del Quinto Informe del IPCC (AR5).</li><li>Energía = L × ${FE.dens} kg/L × ${FE.pci} TJ/Gg ÷ 10⁶ = L × ${FE.tjL.toExponential(4)} TJ</li><li>CO₂ = energía × ${FE.co2TJ} kg/TJ = L × ${FE.co2L.toFixed(4)} kg</li><li>CH₄ = energía × ${FE.ch4TJ} kg/TJ; N₂O = energía × ${FE.n2oTJ} kg/TJ (IPCC 2006, vol. 2, cap. 3, cuadro 3.2.2)</li><li>CO₂e = CO₂ + ${FE.gwpCH4} × CH₄ + ${FE.gwpN2O} × N₂O = L × ${FE.co2eL.toFixed(4)} kg</li><li>Pendiente de validación: densidad del diésel (0.84 kg/L, supuesto) y tratamiento de la fracción de biodiésel del diésel B5, que deben contrastarse con los factores vigentes de la herramienta Huella de Carbono Perú antes de cualquier uso oficial.</li><li>Excluye: camión baranda, electricidad, residuos en el botadero, desplazamientos del personal y demás fuentes de la municipalidad.</li></ul>
+</body></html>`;
+  }
+  $('hcForm').addEventListener('submit', ev => { ev.preventDefault(); hcRegistrar($('hcU').value, $('hcM').value, Number($('hcLi').value === '' ? NaN : $('hcLi').value), Number($('hcTo').value === '' ? NaN : $('hcTo').value)); });
+  $('hcPer').addEventListener('change', () => { S.hc.per = $('hcPer').value; guardar(); renderHC(); });
+  $('hcRed').addEventListener('input', () => { const raw = $('hcRed').value, v = Number(raw); if (raw === '' || !Number.isFinite(v) || v < 0 || v > 30) { $('hcRed').setAttribute('aria-invalid', 'true'); $('hcExpMsg').textContent = 'Reducción no válida: use un número entre 0 y 30. Se mantiene el último valor válido.'; $('hcExpMsg').className = 'msg err'; return; } $('hcRed').removeAttribute('aria-invalid'); $('hcExpMsg').textContent = ''; S.hc.red = v; guardar(); renderHC(); });
+  $('hcBody').addEventListener('click', ev => { const b = ev.target.closest('[data-hcdel]'); if (!b) return; S.hc.reg = S.hc.reg.filter(r => r.id !== b.dataset.hcdel); guardar(); renderHC(); $('hcMsg').textContent = 'Registro eliminado.'; $('hcMsg').className = 'msg okm'; });
+  $('hcRep').addEventListener('click', () => { descargar('FlotaIA_reporte_huella_carbono.html', 'text/html;charset=utf-8', hcReporte()); $('hcExpMsg').textContent = 'Reporte generado.'; $('hcExpMsg').className = 'msg okm'; });
+  $('hcCsv').addEventListener('click', () => { descargar('FlotaIA_huella_carbono_datos.csv', 'text/csv;charset=utf-8', '﻿' + hcCSV()); $('hcExpMsg').textContent = 'Datos exportados.'; $('hcExpMsg').className = 'msg okm'; });
+
   function renderSelects() {
     const opts = UNITS.map(u => `<option>${u}</option>`).join('');
     const set = (id, html) => { const v = $(id).value; $(id).innerHTML = html; if (v) $(id).value = v; };
     set('fUnidad', opts + '<option value="B-01">B-01 (camión baranda)</option>');
     set('aUnidad', opts);
+    set('hcU', opts);
     set('flU', '<option value="">Todas</option>' + opts + '<option value="B-01">B-01</option>');
   }
   function renderAll() {
     const K = calc(), A = amb(K.F);
-    renderResumen(K, A); renderFlota(K); renderMant(); renderAnalisis(); renderAmb(K, A); renderDetalle(K);
+    renderResumen(K, A); renderFlota(K); renderMant(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K);
     $('clock').textContent = 'Simulación · ' + fechaHora(new Date().toISOString());
     return { K, A };
   }
@@ -1050,7 +1251,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   $('confNo').addEventListener('click', () => cerrarConf(false));
 
   // ---------- navegación ----------
-  const VIEWS = { resumen: 'Resumen ejecutivo', flota: 'Gestión de flota', mantenimiento: 'Mantenimiento y órdenes de trabajo', analisis: 'Análisis inteligente', ambiental: 'Impacto ambiental', demo: 'Demostración guiada C-03' };
+  const VIEWS = { resumen: 'Resumen ejecutivo', flota: 'Gestión de flota', mantenimiento: 'Mantenimiento y órdenes de trabajo', analisis: 'Análisis inteligente', ambiental: 'Impacto ambiental', huella: 'Huella de carbono de la flota', demo: 'Demostración guiada C-03' };
   let vista = 'resumen';
   function ir(v, sinScroll) {
     if (!VIEWS[v]) v = 'resumen';
@@ -1060,8 +1261,9 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     if (location.hash !== '#' + v) { try { history.replaceState(null, '', '#' + v); } catch (e) {} }
     menu(false); if (!sinScroll) window.scrollTo({ top: 0 });
     if (v === 'resumen') $('rDispChart').innerHTML = dispChart(calc().lv);
+    if (v === 'huella') renderHC();
   }
-  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (vista === 'resumen') $('rDispChart').innerHTML = dispChart(calc().lv); }, 150); });
+  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (vista === 'resumen') $('rDispChart').innerHTML = dispChart(calc().lv); if (vista === 'huella') renderHC(); }, 150); });
   function menu(abrir) { $('side').classList.toggle('open', abrir); $('scrim').hidden = !abrir; $('btnMenu').setAttribute('aria-expanded', abrir ? 'true' : 'false'); }
   document.addEventListener('click', ev => {
     const a = ev.target.closest('a[href^="#"]');
@@ -1184,10 +1386,10 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   $('sReset').addEventListener('click', () => { S.sup = { ...SUP0 }; syncSup(); ['sTon', 'sLit', 'sAho'].forEach(i => $(i).removeAttribute('aria-invalid')); $('supMsg').textContent = 'Valores por defecto restaurados.'; $('supMsg').className = 'msg okm'; guardar(); renderAll(); });
 
   // ---------- reinicio ----------
-  function reiniciar() { S = estadoInicial(); guardar(); syncSup(); resolviendo = null; ultimoOt = null; filtroFlota = 'all'; $('cicloMsg').textContent = ''; $('otMsg').textContent = ''; $('fTexto').value = ''; preview(); ['flU', 'flP', 'flE'].forEach(i => { $(i).value = ''; }); renderAll(); }
+  function reiniciar() { S = estadoInicial(); guardar(); syncSup(); resolviendo = null; ultimoOt = null; filtroFlota = 'all'; $('cicloMsg').textContent = ''; $('otMsg').textContent = ''; $('fTexto').value = ''; preview(); ['flU', 'flP', 'flE'].forEach(i => { $(i).value = ''; }); hcLimpiarForm(); renderAll(); }
   $('btnReset').addEventListener('click', async () => {
     menu(false);
-    if (await confirmar('Reiniciar la simulación', 'Se borrarán las órdenes creadas, las lecturas y los parámetros modificados, y la flota volverá a su estado inicial. ¿Desea continuar?', 'Reiniciar')) { reiniciar(); demoSalir(); toast('Simulación reiniciada a su estado inicial', 'ok'); }
+    if (await confirmar('Reiniciar la simulación', 'Se borrarán las órdenes creadas, las lecturas, los registros de combustible y los parámetros modificados, y la flota volverá a su estado inicial. ¿Desea continuar?', 'Reiniciar')) { reiniciar(); demoSalir(); toast('Simulación reiniciada a su estado inicial', 'ok'); }
   });
 
   // ---------- demostración guiada C-03 ----------
@@ -1251,7 +1453,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   renderSelects(); syncSup(); renderCM(); renderAll(); pintarDemo();
   ir((location.hash || '#resumen').slice(1), true);
   setInterval(() => { $('clock').textContent = 'Simulación · ' + fechaHora(new Date().toISOString()); }, 30000);
-  window.FlotaIA = { predecir, ciclos: CICLOS, estado: () => S, calc, amb: () => amb(calc().F) };
+  window.FlotaIA = { predecir, ciclos: CICLOS, estado: () => S, calc, amb: () => amb(calc().F), FE, hc: () => hcCalc() };
 })();
 </script>
 </body>
