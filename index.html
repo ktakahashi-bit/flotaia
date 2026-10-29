@@ -384,6 +384,209 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
   .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .cb { grid-template-columns: 90px minmax(0, 1fr) 70px; }
 }
+
+/* FLOTAIA IMPACT LAB · módulos de decisión y escenarios */
+.impact-hero{background:linear-gradient(115deg,#102844,#164b64 65%,#176b60);color:white;border:0;padding:25px 28px;grid-template-columns:1fr auto;align-items:center}
+.impact-hero h1,.impact-hero h2{color:#fff}.impact-hero p{color:#d4e5ee;max-width:65ch}.impact-hero .eyebrow{color:#a5e7d4}
+.impact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.impact-num{font:600 1.8rem var(--mono);color:var(--navy-900)}
+.impact-stat{border:1px solid var(--line);border-radius:10px;padding:18px;background:white;display:grid;gap:5px}.impact-stat small{color:var(--muted)}
+.impact-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.impact-controls label{display:grid;gap:7px;font-size:.8rem;font-weight:600;color:var(--ink-2)}
+.impact-controls input[type=range]{width:100%;accent-color:#147a69}.impact-controls input[type=number]{width:100%}
+.impact-comparison{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.impact-scenario{border:1px solid var(--line);border-radius:10px;padding:16px;background:#fff;display:grid;gap:9px}
+.impact-scenario.feature{border:2px solid #18826e;background:#f1faf6}.impact-scenario h3{font-size:1rem}.impact-scenario strong{font-size:1.5rem;font-family:var(--mono)}
+.impact-bar{height:12px;background:#e8edf2;border-radius:7px;overflow:hidden}.impact-bar i{height:100%;display:block;background:#537c9b;border-radius:7px}
+.impact-note{background:#f4f7fb;border-left:3px solid #456c98;padding:12px 14px;font-size:.8rem;color:#41536a;border-radius:5px}
+.decision-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.decision-flow>div{padding:12px;background:#f4f7fa;border:1px solid var(--line);border-radius:9px;font-size:.78rem}.decision-flow b{display:block;color:var(--navy-800);margin-bottom:4px}
+.action-panel{border-left:4px solid var(--crit);background:#fff8f6;padding:18px;border-radius:8px;display:grid;gap:9px}.impact-pill{display:inline-block;border-radius:20px;padding:4px 10px;font-size:.72rem;font-weight:600;background:#e4f2eb;color:#166348}
+@media(max-width:1050px){.impact-grid,.impact-comparison{grid-template-columns:1fr}.decision-flow{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.impact-controls,.decision-flow{grid-template-columns:1fr}.impact-hero{grid-template-columns:1fr}}
+
+/* FLOTaIA STUDIO — sistema visual V3 */
+:root{--bg:#eef3f7;--surface:#fff;--surface-2:#f8fafc;--line:#dfe7ef;--shadow:0 5px 22px rgba(16,38,65,.055);--good:#12896d;--warn:#ca8b30;--crit:#d3544c;--navy-900:#071a2f;--navy-800:#122f50;--navy-700:#21547d}
+body{background:#eef3f7} .side{background:linear-gradient(175deg,#08172a 0%,#112a49 100%)}.brand{padding:7px 6px 13px}.bname{letter-spacing:.07em}.side .muni{border-radius:12px;background:rgba(255,255,255,.045)}nav.menu a{border-radius:10px}.top{background:rgba(255,255,255,.91);backdrop-filter:blur(15px)}.content{max-width:1600px;padding:26px 32px 76px}.card,.kpi,.ucard{border-radius:15px;box-shadow:var(--shadow)}.card{padding:21px 23px}.btn{border-radius:9px}.kpi .v{font-size:1.85rem}.badge{border-radius:20px}.eyebrow{letter-spacing:.12em}.impact-hero{border-radius:16px;background:linear-gradient(122deg,#0d2848,#174d67 68%,#17776f)}
+.studio-banner{background:#0b2948;color:white;border-radius:18px;padding:28px 30px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:26px;align-items:center;position:relative;overflow:hidden;min-height:180px}
+.studio-banner:after{content:'';width:300px;height:300px;position:absolute;border:1px solid rgba(255,255,255,.15);border-radius:50%;right:-100px;top:-100px;box-shadow:0 0 0 35px rgba(255,255,255,.025),0 0 0 80px rgba(255,255,255,.025);pointer-events:none}.studio-banner>*{z-index:1}.studio-kicker{color:#9ee3d3;font-size:.69rem;letter-spacing:.17em;font-weight:700;text-transform:uppercase}.studio-banner h1{font-size:1.8rem;letter-spacing:-.035em;color:#fff;margin:8px 0 10px}.studio-banner p{color:#d8e8f3;max-width:72ch;font-size:.94rem;line-height:1.6}.studio-banner .btn{background:#ecf7f3;border-color:#ecf7f3;color:#114637;text-decoration:none}.studio-banner .tagline{font-size:.75rem;color:#a8cbd7;text-align:right;white-space:nowrap}
+.studio-statgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.studio-stat{background:white;border:1px solid var(--line);border-radius:14px;padding:17px 19px;display:grid;gap:6px;border-top:4px solid var(--tone,#2488a6);box-shadow:var(--shadow)}.studio-stat small{color:#64758a;font-size:.72rem}.studio-stat strong{font:600 1.7rem var(--mono);letter-spacing:-.04em}.studio-stat span{color:#62748b;font-size:.72rem}
+.studio-panel{background:white;border:1px solid var(--line);border-radius:16px;padding:21px 23px;box-shadow:var(--shadow);min-width:0}.studio-panel h2{font-size:1rem}.studio-muted{color:#68788b;font-size:.79rem}.studio-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}.studio-grid{display:grid;grid-template-columns:1.22fr .78fr;gap:17px}.studio-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}.studio-filters label{display:grid;gap:5px;color:#56677b;font-size:.7rem;font-weight:600}.studio-filters select,.studio-filters input{border:1px solid #d4e0eb;border-radius:9px;background:#f8fbfd;padding:9px 11px;min-width:125px}.studio-filters input{min-width:180px}.studio-tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}.studio-table{border-collapse:collapse;width:100%;min-width:690px;font-size:.81rem}.studio-table thead{background:#f1f6fa}.studio-table th{font-size:.69rem;text-transform:uppercase;letter-spacing:.06em;color:#60758a;text-align:left;white-space:nowrap;padding:12px 12px;border-bottom:1px solid var(--line);cursor:pointer}.studio-table th:hover{color:#175b81}.studio-table td{padding:13px 12px;border-bottom:1px solid #edf1f5}.studio-table tr:last-child td{border:0}.studio-table tbody tr:hover{background:#f7fafc}.studio-table .code{font-weight:700}.studio-chip{border-radius:999px;font-weight:600;font-size:.7rem;padding:5px 9px;display:inline-flex;gap:6px;align-items:center}.studio-chip:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}.studio-chip.ok{color:#117a5a;background:#e4f5ed}.studio-chip.mid{color:#986018;background:#fff1d9}.studio-chip.high{color:#b63d34;background:#ffebe7}.studio-hbars{display:grid;gap:13px}.studio-barlabel{display:flex;align-items:center;justify-content:space-between;font-size:.79rem;margin-bottom:6px}.studio-track{height:12px;border-radius:15px;background:#edf3f7;overflow:hidden}.studio-fill{height:100%;border-radius:15px;transition:width .35s}.studio-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.72rem;color:#63758b;margin-top:12px}.studio-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}.studio-actions{display:flex;gap:8px;flex-wrap:wrap}.studio-insight{border-left:3px solid #1a8873;padding:10px 13px;background:#f1f9f6;border-radius:0 9px 9px 0;font-size:.8rem;color:#285c52}.studio-donut{width:200px;height:200px;margin:auto;position:relative;border-radius:50%;background:conic-gradient(#159b7c 0 70%,#e4a24b 70% 85%,#d8574c 85% 100%)}.studio-donut:after{content:'';position:absolute;inset:40px;border-radius:50%;background:white}.studio-donut-center{position:absolute;z-index:1;inset:55px 20px;display:grid;place-content:center;text-align:center;font:600 2rem var(--mono);color:#0d2a44}.studio-donut-center small{font:500 .7rem var(--sans);color:#6b7b8d}.studio-empty{padding:30px;text-align:center;color:#6f7e8e}.studio-note{font-size:.72rem;color:#64778c;line-height:1.55}.studio-split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:1200px){.studio-statgrid{grid-template-columns:repeat(2,1fr)}.studio-grid{grid-template-columns:1fr}}@media(max-width:700px){.content{padding:18px 15px 90px}.studio-banner{grid-template-columns:1fr;padding:23px}.studio-banner .tagline{text-align:left}.studio-statgrid,.studio-split{grid-template-columns:1fr}.studio-panel{padding:17px}.studio-filters input{min-width:140px}}
+.studio-section{display:grid;gap:16px}
+.studio-pills{display:flex;gap:10px;flex-wrap:wrap}.studio-pill{border:1px solid #d4dbe6;background:#fff;border-radius:999px;padding:9px 14px;font-size:.78rem;font-weight:600;color:#44586f;cursor:pointer;box-shadow:var(--shadow)}.studio-pill.on,.studio-pill:hover{background:#132c4d;color:#fff;border-color:#132c4d}
+.studio-gauges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.studio-gcard{background:linear-gradient(160deg,#0d1f35,#132e4d);color:#fff;border-radius:18px;padding:18px 18px 16px;box-shadow:var(--shadow-lg);display:grid;gap:12px;position:relative;overflow:hidden}.studio-gcard:after{content:'';position:absolute;right:-20px;bottom:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08),rgba(255,255,255,0) 70%)}.studio-ghead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.studio-ghead small{font-size:.72rem;color:#a7c0d8;text-transform:uppercase;letter-spacing:.08em}.studio-ghead strong{display:block;font-size:.98rem;line-height:1.25}.studio-gsub{font-size:.72rem;color:#a7c0d8}.studio-gauge{--pct:70;--tone:#27c498;position:relative;width:168px;height:168px;margin:2px auto 0;border-radius:50%;background:conic-gradient(var(--tone) 0 calc(var(--pct)*1%), rgba(255,255,255,.12) 0 100%)}.studio-gauge:before{content:'';position:absolute;inset:18px;border-radius:50%;background:#0d1f35;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}.studio-gauge .center{position:absolute;inset:40px;display:grid;place-content:center;text-align:center;z-index:1}.studio-gauge .value{font:700 2rem var(--mono);letter-spacing:-.05em}.studio-gauge .meta{font-size:.72rem;color:#b7cee1}.studio-minirow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.studio-mini{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;display:grid;gap:2px}.studio-mini span{font-size:.68rem;color:#a7c0d8}.studio-mini b{font:600 1.02rem var(--mono);color:#fff}
+.studio-panel.dark{background:linear-gradient(180deg,#10243d,#0e1f35);color:#fff;border-color:#10243d}.studio-panel.dark h2,.studio-panel.dark .studio-muted,.studio-panel.dark .studio-note{color:#cfe0ee}.studio-panel.dark .studio-tablewrap{border-color:rgba(255,255,255,.12)}.studio-panel.dark .studio-table thead{background:rgba(255,255,255,.06)}.studio-panel.dark .studio-table th{color:#b7c9d9;border-color:rgba(255,255,255,.12)}.studio-panel.dark .studio-table td{border-color:rgba(255,255,255,.08);color:#e8f0f7}.studio-panel.dark .studio-table tbody tr:hover{background:rgba(255,255,255,.04)}.studio-panel.dark .studio-filters select,.studio-panel.dark .studio-filters input{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff}.studio-panel.dark .studio-filters label{color:#c9d7e4}.studio-panel.dark .studio-insight{background:rgba(30,171,136,.12);color:#bfeedd;border-left-color:#2cb48d}
+.studio-topgrid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.studio-rightstack{display:grid;gap:16px}
+.studio-kpi-stack{display:grid;gap:12px}.studio-kpi-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);display:grid;gap:4px;position:relative;overflow:hidden}.studio-kpi-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--tone,#27c498)}.studio-kpi-card small{font-size:.72rem;color:#66788d}.studio-kpi-card strong{font:700 1.7rem var(--mono);letter-spacing:-.04em}.studio-kpi-card span{font-size:.74rem;color:#6a7d91}
+.studio-heat{display:grid;grid-template-columns:120px repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}.studio-heat .h{padding:10px 8px;border-radius:10px;background:#eef4f8;color:#5f7288;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:center}.studio-panel.dark .studio-heat .h{background:rgba(255,255,255,.08);color:#c9d7e4}.studio-heat .r{padding:10px 10px;border-radius:10px;background:#f8fbfd;color:#4a5c72;font-size:.77rem;font-weight:600;display:grid;align-items:center}.studio-panel.dark .studio-heat .r{background:rgba(255,255,255,.06);color:#eef4fa}.studio-heat .c{padding:12px 8px;border-radius:12px;text-align:center;font:700 1rem var(--mono);display:grid;gap:2px;align-content:center}.studio-heat .c small{font-size:.62rem;font-family:var(--sans);font-weight:600;opacity:.8}
+.studio-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.studio-summary .box{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 16px;display:grid;gap:5px;box-shadow:var(--shadow)}.studio-summary .box small{font-size:.7rem;color:#6a7d91;text-transform:uppercase;letter-spacing:.08em}.studio-summary .box strong{font:700 1.35rem var(--mono)}.studio-summary .box span{font-size:.76rem;color:#6a7d91;line-height:1.45}
+@media(max-width:1200px){.studio-gauges,.studio-topgrid,.studio-summary{grid-template-columns:1fr}.studio-rightstack{grid-template-columns:1fr}.studio-heat{grid-template-columns:100px repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.studio-gauges,.studio-summary{grid-template-columns:1fr}.studio-heat{grid-template-columns:90px repeat(3,minmax(0,1fr));gap:6px}.studio-gauge{width:150px;height:150px}}
+
+
+
+/* FLOTAIA WEB EXPERIENCE · diseño editorial de producto */
+:root{--bg:#f5f7f9;--surface:#fff;--surface-2:#f8fafb;--line:#e1e8ed;--navy-900:#101e2d;--navy-800:#173248;--navy-700:#174e55;--good:#008e77;--warn:#da8b20;--crit:#cf514c;--shadow:0 8px 35px rgba(17,39,58,.045)}
+body{background:#f5f7f9;font-family:'IBM Plex Sans',Arial,sans-serif;color:#162b3b}
+.side{background:#0c1e2c;padding:26px 16px 18px;border-right:1px solid #1c3742}
+.bname{font-size:1.32rem;letter-spacing:.035em}.bname span{color:#79e5c3}
+.side .muni{border:0;background:#152c3b;border-radius:13px;padding:14px}
+nav.menu a{border-radius:10px;padding:11px 13px}nav.menu a.on{background:#184a4e;color:white}nav.menu a.on::before{background:#6be2bd}
+.top{padding:15px 36px;background:rgba(255,255,255,.91);backdrop-filter:blur(18px);border-bottom:1px solid #e9edf1}
+.content{padding:28px 36px 90px;max-width:1650px}
+.card,.kpi,.ucard,.studio-panel,.studio-stat,.studio-kpi-card{border-radius:18px;box-shadow:0 6px 26px rgba(16,43,62,.045);border-color:#e8edf0}
+.card{padding:22px 24px}.kpi{border-radius:16px;padding:18px 20px}.kpi::before{width:0}.kpi .v{font-size:2.05rem;font-weight:600}
+.btn{border-radius:10px;background:#076e63;border-color:#076e63;box-shadow:none;padding:10px 16px}.btn:hover{background:#055b53}.btn.sec{background:#fff;color:#174858;border-color:#dce7ea}
+.eyebrow{color:#08746a;letter-spacing:.13em}.vhead h1{font-size:1.8rem;letter-spacing:-.03em}.vhead .lead{font-size:.88rem}
+.web-hero{min-height:370px;position:relative;overflow:hidden;border-radius:27px;background:linear-gradient(112deg,#0d2333 0%,#123e4a 61%,#126c66 100%);color:#fff;display:grid;grid-template-columns:1.13fr .87fr;box-shadow:0 20px 54px rgba(12,51,60,.16)}
+.web-hero:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 82% 30%,rgba(105,240,202,.17),transparent 40%)}
+.web-hero-copy{position:relative;z-index:1;padding:45px 0 43px 44px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:17px}
+.web-hero .web-overline{color:#9be5d1;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.web-hero h2{color:white;font-size:clamp(2rem,3vw,3.15rem);font-weight:600;line-height:1.08;letter-spacing:-.045em;max-width:660px}
+.web-hero h2 em{font-style:normal;color:#89e4c6}
+.web-hero p{font-size:1rem;color:#d4e6eb;max-width:510px;line-height:1.7}
+.web-hero-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:6px}
+.web-hero-actions a{display:inline-flex;align-items:center;text-decoration:none;font-weight:700;font-size:.85rem;padding:12px 19px;border-radius:10px;color:#0d3b38;background:#b5f3d8;transition:transform .16s,background .16s}
+.web-hero-actions a:hover{transform:translateY(-2px);background:white}
+.web-hero-actions a.alt{background:transparent;color:#f3ffff;border:1px solid rgba(225,255,248,.42)}
+.web-hero-art{position:relative;display:flex;align-items:center;justify-content:center;padding:12px;min-height:300px}
+.web-orbit{position:absolute;width:360px;max-width:90%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(150,234,219,.22);box-shadow:0 0 0 43px rgba(168,235,225,.035),0 0 0 86px rgba(168,235,225,.025)}
+.web-hero-art svg{position:relative;z-index:2;width:min(390px,92%);height:auto;filter:drop-shadow(0 24px 26px rgba(0,0,0,.22))}
+.web-art-chip{position:absolute;z-index:3;background:#fff;color:#183745;border-radius:13px;padding:10px 14px;box-shadow:0 10px 28px rgba(0,0,0,.17);font-size:.74rem;font-weight:700}
+.web-art-chip.a{right:8%;top:15%}.web-art-chip.b{left:7%;bottom:18%}.web-art-chip b{color:#008d74}
+.web-proof{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.web-proof article{border-radius:17px;padding:17px 20px;background:#fff;border:1px solid #e7eef0;display:grid;gap:5px}
+.web-proof small{color:#5c7480;text-transform:uppercase;letter-spacing:.075em;font-size:.68rem;font-weight:700}
+.web-proof strong{font-size:1.2rem;letter-spacing:-.02em;color:#173a43}.web-proof p{color:#6d7d85;font-size:.76rem}
+.web-sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0 0}.web-sectionhead h2{font-size:1.23rem;letter-spacing:-.025em}.web-sectionhead span{font-size:.76rem;color:#74828a}
+.studio-banner{background:linear-gradient(110deg,#0e2838,#155a5b);border-radius:23px;min-height:165px}
+.studio-gcard{border-radius:20px;background:linear-gradient(155deg,#11293c,#173e4c)}
+.studio-pill.on,.studio-pill:hover{background:#0a796c;border-color:#0a796c}.studio-panel.dark{background:#132c3d}
+.studio-gauge:before{background:#133547}
+.studio-track{height:15px;border-radius:8px}
+.studio-panel h2{letter-spacing:-.015em}
+@media(max-width:1130px){.web-hero{grid-template-columns:1fr}.web-hero-art{min-height:230px}.web-hero-copy{padding:36px 30px 0}.web-hero-art svg{width:min(310px,75%)}}
+@media(max-width:700px){.content{padding:16px 14px 80px}.web-hero{border-radius:20px}.web-hero-copy{padding:30px 23px 5px}.web-hero h2{font-size:2.1rem}.web-hero-art{min-height:225px}.web-art-chip.a{right:4%}.web-art-chip.b{left:4%}.web-proof{grid-template-columns:1fr}.top{padding:10px 15px}.web-sectionhead{align-items:flex-start;flex-direction:column}}
+
+
+/* Fichas de flota — diseño producto */
+.ucards{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:22px;align-items:stretch}
+.ucard{--accent:#10a68c;--accent-soft:#e6f8f2;position:relative;background:#fff;border:1px solid #e2ebee;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 38px rgba(16,40,62,.07);transition:transform .22s ease,box-shadow .22s ease,border-color .22s}
+.ucard:hover{transform:translateY(-5px);box-shadow:0 22px 48px rgba(16,40,62,.12);border-color:#c8dadf}
+.ucard.l1{--accent:#ec9e25;--accent-soft:#fff3da;border-color:#efdcb9}
+.ucard.l2{--accent:#df5b53;--accent-soft:#fff0ed;border-color:#f0c4bf}
+.uc-topline{height:5px;background:linear-gradient(90deg,var(--accent),#d9f1e8)}
+.ucard.l1 .uc-topline{background:linear-gradient(90deg,#e9a12c,#ffd890)}
+.ucard.l2 .uc-topline{background:linear-gradient(90deg,#df5b53,#ffb1aa)}
+.uc-hero{background:linear-gradient(130deg,#f9fcfd 0%,#fff 78%);padding:22px 22px 16px;display:grid;gap:16px}
+.uc-hero-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.uc-ident{display:flex;align-items:center;gap:12px}
+.uc-ident-icon{width:48px;height:48px;display:grid;place-items:center;background:#eaf4f5;color:#175767;border-radius:15px}
+.uc-ident-icon svg{height:25px;width:25px}
+.uc-name{font-size:1.3rem;font-weight:700;line-height:1.1;letter-spacing:-.035em;color:#102b3e}
+.uc-subname{font-size:.75rem;color:#74879a;margin-top:4px}
+.uc-state{background:var(--accent-soft);color:var(--accent);border-radius:999px;font-size:.71rem;font-weight:700;padding:6px 11px}
+.uc-mainmetric{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.uc-mainmetric .metric-caption{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#667e8d;font-weight:700}
+.uc-mainmetric .metric-value{font-size:2.15rem;line-height:1.1;font-family:var(--mono);font-weight:600;letter-spacing:-.07em;color:#102b3e;margin:5px 0}
+.uc-mainmetric .metric-hint{font-size:.75rem;color:#667e8d}
+.uc-ring{--pct:100;position:relative;flex:none;width:94px;height:94px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--pct)*1%),#eaf0f3 0)}
+.uc-ring::before{content:"";position:absolute;inset:11px;border-radius:50%;background:#fff}
+.uc-ring-inner{position:absolute;inset:0;display:grid;place-items:center;font-size:.69rem;font-weight:700;color:#376071}
+.uc-quickstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 22px 18px}
+.uc-quickstat{border:1px solid #e5edf1;background:#f7fafb;border-radius:13px;padding:12px;display:grid;gap:3px;min-height:67px}
+.uc-quickstat small{font-size:.69rem;color:#71869a}
+.uc-quickstat strong{font-size:.87rem;color:#15374c;font-weight:700}
+.uc-quickstat .status-critical{color:#c53e36}
+.uc-activity{margin:0 22px 14px;padding:12px 14px;border-left:3px solid var(--accent);background:#f6f9fa;border-radius:0 12px 12px 0;display:grid;gap:4px}
+.uc-activity .timestamp{font-size:.68rem;font-weight:700;color:#6f8596;text-transform:uppercase;letter-spacing:.06em}
+.uc-activity .description{font-size:.76rem;color:#365269;line-height:1.45}
+.uc-bottom{margin-top:auto;padding:14px 22px 20px;border-top:1px solid #edf1f4;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.uc-bottom .uc-count{font-size:.75rem;color:#688094}
+.uc-bottom .uc-count b{color:#183c52}
+.uc-bottom button{background:#123b51;color:#fff;border:1px solid #123b51;border-radius:10px;padding:9px 14px;font-size:.76rem;font-weight:700;cursor:pointer}
+.uc-bottom button:hover{background:#0a6f69;border-color:#0a6f69}
+@media(max-width:700px){.ucards{grid-template-columns:1fr}.uc-hero{padding:19px 18px 14px}.uc-quickstats{padding:0 18px 16px}.uc-activity{margin:0 18px 12px}.uc-bottom{padding:14px 18px 18px}}
+
+
+/* V6 refinada: acentos sobrios sin saturación */
+:root{--good:#16866d;--warn:#c78a27;--crit:#cf5550}
+.content{max-width:1540px}
+.vhead{padding:5px 2px 2px}.vhead h1{font-size:1.75rem;letter-spacing:-.035em}
+.ucards{gap:20px}
+.ucard{box-shadow:0 8px 28px rgba(21,48,66,.065);border-color:#dfe8eb}
+.ucard:hover{box-shadow:0 18px 42px rgba(21,48,66,.12)}
+.uc-hero{background:linear-gradient(145deg,#f7fafb 0%,#fff 82%)}
+.uc-mainmetric .metric-value{font-size:2.35rem}
+.uc-state{letter-spacing:.015em}
+.uc-quickstat{background:#f8fafb;border-color:#e9eef1}
+.uc-bottom button{transition:background .18s ease,transform .18s ease}
+.uc-bottom button:hover{transform:translateY(-1px)}
+.studio-banner{background:linear-gradient(112deg,#102a3e,#195e61);box-shadow:0 16px 40px rgba(21,70,75,.11)}
+.studio-gcard{box-shadow:0 9px 26px rgba(16,44,63,.10)}
+.studio-gauge{box-shadow:0 8px 22px rgba(0,0,0,.11)}
+.studio-panel{border-color:#e3ebef}
+.studio-table tbody tr:hover{background:#edf6f4}
+.studio-pill.on{background:#174c53;border-color:#174c53}
+.studio-track{height:14px;background:#e9eff2}
+.studio-fill{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+@media(max-width:700px){.vhead h1{font-size:1.45rem}.uc-mainmetric .metric-value{font-size:2rem}}
+
+/* ===== FlotaIA V9 - lenguaje ejecutivo global ===== */
+:root{
+  --bg-soft:#eef4f8;
+  --panel:#ffffff;
+  --panel-2:#f7fbfd;
+  --ink-strong:#10263f;
+  --teal:#0f8f83;
+  --cyan:#2a7de1;
+  --violet:#7b61ff;
+  --amber:#f0a52b;
+  --danger:#d85a52;
+  --good2:#14a086;
+  --shadow-xl:0 22px 54px rgba(15,36,62,.08), 0 8px 20px rgba(15,36,62,.05);
+}
+body{background:radial-gradient(circle at top left,#f8fbfd 0,#edf3f7 40%,#eef4f8 100%)}
+.content{max-width:1650px}
+.view{display:grid;gap:18px}
+.vhead{padding:4px 2px 0}.vhead .eyebrow{color:#6b879d}.vhead h1{letter-spacing:-.04em}
+.card{border-radius:22px;border:1px solid #dbe7ef;box-shadow:var(--shadow-xl);background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);padding:22px 24px}
+.card-h{margin-bottom:16px;align-items:flex-start}.card-h h2{font-size:1.14rem;letter-spacing:-.02em;color:#0f2742}.card-h p{font-size:.82rem;color:#6a7f93;max-width:65ch}
+.badge{border-radius:999px;padding:6px 10px;font-size:.66rem;letter-spacing:.07em;box-shadow:none}
+.badge.b-auto{background:#ecf3ff;color:#295db7}.badge.b-sim{background:#edf7f2;color:#147f68}.badge.b-ia{background:#f1ecff;color:#6c50dd}
+.filters{padding:14px 16px;border-radius:18px;background:linear-gradient(180deg,#fff,#f9fbfd);border:1px solid #dee8f0;box-shadow:0 10px 28px rgba(15,36,62,.05)}
+.filters .f,.hc-form .f{gap:8px}.filters select,.filters input,.hc-form select,.hc-form input,.studio-filters select,.studio-filters input{border-radius:12px;border:1px solid #d6e3ec;background:#f9fbfd;padding:11px 12px}
+.btn{border-radius:12px;background:linear-gradient(180deg,#14395d,#102f4d);box-shadow:0 8px 18px rgba(16,47,77,.18)}
+.btn.sec{background:linear-gradient(180deg,#fff,#f7fbfe);color:#153a58;border:1px solid #d4e2ec;box-shadow:none}
+.akpis{gap:16px}
+.kpi{border-radius:22px;min-height:150px;padding:20px 22px;border:1px solid #dbe7ef;box-shadow:var(--shadow-xl);background:linear-gradient(145deg,#ffffff 0%,#f5faff 100%);overflow:hidden}
+.kpi::before{width:6px;border-radius:0 6px 6px 0;background:var(--kc,linear-gradient(180deg,#2a7de1,#15a38a))}
+.kpi::after{content:"";position:absolute;right:-24px;bottom:-26px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(42,125,225,.09),rgba(42,125,225,0) 65%)}
+.kpi .l{font-size:.76rem;font-weight:700;letter-spacing:.03em;color:#5f7690;text-transform:none;margin-bottom:8px}
+.kpi .v{font-size:2.35rem;letter-spacing:-.06em;line-height:1.02;color:#071d39}
+.kpi .m{font-size:.8rem;color:#667d93;line-height:1.45;max-width:35ch;margin-top:6px}
+#hcK .kpi:nth-child(1){background:linear-gradient(145deg,#ffffff 0%,#eef6ff 100%);--kc:#2a7de1}
+#hcK .kpi:nth-child(2){background:linear-gradient(145deg,#ffffff 0%,#eefaf0 100%);--kc:#65c96a}
+#hcK .kpi:nth-child(3){background:linear-gradient(145deg,#ffffff 0%,#eefbfd 100%);--kc:#30c3d9}
+#hcK .kpi:nth-child(4){background:linear-gradient(145deg,#ffffff 0%,#fff7ed 100%);--kc:#f0a52b}
+#hcK .kpi:nth-child(5){background:linear-gradient(145deg,#ffffff 0%,#f4f0ff 100%);--kc:#7b61ff}
+#hcK .kpi:nth-child(6){background:linear-gradient(145deg,#ffffff 0%,#edf9f0 100%);--kc:#37c97b}
+.hc-g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#cHcEvo,#cHcCmpC,#cHcForm{position:relative;overflow:hidden}
+#cHcEvo::after,#cHcCmpC::after,#cHcForm::after{content:"";position:absolute;right:-70px;top:-70px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(36,115,217,.05),rgba(36,115,217,0) 70%);pointer-events:none}
+.chart{width:100%;height:auto;overflow:visible}.chart text{font-family:Inter,system-ui,sans-serif;fill:#5f7893;font-size:12px}.chart .titlev{fill:#09213d;font-weight:700}.chart .value{fill:#071d39;font-weight:700}.chart .axis{stroke:#d6e2ec}.chart .grid{stroke:#e7eef4;stroke-dasharray:4 5}.chart .line-int{stroke:#39c0d8;stroke-width:3;fill:none}.chart .dot-int{fill:#39c0d8;stroke:#fff;stroke-width:2}.chart .bar-grad{fill:url(#barGrad)} .chart .bar-soft{fill:#ecf2f6}
+.hc-note{font-size:.77rem;color:#5f7893;line-height:1.55;padding-top:6px}
+.tw{border-radius:18px;border:1px solid #dce7ef;overflow:hidden;background:#fff}
+.dt thead{background:#f3f8fb}.dt th{font-size:.72rem;letter-spacing:.06em;color:#5e7691}.dt td{padding:13px 12px}
+.foot{font-size:.78rem;color:#60778f;line-height:1.6}
+.cmp-g .tr{background:#eef4f8;border-radius:999px;height:12px}.cmp-g .tr i{border-radius:999px}
+#hcEsc{padding-top:8px}
+@media(max-width:1100px){.hc-g2{grid-template-columns:1fr}.kpi{min-height:132px}.kpi .v{font-size:2rem}}
+
+
+/* IPIM · componente diferencial de FlotaIA */
+.ipim-panel{gap:20px;background:linear-gradient(165deg,#fff,#f5f9fc)}.ipim-layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px}.ipim-center{border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;background:#0b2947;color:white}.ipim-center b{color:#fff;font-size:1rem}.ipim-center .foot{color:#c8dbe9}.ipim-ring{--pct:0;--ring:#1ea88e;width:172px;height:172px;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--pct)*1%),rgba(255,255,255,.12) 0);padding:16px;display:flex}.ipim-ring>div{border-radius:50%;background:#0b2947;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}.ipim-ring strong{font:700 3rem var(--mono);line-height:1;color:#fff}.ipim-ring small{font-size:.73rem;color:#b8cfdf}.ipim-control{display:grid;gap:14px}.ipim-control select{max-width:260px}.ipim-subrow{display:flex;justify-content:space-between;gap:12px;align-items:center}.ipim-components{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ipim-factor{padding:12px;border:1px solid #dce8f0;border-radius:13px;background:#fff}.ipim-factor small{display:block;color:#6c8197;font-size:.72rem}.ipim-factor strong{display:block;font:700 1.3rem var(--mono);color:#15324c;margin-top:3px}.ipim-weights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.ipim-weights label{font-size:.75rem;color:#435c72;display:grid;gap:5px}.ipim-weights strong{color:#163b55}.ipim-weights input{width:100%;accent-color:#168a79}.ipim-small-actions{display:flex;gap:9px;flex-wrap:wrap}.ipim-explain{background:#eaf5f3;border:1px solid #cbe4df;padding:13px 16px;border-radius:13px;color:#205a52;font-size:.82rem}.ipim-cases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.ipim-case{border-radius:15px;padding:16px;background:#fff;border:1px solid #dce8f0;display:grid;gap:8px}.ipim-case strong{font-size:.9rem;color:#122f49}.ipim-case p{font-size:.78rem;color:#526d80;line-height:1.55}.ipim-case .bar{height:8px;border-radius:99px;background:#e6eef3;overflow:hidden}.ipim-case .bar i{display:block;height:100%;background:var(--tone,#208a78);width:var(--width,50%);border-radius:99px}.ipim-case small{font-size:.7rem;color:#62798d}.ipim-case.warn{--tone:#d8a03c}.ipim-case.good{--tone:#1f9a83}.ipim-case.bad{--tone:#d9655c}.ipim-note{border-left:4px solid #88a9ba;padding:12px 15px;background:#f0f5f8;font-size:.76rem;color:#4e687b;border-radius:0 10px 10px 0;line-height:1.6}
+@media(max-width:900px){.ipim-layout{grid-template-columns:1fr}.ipim-cases{grid-template-columns:1fr}.ipim-weights{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:550px){.ipim-components{grid-template-columns:1fr}}
+
+/* Gemelo operativo académico V11 */
+.twin-hero{background:linear-gradient(125deg,#071c32,#164466 60%,#187d72);border:0;color:white;border-radius:20px;padding:24px 28px}.twin-hero h1{color:white;font-size:1.6rem}.twin-hero p{color:#d5e8f1;max-width:85ch}.twin-fleet{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.twin-unit{cursor:pointer;background:#f7fafc;border:1px solid #dce7ed;border-top:5px solid #15997d;border-radius:15px;padding:14px 7px;display:grid;gap:8px;text-align:center;justify-items:center;transition:.2s}.twin-unit:hover,.twin-unit.selected{transform:translateY(-3px);box-shadow:0 10px 24px #123c5d22;border-color:#5382a0}.twin-unit.warn{border-top-color:#e7a632}.twin-unit.crit{border-top-color:#d85e56;background:#fff4f2}.twin-unit svg{width:48px;height:38px;color:#184765}.twin-unit strong{font:700 .94rem var(--mono)}.twin-unit small{font-size:.67rem;color:#61778c}.twin-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.twin-metric{padding:16px 17px;background:#f4f8fa;border-radius:13px;display:grid;gap:5px}.twin-metric small{font-size:.7rem;color:#5c7487}.twin-metric strong{font:700 1.55rem var(--mono);color:#122e48}.twin-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.twin-option{display:grid;gap:8px;background:#fff;border:1px solid #dce6ed;border-radius:15px;padding:17px;cursor:pointer;text-align:left}.twin-option.selected{border:2px solid #159581;background:#effaf6}.twin-option b{color:#193952}.twin-option p{font-size:.78rem;color:#5b7284;line-height:1.5}.twin-option em{font:700 1.4rem var(--mono);font-style:normal;color:#138771}.twin-layout{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}.twin-note{padding:13px 16px;background:#edf4f8;border-left:4px solid #5889a8;border-radius:7px;color:#476276;font-size:.79rem}.twin-route{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.twin-route span{border-radius:9px;padding:12px 4px;text-align:center;background:#e2f4ed;color:#197c5a;font-weight:700;font-size:.75rem}.twin-route span.missing{background:#ffebe6;color:#b74336}.twin-route span.recovered{background:#e8efff;color:#2d60a0}@media(max-width:1100px){.twin-fleet{grid-template-columns:repeat(4,1fr)}.twin-layout{grid-template-columns:1fr}.twin-options{grid-template-columns:1fr}}@media(max-width:620px){.twin-fleet{grid-template-columns:repeat(3,1fr)}.twin-route{grid-template-columns:repeat(4,1fr)}.twin-metrics{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -413,7 +616,7 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
       <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#1b4277"/><path d="M9 27.5l7-9.5 6.5 5.5L31 12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="27.5" r="2.6" fill="#fff"/><circle cx="16" cy="18" r="2.6" fill="#fff"/><circle cx="22.5" cy="23.5" r="2.6" fill="#fff"/><circle cx="31" cy="12" r="3.4" fill="#7fd1a8"/></svg>
       <div><div class="bname">FLOTA<span>IA</span></div><div class="bsub">Sistema Inteligente de Gestión de Flota y Mantenimiento</div></div>
     </div>
-    <div class="muni"><b>Municipalidad Distrital de El Tambo — Huancayo</b><span class="proto">Prototipo académico | Datos simulados</span></div>
+    <div class="muni"><b>Municipalidad Distrital de El Tambo — Huancayo</b><span class="proto">Prototipo académico | Caso simulado</span></div>
     <nav class="menu" id="nav">
       <div class="nav-l">Gestión</div>
       <a href="#resumen" data-v="resumen"><svg class="i"><use href="#i-grid"/></svg>Resumen ejecutivo<span class="nbadge crit" id="nbAlert" hidden></span></a>
@@ -423,7 +626,12 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
       <a href="#analisis" data-v="analisis"><svg class="i"><use href="#i-cpu"/></svg>Análisis inteligente</a>
       <a href="#ambiental" data-v="ambiental"><svg class="i"><use href="#i-leaf"/></svg>Impacto ambiental</a>
       <a href="#huella" data-v="huella"><svg class="i"><use href="#i-co2"/></svg>Huella de carbono</a>
-      <div class="nav-l">Sustentación</div>
+      <div class="nav-l">Innovación aplicada</div>
+       <a href="#decisiones" data-v="decisiones"><svg class="i"><use href="#i-alert"/></svg>Centro de decisiones</a>
+       <a href="#gemelo" data-v="gemelo"><svg class="i"><use href="#i-truck"/></svg>Gemelo operativo</a>
+       <a href="#impacto" data-v="impacto"><svg class="i"><use href="#i-gauge"/></svg>Simulador de impacto</a>
+       <div class="nav-l">Sustentación</div>
+      <a href="#studio" data-v="studio"><svg class="i"><use href="#i-grid"/></svg>Observatorio visual</a>
       <a href="#demo" data-v="demo"><svg class="i"><use href="#i-play"/></svg>Demostración C-03</a>
     </nav>
     <div class="side-foot">
@@ -439,7 +647,7 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
       <div class="crumb"><span class="cr1">FlotaIA · Municipalidad Distrital de El Tambo — Huancayo</span><span class="cr2" id="topTitle">Resumen ejecutivo</span></div>
       <div class="top-r">
         <span class="clock" id="clock">Simulación</span>
-        <span class="chip-proto">Prototipo académico | Datos simulados</span>
+        <span class="chip-proto">Prototipo académico | Caso simulado</span>
         <a class="btn sm" href="#demo" id="btnTopDemo"><svg class="i"><use href="#i-play"/></svg><span>Demostración C-03</span></a>
       </div>
     </header>
@@ -448,10 +656,21 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
       <!-- ================= A. RESUMEN EJECUTIVO ================= -->
       <section class="view" id="v-resumen" aria-labelledby="h-resumen">
         <div class="vhead">
-          <div><div class="eyebrow">Panel gerencial</div><h1 id="h-resumen">Resumen ejecutivo</h1><p class="lead">Estado de las siete compactadoras, del mantenimiento y del servicio de recolección en la simulación.</p></div>
+          <div><div class="eyebrow">Panel de operación</div><h1 id="h-resumen">Resumen ejecutivo</h1><p class="lead">Estado de las siete compactadoras, del mantenimiento y del servicio de recolección en la simulación.</p></div>
           <div class="badges"><span class="badge b-ia">IA</span><span class="badge b-auto">Automatización</span><span class="badge b-sim">Simulación</span></div>
         </div>
-        <div class="banner crit" id="rBanner" role="alert" hidden></div>
+        <div class="web-hero" aria-label="Presentación FlotaIA">
+<div class="web-hero-copy"><div class="web-overline">FLOTAIA / PLATAFORMA DE GESTIÓN OPERATIVA</div><h2>Una flota que funciona.<br><em>Una ciudad que avanza.</em></h2><p>Del reporte de una falla a una decisión de mantenimiento. Una propuesta para proteger la continuidad del recojo de residuos y gestionar mejor los recursos municipales.</p><div class="web-hero-actions"><a href="#studio">Explorar tablero</a><a class="alt" href="#demo">Ver caso C-03 ↗</a></div></div>
+<div class="web-hero-art"><div class="web-orbit"></div><svg viewBox="0 0 540 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración de un camión compactador">
+<ellipse cx="278" cy="254" rx="203" ry="19" fill="#041b26" opacity=".37"/>
+<rect x="67" y="104" width="296" height="116" rx="14" fill="#2aa38e" stroke="#80e7ce" stroke-width="4"/><path d="M80 112h265v96H80z" fill="#126b68"/><path d="M112 125h205" stroke="#6fe1c4" stroke-width="3" opacity=".65"/><path d="M116 150h183" stroke="#6fe1c4" stroke-width="3" opacity=".42"/><path d="M116 176h153" stroke="#6fe1c4" stroke-width="3" opacity=".3"/>
+<path d="M366 143h74l49 54v23H365z" fill="#e7f8f2"/><path d="M383 156h50l32 39h-82z" fill="#194d59"/><path d="M377 209h107v19H377z" fill="#b9d9d0"/><path d="M67 217h429v16H67z" fill="#163547"/><circle cx="151" cy="234" r="35" fill="#0b202e" stroke="#b8e2d7" stroke-width="9"/><circle cx="151" cy="234" r="13" fill="#688d94"/><circle cx="401" cy="234" r="35" fill="#0b202e" stroke="#b8e2d7" stroke-width="9"/><circle cx="401" cy="234" r="13" fill="#688d94"/>
+<rect x="192" y="145" width="85" height="47" rx="10" fill="#0f3945"/><path d="m213 170 14 12 28-29" fill="none" stroke="#9cf5ce" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="449" cy="196" r="7" fill="#ffa752"/><path d="M55 231h-20m459 0h22" stroke="#9de5d4" stroke-width="4" stroke-linecap="round"/>
+</svg><div class="web-art-chip a">● <b>7</b> compactadoras</div><div class="web-art-chip b">◈ Datos de <b>simulación</b></div></div></div>
+<div class="web-proof"><article><small>El reto</small><strong>Continuidad del servicio</strong><p>Prevenir interrupciones por fallas de la flota.</p></article><article><small>La solución</small><strong>Mantenimiento trazable</strong><p>Incidencias, órdenes y decisiones conectadas.</p></article><article><small>La innovación</small><strong>Análisis + gestión</strong><p>Clasificación experimental y escenarios operativos.</p></article></div>
+<div class="web-sectionhead"><h2>Centro de control de flota</h2><span>Lecturas demostrativas del caso El Tambo · no son datos en vivo</span></div>
+<div class="banner crit" id="rBanner" role="alert" hidden></div>
         <div class="g-exec">
           <div class="card" id="cFleet">
             <div class="card-h"><div><h2>Estado de la flota</h2><p>Compactadoras monitoreadas por el sistema</p></div><span class="badge b-auto">Automatización</span></div>
@@ -629,7 +848,7 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
       <section class="view" id="v-ambiental" aria-labelledby="h-amb" hidden>
         <div class="vhead">
           <div><div class="eyebrow">Sostenibilidad</div><h1 id="h-amb">Impacto ambiental estimado</h1><p class="lead">Efecto de la disponibilidad de la flota en el servicio de recolección y en las emisiones. Son estimaciones con supuestos, no impactos medidos en El Tambo.</p></div>
-          <div class="badges"><span class="badge b-auto">Cálculo automático</span><span class="badge b-sim">Supuestos</span></div>
+          <div class="badges"><span class="badge b-auto">Estimación calculada</span><span class="badge b-sim">Supuestos</span></div>
         </div>
         <div class="akpis" id="cAmbK">
           <div class="kpi" id="kpASin"><span class="l">Residuos sin recoger hoy</span><span class="v tone" id="aSin">–</span><span class="m" id="aSinM">&nbsp;</span></div>
@@ -674,7 +893,7 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
       <section class="view" id="v-huella" aria-labelledby="h-hc" hidden>
         <div class="vhead">
           <div><div class="eyebrow">Sostenibilidad</div><h1 id="h-hc">Huella de carbono de la flota</h1><p class="lead">Emisiones estimadas por la combustión de diésel de las siete compactadoras (alcance 1, combustión móvil). No es la huella de carbono de la municipalidad ni un reporte presentado a Huella de Carbono Perú: los registros iniciales son simulados.</p></div>
-          <div class="badges"><span class="badge b-auto">Cálculo automático</span><span class="badge b-sim">Datos simulados</span></div>
+          <div class="badges"><span class="badge b-auto">Estimación calculada</span><span class="badge b-sim">Caso simulado</span></div>
         </div>
         <div class="filters">
           <label class="f" for="hcPer">Periodo analizado<select id="hcPer"></select></label>
@@ -687,8 +906,8 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
           <div class="kpi"><span class="l">CO₂ fósil</span><span class="v" id="hcC">–</span><span class="m" id="hcCM">&nbsp;</span></div>
           <div class="kpi" id="kpHcI"><span class="l">Intensidad por tonelada recolectada</span><span class="v tone" id="hcI">–</span><span class="m" id="hcIM">&nbsp;</span></div>
           <div class="kpi"><span class="l">Diésel registrado</span><span class="v" id="hcL">–</span><span class="m" id="hcLM">&nbsp;</span></div>
-          <div class="kpi"><span class="l">Mayor intensidad</span><span class="v" id="hcMx">–</span><span class="m" id="hcMxM">&nbsp;</span></div>
-          <div class="kpi"><span class="l">Reducción del escenario hipotético</span><span class="v" id="hcE">–</span><span class="m" id="hcEM">&nbsp;</span></div>
+          <div class="kpi"><span class="l">Unidad con mayor intensidad</span><span class="v" id="hcMx">–</span><span class="m" id="hcMxM">&nbsp;</span></div>
+          <div class="kpi"><span class="l">Reducción hipotética de emisiones</span><span class="v" id="hcE">–</span><span class="m" id="hcEM">&nbsp;</span></div>
         </div>
         <div class="hc-g2">
           <div class="card" id="cHcEvo">
@@ -735,28 +954,135 @@ input[type=month] { background: var(--surface); border: 1px solid var(--line-2);
         </div>
       </section>
 
+
+      <!-- ================= G. CENTRO DE DECISIONES ================= -->
+      <section class="view" id="v-decisiones" aria-labelledby="h-decisiones" hidden>
+        <div class="card impact-hero"><div><div class="eyebrow">Innovación aplicada · decisión humana supervisada</div><h1 id="h-decisiones">De la alerta a la acción</h1><p>FlotaIA conecta la condición hidráulica detectada con una respuesta de mantenimiento trazable. Las recomendaciones son reglas orientativas, no diagnósticos mecánicos certificados.</p></div><svg class="i" style="width:58px;height:58px;color:#a7e8d3"><use href="#i-cpu"/></svg></div>
+        <div class="impact-grid">
+          <div class="impact-stat"><small>Condición C-03 · simulación</small><div class="impact-num" id="dcCondition">—</div><small id="dcConfidence">Modelo experimental</small></div>
+          <div class="impact-stat"><small>Órdenes abiertas C-03</small><div class="impact-num" id="dcOrders">—</div><small>Seguimiento por registro</small></div>
+          <div class="impact-stat"><small>Rutas atendidas</small><div class="impact-num" id="dcRoutes">—</div><small>Supuesto: una ruta por compactadora</small></div>
+        </div>
+        <div class="card ipim-panel" id="ipimPanel">
+          <div class="card-h"><div><div class="eyebrow">INNOVACIÓN DIFERENCIAL · IPIM</div><h2>Prioridad de Intervención Municipal</h2><p>Comparación explicable de riesgo técnico, continuidad del servicio, parada e impacto ambiental. Modelo académico no validado en campo.</p></div><span class="badge b-sim">Hipótesis evaluable</span></div>
+          <div class="ipim-layout">
+            <div class="ipim-center"><div class="ipim-ring" id="ipimRing"><div><strong id="ipimValue">—</strong><small>de 100 puntos</small></div></div><b id="ipimLevel">—</b><span class="foot" id="ipimWhy">—</span></div>
+            <div class="ipim-control">
+              <label class="f">Compactadora para evaluar<select id="ipimUnit"></select></label>
+              <div class="ipim-subrow"><b>Componentes del índice</b><span class="foot">Pesos propuestos y ajustables</span></div>
+              <div class="ipim-components" id="ipimFactors"></div>
+              <div class="ipim-weights">
+                <label>Gravedad <strong id="ipimW0Val">40%</strong><input type="range" id="ipimW0" min="0" max="100" step="5" value="40"></label>
+                <label>Rutas <strong id="ipimW1Val">30%</strong><input type="range" id="ipimW1" min="0" max="100" step="5" value="30"></label>
+                <label>Parada <strong id="ipimW2Val">20%</strong><input type="range" id="ipimW2" min="0" max="100" step="5" value="20"></label>
+                <label>Ambiental <strong id="ipimW3Val">10%</strong><input type="range" id="ipimW3" min="0" max="100" step="5" value="10"></label>
+              </div>
+              <div class="ipim-small-actions"><button type="button" class="btn sec sm" id="ipimReset">Restablecer pesos</button><button type="button" class="btn sec sm" id="ipimCSV">Exportar análisis CSV</button></div>
+            </div>
+          </div>
+          <div class="ipim-explain" id="ipimExplain"></div>
+          <div class="card-h"><div><h2>Comparador de decisiones</h2><p>Escenarios ilustrativos para la compactadora seleccionada: no representan costos, emisiones o resultados observados.</p></div></div>
+          <div class="ipim-cases" id="ipimCases"></div>
+          <div class="ipim-note">La gravedad severa exige evaluación prioritaria independientemente de la puntuación. La puntuación no sustituye la inspección mecánica ni autoriza circular. La continuidad del servicio es el cociente entre rutas atendidas y programadas; el prototipo supone 1 ruta por compactadora.</div>
+        </div>
+        <div class="card"><div class="card-h"><div><h2>Protocolo de respuesta sugerido</h2><p>Acciones condicionadas por la alerta calculada para C-03</p></div><span class="badge b-auto">Reglas de negocio</span></div><div id="dcAction" class="action-panel"></div><div class="decision-flow"><div><b>01 · Captura</b>Incidencia del chofer o ciclo del banco de pruebas</div><div><b>02 · Clasificación</b>Modelo experimental + reglas de prioridad</div><div><b>03 · Gestión</b>Inspección, orden y validación por responsable</div><div><b>04 · Impacto</b>Rutas, tiempo detenido y KPIs calculados</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="dcGotoDemo" type="button">Ejecutar caso C-03</button><button class="btn sec" id="dcGotoMant" type="button">Abrir órdenes de trabajo</button><button class="btn sec" id="dcGotoImpact" type="button">Evaluar escenarios</button></div></div>
+        <div class="impact-note">La lectura del modelo proviene de un banco de pruebas hidráulico. No existe conexión con sensores instalados en las compactadoras reales de El Tambo. La autorización de retiro de ruta y reparación corresponde al responsable municipal.</div>
+      </section>
+
+      <section class="view" id="v-gemelo" aria-labelledby="h-gemelo" hidden>
+        <div class="twin-hero"><div class="eyebrow" style="color:#a6e5cf">CENTRO DE SIMULACIÓN · FLOTAIA</div><h1 id="h-gemelo">Gemelo digital operativo de la flota</h1><p>Representación del estado calculado de las siete compactadoras. Usa exactamente las incidencias y órdenes del caso C-03. Prueba una contingencia sin alterar los registros reales del prototipo.</p></div>
+        <div class="card"><div class="card-h"><div><h2>Flota conectada a la simulación</h2><p>Selecciona una unidad. Las alertas provienen del mismo estado que el Centro de decisiones y la Demostración C-03.</p></div><span class="badge b-sim">Modelo operativo simplificado</span></div><div id="twinFleet" class="twin-fleet"></div></div>
+        <div class="twin-metrics"><div class="twin-metric"><small>Rutas cubiertas · simulación base</small><strong id="twinBase">—</strong></div><div class="twin-metric"><small>Con contingencia hipotética</small><strong id="twinProjected">—</strong></div><div class="twin-metric"><small>Prioridad IPIM</small><strong id="twinIPIM">—</strong></div><div class="twin-metric"><small>Órdenes abiertas · unidad</small><strong id="twinOT">—</strong></div></div>
+        <div class="twin-layout"><div class="card"><div class="card-h"><div><h2>Laboratorio de decisiones</h2><p>Escoge qué ocurriría ante la salida de la unidad seleccionada.</p></div></div><div class="twin-options" id="twinOptions"><button type="button" class="twin-option selected" data-twin-plan="base"><b>01 · Estado observado</b><p>Mostrar la cobertura tal como la calcula el prototipo.</p><em id="twinBaseOption">—</em></button><button type="button" class="twin-option" data-twin-plan="retirar"><b>02 · Retiro preventivo</b><p>Simular que esta unidad deja de atender su ruta hasta revisión técnica.</p><em id="twinRemoveOption">—</em></button><button type="button" class="twin-option" data-twin-plan="contingencia"><b>03 · Cobertura alternativa</b><p>Hipótesis: otra unidad o turno puede absorber una ruta afectada, solo si existe capacidad.</p><em id="twinRecoverOption">—</em></button></div><div class="twin-note" id="twinNarrative">—</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="twinDemo">Iniciar demostración C-03</button><button type="button" class="btn sec" id="twinIPIMGo">Ver análisis IPIM</button><button type="button" class="btn sec" id="twinReset">Volver a estado base</button></div></div><div class="card"><div class="card-h"><div><h2>Continuidad de las rutas</h2><p>R-01 a R-07 son identificadores académicos, no rutas geográficas verificadas.</p></div></div><div id="twinRoutes" class="twin-route"></div><div class="twin-note">Modelo: una ruta por compactadora; no incluye distancias, turnos, capacidades, GPS ni rutas reales. La contingencia recuperada representa una <b>posibilidad condicional</b>, nunca una reasignación municipal efectuada.</div></div></div>
+        <div class="card"><div class="card-h"><div><h2>Vinculación técnica con C-03</h2><p>El sistema se actualiza tras cada paso ejecutado de la demostración.</p></div></div><div id="twinC3Status" class="impact-note"></div></div>
+      </section>
+
+      <!-- ================= H. LABORATORIO DE IMPACTO ================= -->
+      <section class="view" id="v-impacto" aria-labelledby="h-impacto" hidden>
+        <div class="card impact-hero"><div><div class="eyebrow">Laboratorio de innovación · escenarios editables</div><h1 id="h-impacto">¿Cuánto puede valer una mejor decisión?</h1><p>Compare mantenimiento reactivo, preventivo y apoyado por FlotaIA. Los resultados son cálculos hipotéticos sensibles a sus supuestos, no ahorros realizados ni evidencia de eficacia.</p></div><svg class="i" style="width:60px;height:60px;color:#a7e8d3"><use href="#i-gauge"/></svg></div>
+        <div class="card"><div class="card-h"><div><h2>Parámetros del escenario</h2><p>Modifique los valores para defender diferentes hipótesis ante la docente</p></div><span class="badge b-sim">Simulación transparente</span></div>
+          <div class="impact-controls">
+            <label>Días de indisponibilidad en escenario reactivo <strong id="ipDaysVal">8 días</strong><input id="ipDays" type="range" min="1" max="30" step="1" value="8"></label>
+            <label>Costo incremental supuesto por día (S/) <strong id="ipCostVal">S/ 850</strong><input id="ipCost" type="range" min="100" max="3000" step="50" value="850"></label>
+            <label>Reducción hipotética con mantenimiento preventivo <strong id="ipPrevVal">25 %</strong><input id="ipPrev" type="range" min="0" max="80" step="5" value="25"></label>
+            <label>Reducción hipotética con FlotaIA <strong id="ipIAVal">45 %</strong><input id="ipIA" type="range" min="0" max="80" step="5" value="45"></label>
+            <label>Rutas potencialmente afectadas por día <strong id="ipRoutesVal">1 ruta</strong><input id="ipRoutes" type="range" min="1" max="7" step="1" value="1"></label>
+            <label>Emisiones evitables estimadas por día recuperado (kg CO₂e) <strong id="ipCO2Val">12 kg</strong><input id="ipCO2" type="range" min="0" max="100" step="2" value="12"></label>
+          </div>
+          <div class="impact-note">El costo diario y los porcentajes de reducción NO son datos observados. El factor de CO₂e es ilustrativo y no sustituye el módulo de huella de carbono con factores de emisión verificados. Los escenarios no incluyen el costo de implementación de cada alternativa.</div>
+        </div>
+        <div class="impact-comparison" id="ipCards" aria-live="polite"></div>
+        <div class="card"><div class="card-h"><h2>Valor incremental hipotético frente al escenario reactivo</h2><span class="badge b-sim">No es ahorro neto</span></div><div class="impact-grid"><div class="impact-stat"><small>Reducción de costo operativo modelado</small><div class="impact-num" id="ipSavings">—</div><small>Sin descontar implementación</small></div><div class="impact-stat"><small>Rutas-día potencialmente recuperadas</small><div class="impact-num" id="ipRecovered">—</div><small>No equivale a hogares atendidos</small></div><div class="impact-stat"><small>CO₂e potencialmente evitado</small><div class="impact-num" id="ipCarbon">—</div><small>Supuesto editable, no medición</small></div></div><div class="foot">Método: días restantes = días reactivos × (1 − reducción propuesta); costo modelado = días restantes × costo diario; rutas-día afectadas = días restantes × rutas por día. La diferencia entre escenarios es hipotética, no causalidad demostrada.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sec" type="button" id="ipReset">Restablecer supuestos</button><button class="btn" type="button" id="ipExport">Descargar escenario CSV</button><button class="btn sec" type="button" id="ipToDecision">Volver a decisiones</button></div></div>
+      </section>
+
+
+      <!-- OBSERVATORIO VISUAL DE FLOTAIA / TABLAS DINÁMICAS LOCALES -->
+      <section class="view" id="v-studio" aria-labelledby="h-studio" hidden>
+        <div class="studio-banner"><div><div class="studio-kicker">FLOTAIA / COMMAND CENTER</div><h1 id="h-studio">Tablero visual de impacto operativo</h1><p>Supervisa disponibilidad, rutas y órdenes desde una sola vista. Usa filtros y gráficos para explorar el escenario C-03 y comprender cómo cambia la operación.</p></div><div><a href="#demo" class="btn" id="studioDemo">Ver caso C-03</a><p class="tagline" style="margin-top:13px">7 unidades · datos demostrativos</p></div></div>
+        <div class="studio-pills" id="svPills"><button type="button" class="studio-pill on" data-sv-pill="all">Vista total</button><button type="button" class="studio-pill" data-sv-pill="0">Operativas</button><button type="button" class="studio-pill" data-sv-pill="1">Advertencia</button><button type="button" class="studio-pill" data-sv-pill="2">Críticas</button></div>
+        <div class="studio-gauges">
+          <div class="studio-gcard">
+            <div class="studio-ghead"><div><small>Disponibilidad</small><strong>Salud operativa de la flota</strong></div><span class="badge b-auto">Meta ≥ 90 %</span></div>
+            <div class="studio-gauge" id="svGaugeDisp"><div class="center"><div class="value" id="svGaugeDispVal">—</div><div class="meta">mes en curso</div></div></div>
+            <div class="studio-minirow"><div class="studio-mini"><span>Operativas</span><b id="svOper2">—</b></div><div class="studio-mini"><span>Críticas</span><b id="svCrit2">—</b></div></div>
+          </div>
+          <div class="studio-gcard">
+            <div class="studio-ghead"><div><small>Cobertura</small><strong>Rutas atendidas</strong></div><span class="badge b-sim">Supuesto 1 unidad = 1 ruta</span></div>
+            <div class="studio-gauge" id="svGaugeRoutes"><div class="center"><div class="value" id="svGaugeRoutesVal">—</div><div class="meta">cobertura diaria</div></div></div>
+            <div class="studio-minirow"><div class="studio-mini"><span>Rutas activas</span><b id="svRoutes2">—</b></div><div class="studio-mini"><span>Fuera de servicio</span><b id="svOut2">—</b></div></div>
+          </div>
+          <div class="studio-gcard">
+            <div class="studio-ghead"><div><small>Ejecución</small><strong>Órdenes y atención</strong></div><span class="badge b-ia">Seguimiento</span></div>
+            <div class="studio-gauge" id="svGaugeOT"><div class="center"><div class="value" id="svGaugeOTVal">—</div><div class="meta">OT resueltas</div></div></div>
+            <div class="studio-minirow"><div class="studio-mini"><span>Abiertas</span><b id="svOT2">—</b></div><div class="studio-mini"><span>Alertas</span><b id="svAlert2">—</b></div></div>
+          </div>
+        </div>
+
+        <div class="studio-summary"><div class="box"><small>Decisión sugerida</small><strong id="svDecision">—</strong><span id="svDecisionTxt">—</span></div><div class="box"><small>Mayor atención</small><strong id="svFocus">—</strong><span id="svFocusTxt">—</span></div><div class="box"><small>Lectura ejecutiva</small><strong id="svExecutive">—</strong><span id="svExecutiveTxt">—</span></div></div>
+
+        <div class="studio-topgrid">
+          <div class="studio-panel dark"><div class="studio-heading"><div><h2>Flota · tabla dinámica</h2><p class="studio-muted">Filtra, ordena y exporta la situación de cada compactadora.</p></div><div class="studio-actions"><button type="button" class="btn sec sm" id="svClear">Limpiar filtros</button><button type="button" class="btn sm" id="svExport">Exportar CSV</button></div></div>
+            <div class="studio-filters"><label>Condición<select id="svStatus"><option value="all">Todas</option><option value="0">Normal</option><option value="1">Advertencia</option><option value="2">Crítica</option></select></label><label>Unidad<select id="svUnit"><option value="all">Todas las unidades</option></select></label><label>Buscar<input id="svSearch" type="search" placeholder="Unidad o estado" autocomplete="off"></label></div>
+            <div class="studio-tablewrap"><table class="studio-table"><thead><tr><th data-sv-sort="unidad">Unidad ↕</th><th data-sv-sort="estado">Condición ↕</th><th data-sv-sort="confianza">Confianza ↕</th><th data-sv-sort="ot">OT abiertas ↕</th><th data-sv-sort="disp">Disponibilidad ↕</th><th>Seguimiento</th></tr></thead><tbody id="svBody"></tbody></table></div><p class="studio-note" id="svCount">—</p></div>
+          <div class="studio-rightstack">
+            <div class="studio-panel"><div class="studio-heading"><div><h2>Composición de la flota</h2><p class="studio-muted">Lectura instantánea del escenario</p></div></div><div class="studio-donut" id="svDonut"><div class="studio-donut-center"><span id="svDonutVal">—</span><small>operativas</small></div></div><div class="studio-legend"><span><i style="background:#159b7c"></i>Operativas</span><span><i style="background:#e4a24b"></i>Advertencia</span><span><i style="background:#d8574c"></i>Críticas</span></div><div class="studio-insight" id="svInsight">Las clasificaciones proceden de un modelo experimental y no sustituyen la inspección mecánica.</div></div>
+            <div class="studio-kpi-stack">
+              <div class="studio-kpi-card" style="--tone:#159b7c"><small>Unidades operativas</small><strong id="svOper">—</strong><span>Flota demostrativa</span></div>
+              <div class="studio-kpi-card" style="--tone:#d8574c"><small>Unidades críticas</small><strong id="svCrit">—</strong><span>Requieren atención prioritaria</span></div>
+              <div class="studio-kpi-card" style="--tone:#4a85b4"><small>Órdenes abiertas</small><strong id="svOT">—</strong><span>Mantenimiento sin cierre</span></div>
+              <div class="studio-kpi-card" style="--tone:#e4a24b"><small>Cobertura de rutas</small><strong id="svRoutes">—</strong><span>Supuesto de una ruta por unidad</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="studio-split"><div class="studio-panel"><div class="studio-heading"><div><h2>Disponibilidad por unidad</h2><p class="studio-muted">Escala de 0–100 %</p></div></div><div class="studio-hbars" id="svBars"></div><p class="studio-note">La disponibilidad incorpora el tiempo de parada registrado en las órdenes simuladas.</p></div><div class="studio-panel"><div class="studio-heading"><div><h2>Órdenes por prioridad</h2><p class="studio-muted">Pendientes y en atención</p></div></div><div class="studio-hbars" id="svPriority"></div><div class="studio-insight">Los gráficos y tablas se actualizan cuando cambia el estado del prototipo, por ejemplo durante la demostración C-03.</div></div></div>
+
+        <div class="studio-split"><div class="studio-panel dark"><div class="studio-heading"><div><h2>Mapa de prioridad por componente</h2><p class="studio-muted">Matriz rápida para explicar dónde se concentra el riesgo operativo.</p></div></div><div class="studio-heat" id="svHeat"></div><p class="studio-note">Mayor intensidad de color = mayor concentración de órdenes registradas en ese componente y prioridad.</p></div><div class="studio-panel"><div class="studio-heading"><div><h2>Lectura gerencial</h2><p class="studio-muted">Narrativa de apoyo para sustentar el tablero.</p></div></div><div class="studio-insight" id="svNarrative">—</div><div class="studio-kpi-stack" style="margin-top:12px"><div class="studio-kpi-card" style="--tone:#355fbe"><small>Confianza promedio del modelo</small><strong id="svConfMean">—</strong><span>Promedio simple de las siete unidades</span></div><div class="studio-kpi-card" style="--tone:#7a50c5"><small>Unidades con advertencia o crítica</small><strong id="svWatch">—</strong><span>Requieren seguimiento o intervención</span></div></div></div></div>
+      </section>
+
       <!-- ================= F. DEMOSTRACIÓN ================= -->
       <section class="view" id="v-demo" aria-labelledby="h-demo" hidden>
         <div class="vhead">
-          <div><div class="eyebrow">Sustentación</div><h1 id="h-demo">Demostración guiada: fuga hidráulica en C-03</h1><p class="lead">Recorrido de unos cinco minutos por todo el sistema. Cada paso ejecuta una acción real del prototipo y lleva a la pantalla donde se observa su efecto.</p></div>
+          <div><div class="eyebrow">Sustentación</div><h1 id="h-demo">Demostración guiada: fuga hidráulica en C-03</h1><p class="lead">Recorrido integral de C-03 por mantenimiento, IA, IPIM, gemelo digital, continuidad de rutas, impacto ambiental, huella de carbono, simulador y observatorio. Las decisiones hipotéticas no alteran los registros de mantenimiento.</p></div>
         </div>
         <div class="g-demo">
           <div class="card">
-            <div class="card-h"><div><h2>Pasos de la demostración</h2><p>Tiempo sugerido entre paréntesis · total ≈ 5 min</p></div></div>
+            <div class="card-h"><div><h2>Pasos de la demostración</h2><p>Tiempo sugerido por paso · recorrido integral ≈ 9–11 min</p></div></div>
             <div class="dsteps" id="dSteps"></div>
           </div>
+          <div class="card" style="grid-column:1/-1;background:linear-gradient(110deg,#102944,#155b70);color:#fff;border-color:#155b70"><div class="card-h"><div><h2 style="color:#fff">Una historia, cuatro momentos</h2><p style="color:#cde3eb">Las pantallas abren automáticamente al ejecutar cada paso. Los módulos permanecen conectados al escenario C-03.</p></div><span class="badge b-sim">Prototipo académico</span></div><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px"><div><b>01 · Diagnóstico</b><p style="font-size:.8rem;color:#dceaf2">Flota → incidencia → orden → IA.</p></div><div><b>02 · Decisión</b><p style="font-size:.8rem;color:#dceaf2">IPIM → gemelo → contingencia.</p></div><div><b>03 · Impacto</b><p style="font-size:.8rem;color:#dceaf2">Observatorio → ambiente → huella → escenarios.</p></div><div><b>04 · Recuperación</b><p style="font-size:.8rem;color:#dceaf2">Mantenimiento → gemelo → KPIs.</p></div></div></div>
           <div style="display:grid;gap:18px;align-content:start">
             <div class="card">
               <h2>Antes de empezar</h2>
               <div class="banner info"><svg class="i"><use href="#i-reset"/></svg><span>El paso 1 restablece la simulación a su estado inicial. Las acciones previas se pierden.</span></div>
-              <p class="foot">Use el panel flotante para avanzar. Puede minimizarlo para mostrar la pantalla completa, reiniciar la demostración o salir en cualquier momento.</p>
+              <p class="foot">Son 17 pasos vinculados al mismo escenario C-03. Use el panel flotante para avanzar. Puede minimizarlo para mostrar la pantalla completa, reiniciar la demostración o salir en cualquier momento.</p>
               <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="btnDemo"><svg class="i"><use href="#i-play"/></svg>Iniciar demostración</button></div>
             </div>
             <div class="card">
               <h2>Qué observar</h2>
-              <div class="tdef"><span class="badge b-ia" style="justify-self:start">IA</span>Pasos 5 y 6: el modelo clasifica dos ciclos reales del banco de pruebas (fuga débil y fuga severa).</div>
-              <div class="tdef"><span class="badge b-auto" style="justify-self:start">Automatización</span>Pasos 3, 4, 6, 7 y 9: reglas, orden automática e indicadores.</div>
-              <div class="tdef"><span class="badge b-sim" style="justify-self:start">Simulación</span>La asignación de los ciclos a C-03 y los supuestos ambientales.</div>
+              <div class="tdef"><span class="badge b-ia" style="justify-self:start">IA</span>Pasos 5 y 6: el modelo clasifica dos ciclos experimentales del banco de pruebas (fuga débil y fuga severa).</div>
+              <div class="tdef"><span class="badge b-auto" style="justify-self:start">Automatización</span>Reglas de clasificación, creación y resolución de órdenes, cálculo de IPIM e indicadores sincronizados.</div>
+              <div class="tdef"><span class="badge b-sim" style="justify-self:start">Simulación</span>La asignación de ciclos a C-03, la cobertura hipotética de rutas y las proyecciones de impacto.</div>
             </div>
           </div>
         </div>
@@ -996,16 +1322,34 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     const L = UNITS.filter(u => filtroFlota === 'all' || K.lv[u] === Number(filtroFlota));
     $('fCards').innerHTML = L.length ? L.map(u => {
       const st = S.unidades[u], l = K.lv[u], ev = eventosU(u)[0], ou = otsU(u), oa = ou.filter(o => o.estado !== 'resuelta').length, c = st.pred.clase;
+      const availability=Math.max(0,Math.min(100,dispU(u)));
+      const unitOut=K.F.includes(u);
       return `<article class="ucard l${l}" data-u="${u}">
-        <div class="uc-h"><div class="uc-ico">${ico('truck')}</div><div><div class="id">${u}</div><div class="ty">Compactadora</div></div><span class="pill ${NIV[l][1]}">${NIV[l][0]}</span></div>
-        <div class="uc-b">
-          <div class="kv"><span>Estado operativo</span><span>${K.F.includes(u) ? '<b class="c2">Fuera de ruta</b>' : 'En ruta'}</span></div>
-          <div class="kv"><span>Condición hidráulica</span><span><span class="dot d${c}"></span>${CLS[c]} · ${fmt(st.pred.confianza * 100, 0)} %</span></div>
-          <div class="kv"><span>Disponibilidad (mes)</span><span class="num">${fmt(dispU(u), 1)} %</span></div>
-          <div class="kv"><span>Horas fuera de servicio</span><span class="num">${fmt(paradaU(u), 1)} h</span></div>
+        <div class="uc-topline"></div>
+        <div class="uc-hero">
+          <div class="uc-hero-head">
+            <div class="uc-ident">
+              <span class="uc-ident-icon">${ico('truck')}</span>
+              <div><div class="uc-name">${u}</div><div class="uc-subname">Unidad compactadora</div></div>
+            </div>
+            <span class="uc-state">${NIV[l][0]}</span>
+          </div>
+          <div class="uc-mainmetric">
+            <div><div class="metric-caption">Disponibilidad mensual</div><div class="metric-value">${fmt(availability,1)}<span style="font-size:1rem;letter-spacing:0">%</span></div><div class="metric-hint">Meta de referencia ≥ 90 %</div></div>
+            <div class="uc-ring" style="--pct:${availability}" aria-label="Disponibilidad ${fmt(availability,1)} por ciento"><div class="uc-ring-inner">${availability>=90?'En meta':'Revisar'}</div></div>
+          </div>
         </div>
-        <div class="uc-ev"><span class="w">Último evento · ${esc(fechaHora(ev && ev.t))}</span><span>${esc(ev ? ev.x : 'Sin eventos en la simulación')}</span></div>
-        <div class="uc-f"><span class="ots">${oa} OT abiertas · ${ou.length} en total</span><button type="button" class="btn sec sm" data-det="${u}">Ver detalle</button></div>
+        <div class="uc-quickstats">
+          <div class="uc-quickstat"><small>Situación operativa</small><strong class="${unitOut?'status-critical':''}">${unitOut?'Fuera de ruta':'En ruta'}</strong></div>
+          <div class="uc-quickstat"><small>Condición hidráulica</small><strong>${CLS[c]} · ${fmt(st.pred.confianza*100,0)} %</strong></div>
+          <div class="uc-quickstat"><small>Tiempo detenido</small><strong>${fmt(paradaU(u),1)} h</strong></div>
+          <div class="uc-quickstat"><small>Órdenes abiertas</small><strong>${oa} OT</strong></div>
+        </div>
+        <div class="uc-activity">
+          <span class="timestamp">Última actividad · ${esc(fechaHora(ev && ev.t))}</span>
+          <span class="description">${esc(ev ? ev.x : 'Sin eventos en la simulación')}</span>
+        </div>
+        <div class="uc-bottom"><span class="uc-count"><b>${ou.length}</b> órdenes registradas</span><button type="button" data-det="${u}">Explorar unidad ↗</button></div>
       </article>`;
     }).join('') : `<div class="card"><div class="empty">${ico('inbox')}<b>No hay unidades en este nivel</b><span>Cambie el filtro para ver otras compactadoras.</span></div></div>`;
   }
@@ -1133,20 +1477,50 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   }
   function hcEvoSvg(porM) {
     if (!porM.length) return '<div class="empty">Sin registros de combustible.</div>';
-    const W = 600, H = 220, L = 46, B = 40, T = 24, bw = Math.min(70, (W - L - 20) / porM.length * 0.55), mx = Math.max(...porM.map(p => p.co2e / 1000)) * 1.15 || 1;
-    const x = i => L + (i + 0.5) * (W - L - 20) / porM.length, y = v => T + (H - T - B) * (1 - v / mx);
-    let g = `<line x1="${L}" y1="${H - B}" x2="${W - 10}" y2="${H - B}" stroke="var(--line-2)"/>`;
-    porM.forEach((p, i) => { const v = p.co2e / 1000; g += `<rect x="${x(i) - bw / 2}" y="${y(v)}" width="${bw}" height="${H - B - y(v)}" rx="3" fill="#2f6f9f"/><text class="vl" x="${x(i)}" y="${y(v) - 6}" text-anchor="middle">${fmt(v, 1)} t</text><text x="${x(i)}" y="${H - B + 16}" text-anchor="middle">${mesTxt(p.m)}</text><text x="${x(i)}" y="${H - B + 31}" text-anchor="middle">${p.int == null ? '–' : fmt(p.int, 1) + ' kg/t'}</text>`; });
-    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Emisiones mensuales: ${porM.map(p => mesTxt(p.m) + ' ' + fmt(p.co2e / 1000, 1) + ' t CO2e').join(', ')}">${g}</svg>`;
+    const W = 660, H = 300, L = 54, R = 20, B = 54, T = 18;
+    const innerW = W - L - R, innerH = H - T - B;
+    const barW = Math.min(72, innerW / porM.length * 0.42);
+    const maxT = Math.max(...porM.map(p => p.co2e / 1000)) * 1.22 || 1;
+    const maxI = Math.max(...porM.map(p => p.int || 0)) * 1.22 || 1;
+    const x = i => L + (i + .5) * innerW / porM.length;
+    const yT = v => T + innerH * (1 - v / maxT);
+    const yI = v => T + innerH * (1 - v / maxI);
+    let g = `<defs><linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b7fbd"/><stop offset="100%" stop-color="#244f7b"/></linearGradient></defs>`;
+    [0,.25,.5,.75,1].forEach(n=>{ const yy=T+innerH*n; g += `<line class="grid" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/>`; });
+    g += `<line class="axis" x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}"/>`;
+    let line='';
+    porM.forEach((p,i)=>{
+      const tv = p.co2e/1000, xi = x(i), yy=yT(tv), bh = H-B-yy, yi=yI(p.int||0);
+      g += `<rect class="bar-soft" x="${xi-barW/2}" y="${yy}" width="${barW}" height="${bh}" rx="10"/>`;
+      g += `<rect class="bar-grad" x="${xi-barW/2}" y="${yy}" width="${barW}" height="${bh}" rx="10"/>`;
+      g += `<text class="value" x="${xi}" y="${yy-10}" text-anchor="middle">${fmt(tv,1)} t</text>`;
+      g += `<text x="${xi}" y="${H-B+18}" text-anchor="middle">${mesTxt(p.m)}</text>`;
+      g += `<text x="${xi}" y="${H-B+34}" text-anchor="middle">${p.int == null ? '–' : fmt(p.int,1)+' kg/t'}</text>`;
+      line += `${i?'L':'M'} ${xi} ${yi} `;
+      g += `<circle class="dot-int" cx="${xi}" cy="${yi}" r="5"/>`;
+    });
+    g += `<path class="line-int" d="${line.trim()}"/>`;
+    g += `<text class="titlev" x="${L}" y="${T+4}">CO₂e mensual</text><text x="${W-120}" y="${T+4}">Intensidad kg/t</text>`;
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Emisiones mensuales: ${porM.map(p => mesTxt(p.m) + ' ' + fmt(p.co2e / 1000, 1) + ' t CO2e').join(', ')}">${g}</svg><div class="hc-note">Las columnas muestran t CO₂e por mes y la línea celeste muestra la intensidad de emisiones por tonelada recolectada.</div>`;
   }
   function hcCmpSvg(porU, media) {
     if (!porU.length) return '<div class="empty">Sin registros en el periodo.</div>';
-    const W = 600, rowH = 28, L = 54, R = 92, H = porU.length * rowH + 22, vals = porU.map(p => p.int || 0), mx = Math.max(...vals, media || 0) * 1.08 || 1;
+    const W = 660, rowH = 44, L = 64, R = 76, H = porU.length * rowH + 54;
+    const vals = porU.map(p => p.int || 0), mx = Math.max(...vals, media || 0) * 1.15 || 1;
     let g = '';
-    if (media) { const xm = L + (W - L - R) * media / mx; g += `<line x1="${xm}" y1="2" x2="${xm}" y2="${H - 12}" stroke="var(--ink-2)" stroke-dasharray="4 3"/><text class="halo" x="${xm}" y="${H}" text-anchor="middle">media ${fmt(media, 1)}</text>`; }
-    porU.forEach((p, i) => { const yy = 6 + i * rowH, w = (W - L - R) * (p.int || 0) / mx, alto = media && p.int > media * 1.1;
-      g += `<text class="id" x="0" y="${yy + 15}">${p.u}</text><rect x="${L}" y="${yy + 3}" width="${Math.max(w, 1)}" height="16" rx="3" fill="${alto ? 'var(--warn)' : 'var(--good)'}"/><text class="vl" x="${w > 90 ? L + w - 6 : L + w + 6}" y="${yy + 15}" text-anchor="${w > 90 ? 'end' : 'start'}" style="${w > 90 ? 'fill:#fff' : ''}">${p.int == null ? '–' : fmt(p.int, 1) + ' kg/t'}</text>`; });
-    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Intensidad por compactadora: ${porU.map(p => p.u + ' ' + fmt(p.int, 1) + ' kg CO2e por tonelada').join(', ')}">${g}</svg>`;
+    if (media) {
+      const xm = L + (W - L - R) * media / mx;
+      g += `<line class="grid" x1="${xm}" y1="16" x2="${xm}" y2="${H-28}"/><text x="${xm}" y="${H-8}" text-anchor="middle">media ${fmt(media,1)}</text>`;
+    }
+    porU.forEach((p, i) => {
+      const yy = 16 + i * rowH, w = (W - L - R) * (p.int || 0) / mx, alto = media && p.int > media * 1.1;
+      const fill = alto ? '#dd9928' : '#0f8f83';
+      g += `<text class="titlev" x="0" y="${yy+21}">${p.u}</text>`;
+      g += `<rect x="${L}" y="${yy+8}" width="${W-L-R}" height="16" rx="8" fill="#edf3f7"/>`;
+      g += `<rect x="${L}" y="${yy+8}" width="${Math.max(w,8)}" height="16" rx="8" fill="${fill}"/>`;
+      g += `<text class="value" x="${Math.min(L+w-10, W-R-4)}" y="${yy+20}" text-anchor="end" style="fill:#fff">${p.int == null ? '–' : fmt(p.int,1)+' kg/t'}</text>`;
+    });
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Intensidad por compactadora: ${porU.map(p => p.u + ' ' + fmt(p.int, 1) + ' kg CO2e por tonelada').join(', ')}">${g}</svg><div class="hc-note">Las barras ámbar superan en más de 10 % la intensidad media de la flota; esa condición amerita revisión operativa.</div>`;
   }
   function renderHC() {
     if (!$('hcPer')) return;
@@ -1233,7 +1607,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   }
   function renderAll() {
     const K = calc(), A = amb(K.F);
-    renderResumen(K, A); renderFlota(K); renderMant(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K);
+    renderResumen(K, A); renderFlota(K); renderMant(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K); renderImpactLab(); renderIPIM(); renderStudio(K); renderTwin(K);
     $('clock').textContent = 'Simulación · ' + fechaHora(new Date().toISOString());
     return { K, A };
   }
@@ -1251,7 +1625,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   $('confNo').addEventListener('click', () => cerrarConf(false));
 
   // ---------- navegación ----------
-  const VIEWS = { resumen: 'Resumen ejecutivo', flota: 'Gestión de flota', mantenimiento: 'Mantenimiento y órdenes de trabajo', analisis: 'Análisis inteligente', ambiental: 'Impacto ambiental', huella: 'Huella de carbono de la flota', demo: 'Demostración guiada C-03' };
+  const VIEWS = { resumen: 'Resumen ejecutivo', flota: 'Gestión de flota', mantenimiento: 'Mantenimiento y órdenes de trabajo', analisis: 'Análisis inteligente', ambiental: 'Impacto ambiental', huella: 'Huella de carbono de la flota', decisiones: 'Centro de decisiones', impacto: 'Simulador de impacto', gemelo: 'Gemelo operativo', studio: 'Observatorio visual', demo: 'Demostración guiada C-03' };
   let vista = 'resumen';
   function ir(v, sinScroll) {
     if (!VIEWS[v]) v = 'resumen';
@@ -1261,7 +1635,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     if (location.hash !== '#' + v) { try { history.replaceState(null, '', '#' + v); } catch (e) {} }
     menu(false); if (!sinScroll) window.scrollTo({ top: 0 });
     if (v === 'resumen') $('rDispChart').innerHTML = dispChart(calc().lv);
-    if (v === 'huella') renderHC();
+    if (v === 'gemelo') renderTwin(calc()); if (v === 'huella') renderHC(); if (v === 'decisiones' || v === 'impacto') renderImpactLab();
   }
   let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (vista === 'resumen') $('rDispChart').innerHTML = dispChart(calc().lv); if (vista === 'huella') renderHC(); }, 150); });
   function menu(abrir) { $('side').classList.toggle('open', abrir); $('scrim').hidden = !abrir; $('btnMenu').setAttribute('aria-expanded', abrir ? 'true' : 'false'); }
@@ -1414,15 +1788,36 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     { t: 'Aparición de la alerta', tm: '0:35', d: 'Un ciclo con fuga severa genera una orden automática.',
       g: 'Señale la <b>alerta crítica</b>: el modelo detecta fuga severa y el sistema genera, sin intervención, una orden de prioridad alta.',
       run: () => { const r = leerCiclo('C-03', null, DEMO_SEVERA); demo.ot2 = r.ot ? r.ot.id : null; renderAll(); avisoLectura('C-03', r); spot('#cRes'); return r.msg; } },
+    { t: 'IPIM: prioridad de intervención municipal', tm: '0:35', d: 'Explica por qué C-03 requiere atención crítica tras la lectura severa.',
+      g: 'En <b>Centro de decisiones</b> explique la puntuación IPIM, sus cuatro factores y la regla de seguridad. Es un índice experimental con pesos editables; no está calibrado con datos municipales.',
+      run: () => { $('ipimUnit').value='C-03'; ir('decisiones'); renderIPIM(); spot('#ipimRing'); const r=ipimCalc('C-03',ipimInput().weights); return `C-03: IPIM ${r.score===null?'sin definir':r.score+'/100'}; factores gravedad ${r.factors[0]}, continuidad ${r.factors[1]}, parada ${r.factors[2]}, ambiental ${r.factors[3]}. ${r.critical?'Condición crítica: revisión prioritaria por seguridad.':'Prioridad orientativa.'}`; } },
+    { t: 'Gemelo digital: interrupción de la ruta', tm: '0:30', d: 'Visualiza C-03 fuera de ruta y una ruta académica afectada.',
+      g: 'En <b>Gemelo operativo</b>, observe cómo el mismo estado de C-03 se replica en el tablero: la ruta R-03 figura afectada. No es un mapa ni una conexión GPS real.',
+      run: () => { twinUnit='C-03'; twinPlan='base'; ir('gemelo'); renderTwin(calc()); spot('#twinFleet'); const K=calc(); return `Gemelo sincronizado: C-03 ${K.F.includes('C-03')?'fuera de ruta':'en ruta'}; cobertura base ${K.cub}/7; rutas académicas R-01 a R-07.`; } },
+    { t: 'Gemelo digital: evaluar contingencia', tm: '0:35', d: 'Compara retiro preventivo y cobertura alternativa sin alterar las órdenes.',
+      g: 'Seleccione el escenario <b>Cobertura alternativa</b>. La recuperación es condicional: supone que hay capacidad en otra unidad o turno. Contraste con el escenario base.',
+      run: () => { twinUnit='C-03'; twinPlan='contingencia'; ir('gemelo'); renderTwin(calc()); spot('#twinOptions'); const K=calc(); return `Cobertura base real del prototipo: ${K.cub}/7. Cobertura hipotética con capacidad adicional para una ruta: ${Math.min(7,K.cub+1)}/7. No se ha registrado reasignación ni reparación.`; } },
     { t: 'Cambio de los indicadores operativos', tm: '0:30', d: 'C-03 sale de ruta y los indicadores se recalculan.',
       g: 'Compare con el paso 1: <b>rutas atendidas, disponibilidad, MTBF</b> y órdenes pendientes cambian automáticamente.',
       run: () => { ir('resumen'); spot('#cKpis'); const K = calc(); return `Rutas atendidas: ${K.cub} de 7. Disponibilidad: ${fmt(K.disp, 1)} %. MTBF: ${fmt(K.mtbf, 0)} h. Órdenes pendientes: ${K.ab.length}. Unidades críticas: ${K.crit}.`; } },
+    { t: 'Observatorio visual de la operación', tm: '0:30', d: 'Explora el estado de las siete unidades y las órdenes por prioridad.',
+      g: 'En <b>Observatorio visual</b>, observe la unidad C-03 y las prioridades, con los mismos datos de la falla. Los gráficos sirven para detectar cambios, no representan monitoreo en vivo.',
+      run: () => { ir('studio'); renderStudio(calc()); spot('#svBars'); const K=calc(); return `Observatorio: ${K.oper}/7 compactadoras en operación, ${K.ab.length} órdenes abiertas y ${K.cub}/7 rutas cubiertas en el escenario.`; } },
     { t: 'Impacto ambiental estimado', tm: '0:30', d: 'Efecto en la recolección, el diésel y el CO₂.',
       g: 'Aclare que son <b>estimaciones con supuestos</b> editables, no mediciones de El Tambo.',
       run: () => { ir('ambiental'); spot('#cAmbK'); const A = amb(calc().F); return `Residuos sin recoger estimados: ${fmt(A.tSin, 1)} t. Diésel: ${fmt(A.diesel, 0)} L/día. CO₂ emitido: ${fmt(A.co2, 1)} t/mes; CO₂ evitado frente a la referencia: ${fmt(A.ev, 2)} t/mes. Estimación con supuestos.`; } },
+    { t: 'Huella de carbono: alcance y límites', tm: '0:30', d: 'Revisa emisiones calculadas por consumo de diésel.',
+      g: 'En <b>Huella de carbono</b>, distinga los registros de consumo simulados de las emisiones realmente medidas. El módulo no calcula toda la huella municipal.',
+      run: () => { ir('huella'); renderHC(); spot('#hcK'); return `El módulo presenta emisiones por diésel, intensidad por tonelada y comparación entre compactadoras. Los registros iniciales son simulados y no dependen causalmente de la falla C-03.`; } },
+    { t: 'Simulador de impacto: hipótesis', tm: '0:30', d: 'Compara escenarios de costo, rutas-día y CO₂e.',
+      g: 'En <b>Simulador de impacto</b>, cambie un supuesto si lo desea. Aclare que representa un análisis hipotético, no ahorros causados o comprobados por FlotaIA.',
+      run: () => { ir('impacto'); renderImpactLab(); spot('#ipSavings'); return 'Los resultados comparan un escenario reactivo con uno supuesto de reducción de días de parada. No son beneficios medidos ni predicciones validadas en campo.'; } },
     { t: 'Atención y cierre de la orden', tm: '0:30', d: 'Las órdenes de C-03 pasan a En atención y luego a Resuelta.',
-      g: 'Muestre el <b>seguimiento</b>: la orden pasa a En atención y se cierra con sus horas reales de reparación y fuera de servicio.',
+      g: 'Muestre el <b>seguimiento</b>: la orden pasa a En atención y se cierra con las horas simuladas de reparación y fuera de servicio.',
       run: () => { ir('mantenimiento'); $('flU').value = ''; $('flP').value = ''; $('flE').value = ''; if (demo.ot2) { atender(demo.ot2); resolver(demo.ot2, 6, 8); } if (demo.ot1) { atender(demo.ot1); resolver(demo.ot1, 1, 0); } ultimoOt = demo.ot2; renderAll(); setTimeout(() => spot('#cTabla'), 60); const o2 = S.ots.find(o => o.id === demo.ot2), o1 = S.ots.find(o => o.id === demo.ot1); return `${o2 ? o2.codigo : 'La orden de la bomba'} resuelta con 6 h de reparación y 8 h fuera de servicio; ${o1 ? o1.codigo : 'la orden del chofer'} resuelta con 1 h. Tras la reparación, la nueva lectura de C-03 no muestra fuga.`; } },
+    { t: 'Gemelo digital tras el mantenimiento', tm: '0:30', d: 'Verifica que C-03 vuelve a ruta en el estado base.',
+      g: 'Vuelva al <b>Gemelo operativo</b>. El escenario se restablece a estado base; la recuperación ahora surge del cierre de órdenes, no de la contingencia hipotética.',
+      run: () => { twinUnit='C-03'; twinPlan='base'; ir('gemelo'); renderTwin(calc()); spot('#twinFleet'); const K=calc(); return `C-03: ${K.F.includes('C-03')?'continúa fuera de ruta':'nuevamente en ruta'}. Cobertura base ${K.cub}/7. Contingencia hipotética desactivada.`; } },
     { t: 'Actualización final de los indicadores', tm: '0:30', d: 'Resumen ejecutivo con los valores finales.',
       g: 'Cierre con el <b>resumen ejecutivo</b>: la flota vuelve a operar completa y el MTTR refleja la reparación registrada.',
       run: () => { ir('resumen'); spot('#cKpis'); const K = calc(); return `Rutas atendidas: ${K.cub} de 7. Disponibilidad: ${fmt(K.disp, 1)} %. MTBF: ${fmt(K.mtbf, 0)} h. MTTR: ${fmt(K.mttr, 1)} h. Órdenes pendientes: ${K.ab.length}. Fin de la demostración.`; } },
@@ -1430,7 +1825,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   function pintarDemo() {
     const n = demo.paso, N = PASOS.length, h = demo.hecho, vis = !$('dock').hidden;
     $('dSteps').innerHTML = PASOS.map((p, i) => `<div class="ds ${i < n ? 'done' : i === n && vis ? 'now' : ''}"><span class="n">${i < n ? '✓' : i + 1}</span><span class="t">${esc(p.t)}</span><span class="tm">${p.tm}</span><span class="d">${esc(p.d)}</span></div>`).join('');
-    $('dkPP').textContent = h >= 0 ? `Paso ${h + 1} de ${N}` : `${N} pasos · ≈ 5 min`;
+    $('dkPP').textContent = h >= 0 ? `Paso ${h + 1} de ${N}` : `${N} pasos · 9–11 min`;
     $('dkBar').style.width = (n / N * 100) + '%';
     if (h < 0) { $('dkTitle').textContent = 'Demostración guiada: fuga hidráulica en C-03'; $('dkGui').innerHTML = 'Pulse <b>«Ejecutar paso 1»</b>. Cada paso realiza una acción en el sistema y abre la pantalla donde se observa su efecto. Aquí aparecerá qué explicar en cada momento.'; $('dkOut').hidden = true; }
     else { $('dkTitle').textContent = `${h + 1}. ${PASOS[h].t}`; $('dkGui').innerHTML = PASOS[h].g; $('dkOut').hidden = false; $('dkOut').textContent = demo.msg; }
@@ -1448,6 +1843,181 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   $('dkReset').addEventListener('click', async () => { if (await confirmar('Reiniciar la demostración', 'La demostración volverá al paso 1 y la simulación se restablecerá al ejecutarlo.', 'Reiniciar')) { demoIniciar(); } });
   $('dkClose').addEventListener('click', demoSalir);
   $('dkMin').addEventListener('click', () => { const m = $('dock').classList.toggle('min'); $('dkMin').innerHTML = ico(m ? 'max' : 'min'); $('dkMin').setAttribute('aria-label', m ? 'Expandir panel' : 'Minimizar panel'); });
+
+
+  // ---------- módulos de innovación: reglas explicables y escenarios ----------
+  const pesosImpacto = { days:8, cost:850, prev:25, ia:45, routes:1, co2:12 };
+  const imFmt = n => new Intl.NumberFormat('es-PE',{maximumFractionDigits:1}).format(n);
+  const imSoles = n => 'S/ ' + new Intl.NumberFormat('es-PE',{maximumFractionDigits:0}).format(n);
+  const impactIds={days:'ipDays',cost:'ipCost',prev:'ipPrev',ia:'ipIA',routes:'ipRoutes',co2:'ipCO2'};
+  function impactValues(){const v={};Object.keys(pesosImpacto).forEach(k=>v[k]=Number($(impactIds[k]).value));return v;}
+  function impactScenario(v,pct){const d=v.days*(1-pct/100);return {d,c:d*v.cost,r:d*v.routes};}
+
+  // Gemelo operativo: replica las mismas variables del escenario, sin modificar S.
+  let twinUnit='C-03', twinPlan='base';
+  function renderTwin(K){
+    if(!$('twinFleet'))return;
+    const unit=twinUnit, actualOut=K.F.includes(unit), r=ipimCalc(unit,ipimInput().weights);
+    const base=K.cub, removal=actualOut?base:Math.max(0,base-1);
+    // Un máximo de una ruta-día adicional: capacidad externa supuesta, jamás comprobada.
+    const recovered=Math.min(7,removal+1);
+    const projected=twinPlan==='retirar'?removal:twinPlan==='contingencia'?recovered:base;
+    $('twinFleet').innerHTML=UNITS.map(u=>{const lev=K.lv[u];return `<button type="button" class="twin-unit ${lev===2?'crit':lev===1?'warn':''} ${u===unit?'selected':''}" data-twin-unit="${u}" aria-pressed="${u===unit}">${ico('truck')}<strong>${u}</strong><small>${K.F.includes(u)?'Fuera de ruta':lev===1?'Advertencia':'En ruta'}</small></button>`}).join('');
+    $('twinBase').textContent=base+'/7'; $('twinProjected').textContent=projected+'/7';$('twinIPIM').textContent=r.score==null?'—':r.score+'/100';$('twinOT').textContent=r.open;
+    $('twinBaseOption').textContent=base+'/7';$('twinRemoveOption').textContent=removal+'/7';$('twinRecoverOption').textContent=recovered+'/7';
+    document.querySelectorAll('[data-twin-plan]').forEach(b=>{b.classList.toggle('selected',b.dataset.twinPlan===twinPlan);b.setAttribute('aria-pressed',b.dataset.twinPlan===twinPlan?'true':'false')});
+    const routeOut=new Set(K.F);if(twinPlan!=='base')routeOut.add(unit);
+    const recoverTarget=twinPlan==='contingencia' ? (routeOut.has(unit)?unit:UNITS.find(u=>routeOut.has(u))) : null;
+    $('twinRoutes').innerHTML=UNITS.map((u,i)=>{const missing=routeOut.has(u);const rec=missing&&u===recoverTarget;return `<span class="${rec?'recovered':missing?'missing':''}" title="${rec?'Cobertura alternativa supuesta':missing?'Sin cobertura':'Atendida'}">R-0${i+1}<small style="display:block;font-weight:400">${rec?'Hipótesis':missing?'Afectada':'Cubierta'}</small></span>`}).join('');
+    const narrative=twinPlan==='base'?'Estado base: '+base+' de 7 rutas atendidas. No se ha aplicado ninguna contingencia.':twinPlan==='retirar'?'Si '+unit+' se retira, la cobertura estimada sería '+removal+' de 7 rutas. La orden o condición actual puede haberla retirado ya.':'Con una capacidad alternativa hipotética de una ruta, la cobertura sería '+recovered+' de 7. Requiere verificación de vehículos, turnos y recursos.';
+    $('twinNarrative').textContent=narrative;
+    const c3=S.unidades['C-03'].pred.clase, c3open=S.ots.filter(o=>o.unidad==='C-03'&&o.estado!=='resuelta').length;
+    $('twinC3Status').textContent=`C-03: ${['sin fuga','fuga débil','fuga severa'][c3]} · ${c3open} órdenes pendientes · ${K.F.includes('C-03')?'fuera de ruta':'en ruta'} · cobertura base ${base}/7. Este panel y el IPIM leen el mismo estado interno de la demostración.`;
+  }
+  $('twinFleet').addEventListener('click',e=>{const b=e.target.closest('[data-twin-unit]');if(b){twinUnit=b.dataset.twinUnit;renderTwin(calc());}});
+  $('twinOptions').addEventListener('click',e=>{const b=e.target.closest('[data-twin-plan]');if(b){twinPlan=b.dataset.twinPlan;renderTwin(calc());}});
+  $('twinReset').addEventListener('click',()=>{twinPlan='base';renderTwin(calc());});
+  $('twinDemo').addEventListener('click',()=>{ir('demo');$('btnDemo').click();});
+  $('twinIPIMGo').addEventListener('click',()=>{$('ipimUnit').value=twinUnit;ir('decisiones');renderIPIM();});
+
+  // IPIM: índice ponderado de cuatro dimensiones, sin datos municipales observados.
+  const ipimNames=['Gravedad mecánica','Continuidad de rutas','Indisponibilidad','Impacto ambiental potencial'];
+  const ipimDefault=[40,30,20,10];
+  function ipimInput(){
+    const weights=ipimDefault.map((_,i)=>Number($('ipimW'+i).value));
+    return {unit:$('ipimUnit').value||'C-03',weights};
+  }
+  function ipimCalc(u,weights){
+    const K=calc(), condition=nivel(u), open=S.ots.filter(o=>o.unidad===u&&o.estado!=='resuelta');
+    const critical=open.some(o=>o.prioridad==='alta');
+    const out=K.F.includes(u), downtime=paradaU(u);
+    // Categorías conservadoras que no aparentan precisión empírica.
+    const factors=[condition===2?100:condition===1?55:critical?85:10, out?100:open.length?45:10,Math.min(100,Math.round(downtime/8*100)),out?75:condition===1?40:20];
+    const sum=weights.reduce((a,b)=>a+b,0),score=sum?Math.round(factors.reduce((n,v,i)=>n+v*weights[i],0)/sum):null;
+    return {score,factors,condition,open:open.length,out,downtime,coverage:K.cub/7*100,critical:condition===2||critical};
+  }
+  function renderIPIM(){
+    if(!$('ipimUnit'))return;
+    if(!$('ipimUnit').options.length){$('ipimUnit').innerHTML=UNITS.map(u=>'<option value="'+u+'">'+u+'</option>').join('');$('ipimUnit').value='C-03';}
+    const {unit,weights}=ipimInput(), result=ipimCalc(unit,weights), score=result.score;
+    const level=score===null?'Definir ponderación':result.critical?'Atención crítica por seguridad':score>=75?'Prioridad crítica':score>=50?'Prioridad alta':'Seguimiento programado';
+    $('ipimValue').textContent=score===null?'—':score;
+    $('ipimLevel').textContent=level;
+    $('ipimWhy').textContent=unit+' · '+(result.out?'Fuera de ruta':'En ruta')+' · '+result.open+' OT abiertas';
+    $('ipimRing').style.setProperty('--pct',score||0);
+    $('ipimRing').style.setProperty('--ring',result.critical||score>=75?'#ee7666':score>=50?'#f0ac40':'#22ba9a');
+    $('ipimFactors').innerHTML=result.factors.map((v,i)=>'<div class="ipim-factor"><small>'+ipimNames[i]+'</small><strong>'+v+' / 100</strong></div>').join('');
+    weights.forEach((w,i)=>{$('ipimW'+i+'Val').textContent=w+'%'});
+    const ws=weights.reduce((a,b)=>a+b,0);
+    $('ipimExplain').textContent='IPIM = suma de (factor × peso) / suma de pesos. Puntuación '+(score===null?'sin definir':score+'/100')+' para '+unit+'. '+(result.critical?'La condición crítica activa el criterio de revisión prioritaria independientemente del resultado ponderado.':'El resultado es orientativo y requiere validación técnica.')+' Pesos: '+weights.join(' / ')+' (total '+ws+'). Cobertura simulada actual: '+fmt(result.coverage,1)+'% ('+calc().cub+' de 7 rutas).';
+    const cases=[
+      ['Continuar hasta el mantenimiento programado','Mantiene la ruta asignada, pero conserva la exposición a una falla no resuelta.','Riesgo relativo: mayor',result.critical?90:45,'bad'],
+      ['Inspección preventiva','Retira temporalmente la unidad para revisión técnica y documentación de la intervención.','Riesgo controlado sujeto a diagnóstico',35,'warn'],
+      ['Inspección + cobertura alternativa','Además de la revisión, evalúa redistribuir el servicio con otra unidad disponible.','Continuidad potencialmente mejor',20,'good']
+    ];
+    $('ipimCases').innerHTML=cases.map(([name,desc,caption,pct,cls])=>'<article class="ipim-case '+cls+'"><strong>'+name+'</strong><p>'+desc+'</p><div class="bar"><i style="--width:'+pct+'%"></i></div><small>'+caption+' · comparación ilustrativa, no pronóstico</small></article>').join('');
+  }
+  ['ipimUnit','ipimW0','ipimW1','ipimW2','ipimW3'].forEach(id=>$(id).addEventListener(id==='ipimUnit'?'change':'input',renderIPIM));
+  $('ipimReset').addEventListener('click',()=>{ipimDefault.forEach((v,i)=>$('ipimW'+i).value=v);renderIPIM();});
+  $('ipimCSV').addEventListener('click',()=>{
+    const {weights}=ipimInput();const lines=['Unidad;IPIM;Gravedad;Rutas;Parada;Ambiental;Peso_gravedad;Peso_rutas;Peso_parada;Peso_ambiental',...UNITS.map(u=>{const r=ipimCalc(u,weights);return [u,r.score===null?'':r.score,...r.factors,...weights].join(';')})];
+    lines.push('AVISO: índice académico exploratorio sin validación con flota real ni ponderaciones aprobadas');
+    descargar('FlotaIA_IPIM_escenario.csv','text/csv;charset=utf-8','\uFEFF'+lines.join('\n'));
+  });
+  function renderImpactLab(){
+    const k=calc(), st=S.unidades['C-03'], n=st.pred.clase, open=S.ots.filter(o=>o.unidad==='C-03'&&o.estado!=='resuelta');
+    $('dcCondition').textContent=['Normal','Advertencia','Crítica'][n]; $('dcCondition').style.color=n===2?'var(--crit)':n===1?'var(--warn)':'var(--good)';
+    $('dcConfidence').textContent='Clasificación experimental · '+imFmt(st.pred.confianza*100)+' % (no calibrada en campo)';
+    $('dcOrders').textContent=String(open.length);$('dcRoutes').textContent=k.cub+' / 7';
+    const plans=[
+      ['Condición normal','Mantener revisión preventiva programada y registrar novedades en el sistema.','No representa autorización automática de circulación.'],
+      ['Advertencia hidráulica','Programar inspección de bomba y sellos; revisar registros y condiciones de operación.','El supervisor valida el plazo y documenta la intervención.'],
+      ['Condición crítica · revisión prioritaria','Proponer retiro preventivo de la unidad, inspección mecánica y evaluación de cobertura de la ruta.','La decisión de inmovilizar o reincorporar la unidad es humana.']
+    ];
+    $('dcAction').innerHTML='<h2>'+plans[n][0]+'</h2><p>'+plans[n][1]+'</p><p class="foot">'+plans[n][2]+'</p>';
+    const v=impactValues(), base=impactScenario(v,0), prev=impactScenario(v,v.prev), ia=impactScenario(v,v.ia);
+    const rows=[['Reactivo',base,0],['Preventivo',prev,v.prev],['FlotaIA · hipótesis',ia,v.ia]];
+    $('ipCards').innerHTML=rows.map(([label,x,p],i)=>'<article class="impact-scenario '+(i===2?'feature':'')+'"><h3>'+label+'</h3><span class="foot">Reducción supuesta: '+p+' %</span><strong>'+imSoles(x.c)+'</strong><small>Costo operacional modelado</small><div class="impact-bar"><i style="width:'+(base.c?100*x.c/base.c:0)+'%;background:'+(i===2?'#16846d':i===1?'#d69c44':'#537c9b')+'"></i></div><div class="kv"><span>Días de parada</span><span>'+imFmt(x.d)+'</span></div><div class="kv"><span>Rutas-día afectadas</span><span>'+imFmt(x.r)+'</span></div></article>').join('');
+    $('ipSavings').textContent=imSoles(base.c-ia.c);$('ipRecovered').textContent=imFmt(base.r-ia.r);$('ipCarbon').textContent=imFmt((base.d-ia.d)*v.co2)+' kg';
+    const tags={Days:' días',Cost:'',Prev:' %',IA:' %',Routes:' '+(v.routes===1?'ruta':'rutas'),CO2:' kg'};
+    ['Days','Cost','Prev','IA','Routes','CO2'].forEach(t=>{$('ip'+t+'Val').textContent=t==='Cost'?imSoles(v.cost):imFmt(v[t==='IA'?'ia':t==='CO2'?'co2':t.toLowerCase()])+tags[t]});
+  }
+  ['Days','Cost','Prev','IA','Routes','CO2'].forEach(k=>$('ip'+k).addEventListener('input',renderImpactLab));
+  $('ipReset').addEventListener('click',()=>{Object.entries(pesosImpacto).forEach(([key,val])=>{$(impactIds[key]).value=val});renderImpactLab()});
+  $('ipExport').addEventListener('click',()=>{
+    const v=impactValues(), ss=[['Reactivo',0],['Preventivo',v.prev],['FlotaIA (hipótesis)',v.ia]];
+    const lines=['Escenario;Reducción_sup_%;Días_parada;Costo_modelado_Soles;Rutas_día_afectadas;kg_CO2e_supuestos',...ss.map(([name,p])=>{const x=impactScenario(v,p);return [name,p,x.d.toFixed(2),x.c.toFixed(2),x.r.toFixed(2),(x.d*v.co2).toFixed(2)].join(';')})];
+    lines.push('AVISO: escenarios hipotéticos no representan ahorros reales ni validación de campo');
+    descargar('FlotaIA_escenarios_hipoteticos.csv','text/csv;charset=utf-8','\uFEFF'+lines.join('\n'));
+  });
+  $('dcGotoDemo').addEventListener('click',()=>{ir('demo');demoIniciar()});
+  $('dcGotoMant').addEventListener('click',()=>ir('mantenimiento'));
+  $('dcGotoImpact').addEventListener('click',()=>ir('impacto'));
+  $('ipToDecision').addEventListener('click',()=>ir('decisiones'));
+
+
+  // ---------- Observatorio: tablas y visualizaciones derivadas del estado existente ----------
+  const svFilter={sort:'unidad',asc:true};
+  function svDisp(unit){const os=S.ots.filter(o=>o.unidad===unit);const par=os.reduce((n,o)=>n+horasParada(o),0);return Math.max(0,Math.min(100,(H_U-par)/H_U*100));}
+  function svRows(){return UNITS.map(u=>{const n=nivel(u);return {unidad:u,estado:n,confianza:S.unidades[u].pred.confianza*100,ot:S.ots.filter(o=>o.unidad===u&&o.estado!=='resuelta').length,disp:svDisp(u)};});}
+  function renderStudio(K){
+    const st=$('svStatus').value,unit=$('svUnit').value,txt=$('svSearch').value.trim().toLowerCase();
+    const names=['Normal','Advertencia','Crítica'];
+    let rows=svRows().filter(r=>(st==='all'||String(r.estado)===st)&&(unit==='all'||r.unidad===unit)&&(!txt||(r.unidad+' '+names[r.estado]).toLowerCase().includes(txt)));
+    rows.sort((a,b)=>{const k=svFilter.sort,av=a[k],bv=b[k];if(typeof av==='string')return svFilter.asc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));return svFilter.asc?av-bv:bv-av;});
+    $('svBody').innerHTML=rows.length?rows.map(r=>`<tr><td class="code">${r.unidad}</td><td><span class="studio-chip ${['ok','mid','high'][r.estado]}">${names[r.estado]}</span></td><td>${fmt(r.confianza,1)} %</td><td>${r.ot}</td><td>${fmt(r.disp,1)} %</td><td><button class="btn sec sm" data-sv-unit="${r.unidad}" type="button">Ver unidad</button></td></tr>`).join(''):'<tr><td colspan="6" class="studio-empty">No hay unidades con estos filtros.</td></tr>';
+    $('svCount').textContent=`${rows.length} unidad(es) visibles de ${UNITS.length}. Datos demostrativos del prototipo.`;
+    if(!$('svUnit').dataset.ready){$('svUnit').innerHTML='<option value="all">Todas las unidades</option>'+UNITS.map(u=>`<option value="${u}">${u}</option>`).join('');$('svUnit').dataset.ready='1';}
+    const all=svRows(), crit=all.filter(r=>r.estado===2).length, adv=all.filter(r=>r.estado===1).length, oper=all.filter(r=>r.estado===0).length;
+    $('svOper').textContent=oper; $('svCrit').textContent=crit; $('svOT').textContent=K.ab.length; $('svRoutes').textContent=`${K.cub}/7`;
+    $('svOper2').textContent=oper; $('svCrit2').textContent=crit; $('svRoutes2').textContent=`${K.cub}/7`; $('svOut2').textContent=7-K.cub; $('svOT2').textContent=K.ab.length; $('svAlert2').textContent=K.alertas.length;
+    $('svDonutVal').textContent=oper;
+    $('svDonut').style.background=`conic-gradient(#159b7c 0 ${(oper/7)*100}%,#e4a24b ${(oper/7)*100}% ${((oper+adv)/7)*100}%,#d8574c ${((oper+adv)/7)*100}% 100%)`;
+    const maxConf = Math.max(...all.map(r=>r.confianza));
+    const meanConf = all.reduce((s,r)=>s+r.confianza,0)/all.length;
+    $('svInsight').textContent = crit ? `Hay ${crit} unidad(es) en condición crítica; la prioridad inmediata es revisar ${all.filter(r=>r.estado===2).map(r=>r.unidad).join(', ')}.` : 'No hay unidades en condición crítica; mantén seguimiento preventivo de las unidades con advertencia.';
+    $('svBars').innerHTML=all.map(r=>`<div><div class="studio-barlabel"><strong>${r.unidad}</strong><span>${fmt(r.disp,1)} %</span></div><div class="studio-track"><div class="studio-fill" style="width:${r.disp}%;background:${r.disp>=90?'#159b7c':r.disp>=85?'#e4a24b':'#d8574c'}"></div></div></div>`).join('');
+    const cc=[['alta','#d8574c'],['media','#e4a24b'],['baja','#159b7c']].map(([p,c])=>({p,c,n:S.ots.filter(o=>o.estado!=='resuelta'&&o.prioridad===p).length}));
+    const top=Math.max(1,...cc.map(x=>x.n));
+    $('svPriority').innerHTML=cc.map(({p,c,n})=>`<div><div class="studio-barlabel"><strong>${p[0].toUpperCase()+p.slice(1)}</strong><span>${n} OT</span></div><div class="studio-track"><div class="studio-fill" style="width:${n/top*100}%;background:${c}"></div></div></div>`).join('');
+
+    // Gauges
+    const setGauge=(id,val,tone,label)=>{const el=$(id); if(!el) return; el.style.setProperty('--pct', Math.max(0,Math.min(100,val))); el.style.setProperty('--tone', tone); const t=el.querySelector('.value'); if(t) t.textContent=label;};
+    const otResolved=S.ots.length?S.ots.filter(o=>o.estado==='resuelta').length/S.ots.length*100:0;
+    setGauge('svGaugeDisp', K.disp, K.disp>=90?'#27c498':K.disp>=85?'#f3b340':'#ee6b5c', `${fmt(K.disp,1)}%`);
+    setGauge('svGaugeRoutes', K.cub/7*100, K.cub===7?'#27c498':K.cub>=6?'#f3b340':'#ee6b5c', `${K.cub}/7`);
+    setGauge('svGaugeOT', otResolved, otResolved>=75?'#27c498':otResolved>=50?'#f3b340':'#ee6b5c', `${fmt(otResolved,0)}%`);
+    $('svGaugeDispVal').textContent=`${fmt(K.disp,1)}%`; $('svGaugeRoutesVal').textContent=`${K.cub}/7`; $('svGaugeOTVal').textContent=`${fmt(otResolved,0)}%`;
+
+    // Heatmap by component x priority
+    const comps=['Hidráulico','Motor','Eléctrico','Otros'];
+    const pris=['alta','media','baja'];
+    const bucket=(s)=> comps.includes(s)?s:'Otros';
+    const counts={}; comps.forEach(c=>{counts[c]={alta:0,media:0,baja:0};});
+    S.ots.forEach(o=>{const c=bucket(o.sistema); if(pris.includes(o.prioridad)) counts[c][o.prioridad]++;});
+    const mx=Math.max(1,...comps.flatMap(c=>pris.map(p=>counts[c][p])));
+    const color=(n,p)=>{if(n===0) return 'background:rgba(255,255,255,.06);color:#cfdcea;border:1px solid rgba(255,255,255,.06)'; const a=.18+.42*(n/mx); const rgb=p==='alta'?'216,87,76':p==='media'?'228,162,75':'21,155,124'; return `background:rgba(${rgb},${a});color:#fff;border:1px solid rgba(${rgb},${min(0.75,a+0.15)})`; function min(a,b){return Math.min(a,b)} };
+    $('svHeat').innerHTML=['<div></div><div class="h">Alta</div><div class="h">Media</div><div class="h">Baja</div>', ...comps.map(c=>`<div class="r">${c}</div>`+pris.map(p=>`<div class="c" style="${color(counts[c][p],p)}">${counts[c][p]}<small>OT</small></div>`).join(''))].join('');
+
+    // Narrative boxes
+    const criticalUnits=all.filter(r=>r.estado===2).map(r=>r.unidad);
+    $('svDecision').textContent=criticalUnits.length?`Priorizar ${criticalUnits[0]}`:'Mantener control';
+    $('svDecisionTxt').textContent=criticalUnits.length?'La unidad crítica debe revisarse antes de reintegrarla a la cobertura de rutas.':'No hay criticidad alta; refuerza el mantenimiento preventivo.';
+    const focusComp = comps.map(c=>({c,n:pris.reduce((s,p)=>s+counts[c][p],0)})).sort((a,b)=>b.n-a.n)[0];
+    $('svFocus').textContent=focusComp.n?focusComp.c:'Sin concentración';
+    $('svFocusTxt').textContent=focusComp.n?`Es el componente con más órdenes registradas en el escenario actual (${focusComp.n}).`:'No hay acumulación relevante de órdenes por componente.';
+    $('svExecutive').textContent=K.cub===7?'Servicio estable':K.cub>=6?'Cobertura presionada':'Cobertura comprometida';
+    $('svExecutiveTxt').textContent=K.cub===7?'La flota sostiene la operación con todas las rutas activas.':'La salida de una o más unidades impacta la continuidad del servicio.';
+    $('svNarrative').textContent = crit ? `La lectura del tablero muestra un escenario con presión operativa: ${crit} unidad(es) crítica(s), ${K.ab.length} OT abiertas y cobertura actual de ${K.cub}/7 rutas. La recomendación es contener primero el riesgo hidráulico y después recuperar disponibilidad.` : `La lectura del tablero sugiere estabilidad relativa: sin unidades críticas, cobertura de ${K.cub}/7 rutas y foco en seguimiento preventivo de las unidades con advertencia.`;
+    $('svConfMean').textContent=`${fmt(meanConf,1)} %`;
+    $('svWatch').textContent=adv+crit;
+
+  }
+  ['svStatus','svUnit','svSearch'].forEach(id=>$(id).addEventListener(id==='svSearch'?'input':'change',()=>renderStudio(calc())));
+  document.querySelectorAll('[data-sv-sort]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.svSort;if(svFilter.sort===k)svFilter.asc=!svFilter.asc;else {svFilter.sort=k;svFilter.asc=true;}renderStudio(calc());}));
+  $('svClear').addEventListener('click',()=>{$('svStatus').value='all';$('svUnit').value='all';$('svSearch').value='';renderStudio(calc());});
+  $('svBody').addEventListener('click',e=>{const btn=e.target.closest('[data-sv-unit]');if(!btn)return;const u=btn.dataset.svUnit;ir('flota');const el=$('flU');if(el){el.value=u;el.dispatchEvent(new Event('change'));}});
+  $('svExport').addEventListener('click',()=>{const names=['Normal','Advertencia','Crítica'];const data=['Unidad;Condición;Confianza_porcentaje;OT_abiertas;Disponibilidad_porcentaje',...svRows().map(r=>[r.unidad,names[r.estado],r.confianza.toFixed(2),r.ot,r.disp.toFixed(2)].join(';')),'AVISO: datos simulados del prototipo, no información operativa municipal'];descargar('FlotaIA_observatorio_simulado.csv','text/csv;charset=utf-8','\uFEFF'+data.join('\n'));});
 
   // ---------- inicio ----------
   renderSelects(); syncSup(); renderCM(); renderAll(); pintarDemo();
