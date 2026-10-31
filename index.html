@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>FlotaIA · Gestión de flota (V13)</title>
+<title>FlotaIA · Gestión de flota (V13.1)</title>
 <meta name="description" content="FlotaIA: sistema inteligente de gestión de flota y mantenimiento de compactadoras. Prototipo académico con datos simulados (caso El Tambo, Huancayo).">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -803,6 +803,37 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
 .top-r .btn,.btn{box-shadow:none!important}
 .web-hero .rb-note{font-size:.82rem!important;line-height:1.45;color:#8E9C99!important;max-width:none!important}
 
+/* =====================================================================
+   V13.1 · acta de entrega-recepción de la unidad
+   ===================================================================== */
+.aer-list{border:1px solid var(--line);border-radius:12px;padding:4px 14px 8px;margin:0;min-width:0;background:#fff}
+.aer-list legend{font-size:.76rem;font-weight:600;color:var(--ink-2);padding:0 6px}
+.aer-g{font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+.aer-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.aer-row:last-child{border-bottom:0}
+.aer-t{font-size:.82rem;color:var(--ink-2);line-height:1.35}
+.aer-k{display:inline-block;margin-left:6px;font-size:.62rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:4px;vertical-align:1px;white-space:nowrap}
+.aer-k.k-a{background:var(--crit-soft);color:var(--crit)}
+.aer-k.k-m{background:var(--warn-soft);color:var(--warn)}
+.aer-k.k-e{background:var(--navy-50);color:var(--navy-700)}
+.aer-seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:#fff}
+.aer-seg button{border:0;background:#fff;padding:5px 10px;font-size:.74rem;cursor:pointer;color:var(--muted);white-space:nowrap}
+.aer-seg button+button{border-left:1px solid var(--line-2)}
+.aer-seg button[aria-pressed="true"][data-v="ok"]{background:var(--good-soft);color:var(--good);font-weight:600}
+.aer-seg button[aria-pressed="true"][data-v="no"]{background:var(--crit-soft);color:var(--crit);font-weight:600}
+.aer-row.pend .aer-t{color:var(--ink)}
+.aer-row.bad .aer-t{color:var(--crit)}
+.aer-conf{display:flex;gap:8px;align-items:flex-start;font-size:.8rem;color:var(--ink-2);line-height:1.4}
+.aer-conf input{margin-top:3px;flex:none;width:16px;height:16px}
+.aer-steps{margin:0;padding-left:18px;font-size:.78rem;color:var(--muted);display:grid;gap:3px}
+@media (max-width:720px){.aer-row{grid-template-columns:minmax(0,1fr)}.aer-seg{justify-self:start}}
+
+/* V13.1 · control de vencimientos */
+#cDocs{margin-top:18px}
+#docF{background:#fff;border:1px solid var(--line-2);border-radius:7px;padding:8px 10px;font-size:.88rem;min-width:0}
+.doc-c{display:grid;gap:3px;justify-items:start}
+.doc-c .btn{margin-top:2px}
+
 </style>
 </head>
 <body>
@@ -852,7 +883,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
     </nav>
     <div class="side-foot">
       <button type="button" class="btn-side" id="btnReset"><svg class="i"><use href="#i-reset"/></svg>Reiniciar simulación</button>
-      <small>Producto Integrador · Gestión e Innovación Tecnológica · Maestría en Gestión Ambiental y Desarrollo Sostenible. No es un sistema oficial de la municipalidad.</small><span class="ver">Versión V13 · 29 de octubre de 2026</span>
+      <small>Producto Integrador · Gestión e Innovación Tecnológica · Maestría en Gestión Ambiental y Desarrollo Sostenible. No es un sistema oficial de la municipalidad.</small><span class="ver">Versión V13.1 · 31 de octubre de 2026</span>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -935,7 +966,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
           <div class="card-h"><h2>Transparencia del prototipo</h2></div>
           <div class="transp">
             <div class="tdef"><span class="badge b-ia" style="justify-self:start">IA real</span>Modelo de bosque aleatorio (Random Forest) entrenado con datos experimentales reales de un banco de pruebas hidráulico (Helwig et al., 2015a). Se ejecuta en este navegador y calcula cada clasificación.</div>
-            <div class="tdef"><span class="badge b-auto" style="justify-self:start">Automatización</span>Reglas programadas: clasificación de los reportes de fallas, órdenes automáticas, niveles de alerta y cálculo de los indicadores.</div>
+            <div class="tdef"><span class="badge b-auto" style="justify-self:start">Automatización</span>Reglas programadas: clasificación de los reportes de fallas, órdenes automáticas, actas de entrega-recepción, niveles de alerta y cálculo de los indicadores.</div>
             <div class="tdef"><span class="badge b-sim" style="justify-self:start">Simulación</span>Asignación de ciclos de laboratorio a las compactadoras, órdenes de ejemplo y supuestos ambientales. No son datos de la operación real de la municipalidad.</div>
           </div>
         </div>
@@ -953,12 +984,36 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
           </div>
         </div>
         <div class="ucards" id="fCards"></div>
+        <div class="card" id="cDocs">
+          <div class="card-h"><div><h2>Documentos y vencimientos</h2><p>SOAT, revisión técnica y extintor de cada unidad. Aviso 30 días antes del vencimiento; con un documento vencido, la unidad no sale a ruta.</p></div><span class="badge b-auto">Automatización</span></div>
+          <div class="stat3">
+            <div class="st"><span class="l"><span class="pill p-ok">Vigentes</span></span><span class="v" id="docVig">0</span></div>
+            <div class="st"><span class="l"><span class="pill p-adv">Por vencer</span></span><span class="v" id="docPor">0</span></div>
+            <div class="st"><span class="l"><span class="pill p-crit">Vencidos</span></span><span class="v" id="docVen">0</span></div>
+          </div>
+          <div class="tw"><table class="dt cards" id="docTable">
+            <thead><tr><th>Unidad</th><th>SOAT</th><th>Revisión técnica</th><th>Extintor</th><th>Situación</th></tr></thead>
+            <tbody id="docBody"></tbody>
+          </table></div>
+          <form id="docForm" class="filters" novalidate>
+            <label class="f" for="docU">Unidad<select id="docU"></select></label>
+            <label class="f" for="docT">Documento<select id="docT"><option value="soat">SOAT</option><option value="rt">Revisión técnica</option><option value="ext">Extintor</option></select></label>
+            <label class="f" for="docF">Nuevo vencimiento<input type="date" id="docF"></label>
+            <button class="btn sm" id="btnDoc" type="submit" style="margin-bottom:2px">Actualizar fecha</button>
+          </form>
+          <div class="chips" aria-label="Ejemplos de vencimiento">
+            <button type="button" class="chipx" data-docej="por">Ejemplo: SOAT de C-04 por vencer</button>
+            <button type="button" class="chipx" data-docej="ven">Ejemplo: revisión técnica de C-06 vencida</button>
+          </div>
+          <p class="msg" id="docMsg" role="status"></p>
+          <p class="foot">Fechas simuladas. En la versión de campo se toman de las pólizas, los certificados de inspección técnica y las fichas de recarga del extintor. Un documento vencido no genera una orden de mantenimiento, porque no es una falla mecánica: no reduce la disponibilidad, pero sí la cobertura de rutas.</p>
+        </div>
       </section>
 
       <!-- ================= C. MANTENIMIENTO ================= -->
       <section class="view" id="v-mantenimiento" aria-labelledby="h-mant" hidden>
         <div class="vhead">
-          <div><div class="eyebrow">Operación</div><h1 id="h-mant">Mantenimiento y órdenes de trabajo</h1><p class="lead">Registro de fallas, generación de órdenes y seguimiento: Pendiente → En atención → Resuelta. Cada cambio recalcula los indicadores.</p></div>
+          <div><div class="eyebrow">Operación</div><h1 id="h-mant">Mantenimiento y órdenes de trabajo</h1><p class="lead">Registro de fallas, generación de órdenes y seguimiento: Pendiente → En atención → Resuelta. Incluye el acta de entrega-recepción de la unidad antes de salir a ruta. Cada cambio recalcula los indicadores.</p></div>
           <span class="badge b-auto">Automatización</span>
         </div>
         <div class="g-mant">
@@ -1006,6 +1061,52 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
               <tbody id="otBody"></tbody>
             </table></div>
             <p class="foot">Una orden de prioridad alta sin resolver retira la unidad de ruta y cuenta 8 h fuera de servicio. Al resolverla se registran las horas reales de reparación y fuera de servicio.</p>
+          </div>
+          <div class="card" id="cActa">
+            <div class="card-h"><div><h2>Entrega-recepción de la unidad</h2><p>Acta y lista de verificación antes de salir a ruta: al inicio del turno, cuando el chofer cambia de unidad o cuando la unidad vuelve del taller</p></div><span class="badge b-auto">Automatización</span></div>
+            <form id="aerForm" novalidate class="fgrid">
+              <div class="fcol">
+              <div class="frow">
+                <label class="f" for="aerU">Unidad<select id="aerU"></select></label>
+                <label class="f" for="aerMot">Motivo<select id="aerMot"><option value="cambio">Cambio de unidad</option><option value="turno">Inicio de turno</option><option value="taller">Retorno de taller</option></select></label>
+              </div>
+              <div class="frow">
+                <label class="f" for="aerEnt">Entrega<select id="aerEnt"></select></label>
+                <label class="f" for="aerRec">Recibe<select id="aerRec"></select></label>
+              </div>
+              <div class="frow">
+                <label class="f" for="aerKm">Kilometraje (km)<input type="number" id="aerKm" min="0" max="2000000" step="1" inputmode="numeric" placeholder="Ej.: 4520"></label>
+                <label class="f" for="aerComb">Combustible<select id="aerComb"><option value="">Seleccione</option><option>Reserva</option><option>1/4</option><option>1/2</option><option>3/4</option><option>Lleno</option></select></label>
+              </div>
+              <fieldset class="aer-list" id="aerList"><legend>Lista de verificación</legend></fieldset>
+              <label class="f" for="aerObs">Daños preexistentes u observaciones (en campo, con foto)
+                <textarea id="aerObs" maxlength="300" placeholder="Ej.: abolladura en la puerta derecha; pedal de freno largo"></textarea></label>
+              <div class="chips" aria-label="Ejemplos de acta">
+                <button type="button" class="chipx" data-aer="ok">Ejemplo: todo conforme</button>
+                <button type="button" class="chipx" data-aer="obs">Ejemplo: botiquín incompleto</button>
+                <button type="button" class="chipx" data-aer="crit">Ejemplo: frenos deficientes</button>
+              </div>
+              </div>
+              <div class="fcol">
+              <div class="preview" id="aerPrev" aria-live="polite">
+                <span class="badge b-auto" style="justify-self:start">Resultado automático</span>
+                <div class="pv"><span>Revisados</span><b id="aerCnt">0 de 13</b><span>Resultado</span><span id="aerRes">—</span><span>Acción</span><span id="aerAcc">Marque cada punto como conforme o no conforme.</span></div>
+              </div>
+              <ol class="aer-steps">
+                <li>Quien entrega y quien recibe revisan juntos la unidad.</li>
+                <li>Un punto crítico no conforme impide salir a ruta y genera una orden de prioridad alta.</li>
+                <li>Un punto no crítico genera una orden programada; sin EPP completo, la salida espera a que se reponga.</li>
+              </ol>
+              <label class="aer-conf" for="aerOk"><input type="checkbox" id="aerOk">Quien recibe revisó la unidad junto con quien entrega y está conforme con lo registrado</label>
+              <button id="btnAer" class="btn" type="submit">Registrar acta</button>
+              <p class="msg" id="aerMsg" role="status"></p>
+              </div>
+            </form>
+            <div class="tw"><table class="dt cards" id="aerTable">
+              <thead><tr><th>Acta</th><th>Unidad</th><th>Entrega → recibe</th><th>Lectura</th><th>Resultado</th><th>Orden</th></tr></thead>
+              <tbody id="aerBody"></tbody>
+            </table></div>
+            <p class="foot">Los choferes se identifican por código y no por nombre (Ley N.° 29733). Lo registrado al recibir deslinda responsabilidades: los daños anotados no se atribuyen a quien recibe, y el reporte no genera sanción (Ley N.° 29783, art. 79). En la versión de campo, el acta se llena en el mismo formulario de la pieza 1 con fotos y la firma de ambos.</p>
           </div>
         </div>
       </section>
@@ -1086,7 +1187,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
               <label class="f" for="sAho">Ahorro de diésel (%)<input id="sAho" type="number" min="0" max="50" step="1" inputmode="decimal"></label>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn sec sm" id="sReset">Restaurar valores por defecto</button><p class="msg" id="supMsg" role="status"></p></div>
-            <p class="foot">191 t/día es la generación del distrito reportada por la prensa (Salomé, 2026), sin documento oficial publicado. Los 35 L de diésel por unidad y día son un valor de trabajo, y el 10 % de ahorro es la meta de combustible por tonelada de la Tabla 52 del informe. Los tres deben reemplazarse con los datos reales de la municipalidad cuando se implemente la propuesta.</p>
+            <p class="foot">191 t/día es la generación del distrito reportada por la prensa (Salomé, 2026), sin documento oficial publicado. Los 35 L de diésel por unidad y día son un valor de trabajo, y el 10 % de ahorro es la meta de combustible por tonelada de la Tabla 54 del informe. Los tres deben reemplazarse con los datos reales de la municipalidad cuando se implemente la propuesta.</p>
             <div class="formula">
               <h3>Fórmulas utilizadas</h3>
               <div>Residuos sin recoger = <code>t/día × unidades fuera de ruta ÷ 7</code></div>
@@ -1148,7 +1249,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
             <div class="card-h"><div><h2>Escenario hipotético de reducción</h2><p>Menos diésel por mantenimiento oportuno, menos ralentí y menos unidades varadas</p></div><span class="badge b-sim">Hipotético</span></div>
             <label class="f" for="hcRed" style="max-width:260px">Reducción supuesta del consumo de diésel (%)<input id="hcRed" type="number" min="0" max="30" step="1" inputmode="decimal"></label>
             <div class="cmp" id="hcEsc"></div>
-            <p class="foot">La meta del proyecto es −10 % de combustible por tonelada (Tabla 52 del informe). El escenario no es un resultado medido: solo podrá verificarse con vales de combustible y pesaje reales frente a la línea base.</p>
+            <p class="foot">La meta del proyecto es −10 % de combustible por tonelada (Tabla 54 del informe). El escenario no es un resultado medido: solo podrá verificarse con vales de combustible y pesaje reales frente a la línea base.</p>
           </div>
           <div class="card" id="cHcMet">
             <div class="card-h"><div><h2>Metodología y factores</h2><p>Criterios de referencia de la herramienta Huella de Carbono Perú (MINAM)</p></div><span class="badge b-auto">Fórmulas</span></div>
@@ -1371,6 +1472,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmt = (n, d = 1) => Number.isFinite(n) ? n.toLocaleString('es-PE', { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false }) : '–';
   const p2 = n => String(n).padStart(2, '0');
+  const minus = t => t.charAt(0).toLowerCase() + t.slice(1);
   const fecha = iso => { const d = new Date(iso); return isNaN(d) ? '' : `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()}`; };
   const fechaHora = iso => { const d = new Date(iso); return isNaN(d) ? '' : `${fecha(iso)} ${p2(d.getHours())}:${p2(d.getMinutes())}`; };
   const ico = (id, cls = 'i') => `<svg class="${cls}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
@@ -1395,6 +1497,22 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   const CM = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], MEDIAS = [0, 1, 2].map(c => { const L = porClase(c); return VARS.map((_, j) => L.reduce((s, k) => s + k.x[j], 0) / L.length); });
   CICLOS.forEach(k => { CM[k.bomba][predecir(k.x).clase]++; });
 
+  // ---------- documentos de las unidades (V13.1) ----------
+  const VEH = [...UNITS, 'B-01'];
+  const DOCS = [['soat', 'SOAT'], ['rt', 'Revisión técnica'], ['ext', 'Extintor']];
+  const DOCN = Object.fromEntries(DOCS);
+  const DOCG = { soat: 'o', rt: 'a', ext: 'o' };  // género gramatical para «vencido/vencida»
+  const hoy0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const isoDia = d => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+  const masDias = n => { const d = hoy0(); d.setDate(d.getDate() + n); return isoDia(d); };
+  const diasA = f => { const d = new Date(f + 'T00:00:00'); return isNaN(d) ? null : Math.round((d - hoy0()) / 864e5); };
+  const fechaDoc = f => { const p = String(f).split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : ''; };
+  function docsIniciales() { const o = {}; VEH.forEach((u, i) => { o[u] = { soat: masDias(160 + 23 * i), rt: masDias(75 + 29 * i), ext: masDias(45 + 37 * i) }; }); return o; }
+  // 0 vigente, 1 por vencer (30 días o menos), 2 vencido
+  const docEstado = (u, t) => { const n = S.docs && S.docs[u] ? diasA(S.docs[u][t]) : null; return n == null ? 0 : n < 0 ? 2 : n <= 30 ? 1 : 0; };
+  const docVencidos = u => DOCS.filter(([t]) => docEstado(u, t) === 2).map(([t]) => t);
+  const docVencido = u => docVencidos(u).length > 0;
+
   // ---------- estado ----------
   function estadoInicial() {
     const ahora = Date.now(), t0 = new Date(ahora - 3600e3).toISOString(), d = n => new Date(ahora - n * 864e5).toISOString();
@@ -1403,7 +1521,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     UNITS.forEach((u, i) => { const k = cicloDe(0, i), pred = predecir(k.x); unidades[u] = { ciclo: k.id, pred }; hist.push({ t: t0, unidad: u, ciclo: k.id, clase: pred.clase, conf: pred.confianza, real: k.bomba, origen: 'Lectura inicial' }); });
     const ej = (id, codigo, unidad, origen, sistema, sintoma, prioridad, accion, rep, par, dias) => { const c = d(dias); return { id, codigo, unidad, origen, sistema, sintoma, prioridad, accion, estado: 'resuelta', horasReparacion: rep, horasParada: par, creada: c, inicio: c, resuelta: dh(c, Math.max(rep, par)), ejemplo: true, motor: 'reglas' }; };
     return {
-      unidades, hist, n: 0, sup: { ...SUP0 }, hc: hcInicial(),
+      unidades, hist, n: 0, sup: { ...SUP0 }, hc: hcInicial(), actas: [], na: 0, docs: docsIniciales(), docLog: [],
       ots: [
         ej('e1', 'OT-EJ-01', 'C-02', 'Chofer', 'Motor', 'Recalentamiento en subida', 'media', 'Revisar radiador y termostato', 3, 4, 9),
         ej('e2', 'OT-EJ-02', 'C-05', 'Mecánico', 'Eléctrico', 'Luces traseras sin funcionar', 'baja', 'Cambiar fusible y revisar cableado', 1, 0, 6),
@@ -1414,12 +1532,15 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   let S = estadoInicial();
   try { const g = JSON.parse(localStorage.getItem(KEY) || 'null'); if (g && g.unidades && Array.isArray(g.ots) && Array.isArray(g.hist) && g.sup) S = g; } catch (e) {}
   if (!S.hc || !Array.isArray(S.hc.reg)) S.hc = hcInicial();
+  if (!Array.isArray(S.actas)) { S.actas = []; S.na = 0; }
+  if (!S.docs || typeof S.docs !== 'object') { S.docs = docsIniciales(); S.docLog = []; }
+  if (!Array.isArray(S.docLog)) S.docLog = [];
   function guardar() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   const nivel = u => S.unidades[u].pred.clase; // 0 verde, 1 ámbar, 2 rojo
 
   // ---------- cálculos (mismas fórmulas del documento, sección X) ----------
   const abiertas = () => S.ots.filter(o => o.estado !== 'resuelta');
-  function fuera() { const ab = abiertas(); return UNITS.filter(u => nivel(u) === 2 || ab.some(o => o.unidad === u && o.prioridad === 'alta')); }
+  function fuera() { const ab = abiertas(); return UNITS.filter(u => nivel(u) === 2 || ab.some(o => o.unidad === u && o.prioridad === 'alta') || docVencido(u)); }
   function horasParada(o) { return o.estado === 'resuelta' ? (Number(o.horasParada) || 0) : (o.prioridad === 'alta' ? 8 : 0); }
   function alertaU(u, F, ab) { return F.includes(u) ? 2 : (nivel(u) === 1 || ab.some(o => o.unidad === u && o.prioridad === 'media')) ? 1 : 0; }
   function calc() {
@@ -1440,6 +1561,9 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     });
     ab.filter(o => o.prioridad === 'alta' && !(o.motor === 'modelo' && S.unidades[o.unidad] && nivel(o.unidad) === 2))
       .forEach(o => alertas.push({ sev: 2, unidad: o.unidad, t: `${o.codigo} · ${o.sistema}: prioridad alta`, d: 'Unidad fuera de ruta hasta resolver la orden', tipo: 'o', id: o.id }));
+    VEH.forEach(u => DOCS.forEach(([t, nom]) => { const e = docEstado(u, t), n = diasA(S.docs[u][t]);
+      if (e === 2) alertas.push({ sev: 2, unidad: u, t: `${nom} vencid${DOCG[t]}`, d: `La unidad no puede salir a ruta hasta renovarl${DOCG[t]}`, tipo: 'd' });
+      else if (e === 1) alertas.push({ sev: 1, unidad: u, t: `${nom} vence en ${n} ${n === 1 ? 'día' : 'días'}`, d: 'Tramitar la renovación antes del vencimiento', tipo: 'd' }); }));
     return { parada, disp, fallas, mttr, mtbf, F, ab, lv, oper: cuenta(0), adv: cuenta(1), crit: cuenta(2), cub: UNITS.length - F.length, alertas };
   }
   function amb(F) {
@@ -1456,6 +1580,8 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   function eventosU(u) {
     const ev = [];
     S.hist.filter(h => h.unidad === u).forEach(h => ev.push({ t: h.t, c: h.clase, x: `${h.origen}: ${CLSm[h.clase]} (${fmt(h.conf * 100, 0)} %)` }));
+    (S.docLog || []).filter(x => x.unidad === u).forEach(x => ev.push({ t: x.t, c: 0, x: `${DOCN[x.doc]} actualizad${DOCG[x.doc]}: vence el ${fechaDoc(x.fecha)}` }));
+    (S.actas || []).filter(a => a.unidad === u).forEach(a => ev.push({ t: a.t, c: AER_RES[a.resultado][2], x: `${a.codigo} · ${AER_MOT[a.motivo]} · ${a.entrega} → ${a.recibe}: ${minus(AER_RES[a.resultado][0])}` }));
     otsU(u).forEach(o => {
       ev.push({ t: o.creada, c: o.prioridad === 'alta' ? 2 : o.prioridad === 'media' ? 1 : 0, x: `${o.codigo} registrada · ${o.sistema}, prioridad ${o.prioridad}` });
       if (o.estado !== 'pendiente' && o.inicio && !o.ejemplo) ev.push({ t: o.inicio, c: 1, x: `${o.codigo} en atención` });
@@ -1509,7 +1635,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     if (crit.length) $('rBanner').innerHTML = `${ico('alert')}<span><b>Alerta crítica:</b> ${crit.map(esc).join(', ')} fuera de ruta. Rutas atendidas: ${K.cub} de ${UNITS.length}; residuos sin recoger estimados: ${fmt(A.tSin, 1)} t. <a href="#mantenimiento">Ver órdenes</a></span>`;
     // incidencias
     const pr = { alta: 2, media: 1, baja: 0 };
-    const items = K.alertas.map(a => ({ sev: a.sev, t: `${a.unidad} · ${a.t}`, d: a.d, w: '', act: a.tipo === 'u' ? `data-det="${a.unidad}"` : `data-goot="${a.id}"` }))
+    const items = K.alertas.map(a => ({ sev: a.sev, t: `${a.unidad} · ${a.t}`, d: a.d, w: '', act: a.tipo === 'u' ? `data-det="${a.unidad}"` : a.tipo === 'd' ? `data-godoc="${a.unidad}"` : `data-goot="${a.id}"` }))
       .concat(K.ab.filter(o => !K.alertas.some(a => a.id === o.id) && !(o.motor === 'modelo' && nivel(o.unidad) === 2)).map(o => ({ sev: pr[o.prioridad], t: `${o.codigo} · ${o.unidad} · ${o.sistema}`, d: `${EST[o.estado][0]} · ${o.sintoma}`, w: fechaHora(o.creada), act: `data-goot="${o.id}"` })))
       .sort((a, b) => b.sev - a.sev).slice(0, 6);
     $('rInc').innerHTML = items.length ? items.map(i => `<button type="button" class="inc" ${i.act}><span class="dot d${i.sev}"></span><span class="t">${esc(i.t)}</span><span class="w">${esc(i.w)}</span><span class="d">${esc(i.d)}</span></button>`).join('')
@@ -1596,6 +1722,10 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
       <div class="card" style="box-shadow:none">
         <div class="card-h"><h3>Órdenes de trabajo de la unidad</h3><span class="tsm">${ou.length} registradas</span></div>
         ${ou.length ? `<div class="tw"><table class="dt"><thead><tr><th>Orden</th><th>Sistema</th><th>Descripción</th><th>Prioridad</th><th>Estado</th></tr></thead><tbody>${ou.map(o => `<tr><td class="code">${esc(o.codigo)}</td><td>${esc(o.sistema)}</td><td>${esc(o.sintoma)}</td><td><span class="pill p-${esc(o.prioridad)}">${esc(o.prioridad)}</span></td><td><span class="pill ${EST[o.estado][1]}">${EST[o.estado][0]}</span></td></tr>`).join('')}</tbody></table></div>` : `<div class="empty">${ico('inbox')}<span>La unidad no tiene órdenes registradas.</span></div>`}
+      </div>
+      <div class="card" style="box-shadow:none">
+        <div class="card-h"><h3>Documentos de la unidad</h3><span class="badge b-auto">Automatización</span></div>
+        <div class="tw"><table class="dt"><thead><tr><th>Documento</th><th>Vence</th><th>Estado</th></tr></thead><tbody>${DOCS.map(([t, nom]) => { const e = docEstado(u, t); return `<tr><td>${nom}</td><td class="num">${esc(fechaDoc(S.docs[u][t]))}</td><td><span class="pill ${['p-ok', 'p-adv', 'p-crit'][e]}">${docTxt(u, t)}</span></td></tr>`; }).join('')}</tbody></table></div>
       </div>
       <p class="foot">No se muestran placa, marca ni kilometraje: la flota de esta demostración es simulada y no corresponde a vehículos reales.</p>`;
   }
@@ -1811,6 +1941,8 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     const opts = UNITS.map(u => `<option>${u}</option>`).join('');
     const set = (id, html) => { const v = $(id).value; $(id).innerHTML = html; if (v) $(id).value = v; };
     set('fUnidad', opts + '<option value="B-01">B-01 (camión baranda)</option>');
+    set('aerU', opts + '<option value="B-01">B-01 (camión baranda)</option>');
+    set('docU', opts + '<option value="B-01">B-01 (camión baranda)</option>');
     set('aUnidad', opts);
     set('hcU', opts);
     set('flU', '<option value="">Todas</option>' + opts + '<option value="B-01">B-01</option>');
@@ -1824,7 +1956,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   }
   function renderAll() {
     const K = calc(), A = amb(K.F);
-    renderResumen(K, A); renderFlota(K); renderMant(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K); renderImpactLab(); renderIPIM(); renderStudio(K); renderTwin(K); renderHeroRoutes(K);
+    renderResumen(K, A); renderFlota(K); renderMant(); renderAer(); renderDocs(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K); renderImpactLab(); renderIPIM(); renderStudio(K); renderTwin(K); renderHeroRoutes(K);
     $('clock').textContent = 'Simulación · ' + fechaHora(new Date().toISOString());
     return { K, A };
   }
@@ -1860,6 +1992,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     const a = ev.target.closest('a[href^="#"]');
     if (a) { const v = a.getAttribute('href').slice(1); if (VIEWS[v]) { ev.preventDefault(); ir(v); return; } }
     const det = ev.target.closest('[data-det]'); if (det) { abrirDetalle(det.dataset.det); return; }
+    const gd = ev.target.closest('[data-godoc]'); if (gd) { ir('flota'); const c = $('cDocs'); if (c) c.scrollIntoView({ block: 'start' }); return; }
     const go = ev.target.closest('[data-goot]');
     if (go) { const o = S.ots.find(x => x.id === go.dataset.goot); $('flU').value = ''; $('flP').value = ''; $('flE').value = ''; ultimoOt = o ? o.id : null; ir('mantenimiento'); renderMant(); const tr = document.querySelector(`tr[data-ot="${ultimoOt}"]`); if (tr) tr.scrollIntoView({ block: 'center' }); }
   });
@@ -1912,6 +2045,176 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   document.querySelectorAll('.chipx').forEach(b => b.addEventListener('click', () => { $('fTexto').value = b.dataset.t; preview(); $('fTexto').focus(); }));
   ['flU', 'flP', 'flE'].forEach(id => $(id).addEventListener('change', renderMant));
   $('flClear').addEventListener('click', () => { $('flU').value = ''; $('flP').value = ''; $('flE').value = ''; renderMant(); });
+
+
+  // ---------- automatización: acta de entrega-recepción de la unidad (V13.1) ----------
+  // c: 'alta' = punto crítico (no sale a ruta, OT alta); 'media' y 'baja' = OT programada; 'epp' = sale solo tras reponer el EPP
+  const AER_ITEMS = [
+    { id: 'frenos', g: 'Seguridad de la unidad', t: 'Frenos de servicio y de estacionamiento', c: 'alta', s: 'Chasis' },
+    { id: 'direccion', t: 'Dirección sin juego anormal', c: 'alta', s: 'Chasis' },
+    { id: 'llantas', t: 'Llantas sin cortes, con presión y labrado adecuados', c: 'alta', s: 'Chasis' },
+    { id: 'luces', t: 'Luces, espejos y alarma de retroceso', c: 'alta', s: 'Eléctrico' },
+    { id: 'fugas', t: 'Sin fugas de aceite, combustible ni refrigerante', c: 'alta', s: 'Motor' },
+    { id: 'hidraulico', g: 'Caja compactadora', t: 'Mangueras, cilindros y nivel de aceite hidráulico', c: 'alta', s: 'Hidráulico' },
+    { id: 'prensa', t: 'Prensa: ciclo en vacío y parada de emergencia', c: 'alta', s: 'Hidráulico' },
+    { id: 'estribos', t: 'Estribos y asideros del personal firmes', c: 'alta', s: 'Chasis' },
+    { id: 'lixiviados', t: 'Compuerta y sellos sin fuga de lixiviados', c: 'media', s: 'Hidráulico' },
+    { id: 'documentos', g: 'Documentos y equipos de emergencia', t: 'SOAT, tarjeta de propiedad y revisión técnica vigentes', c: 'alta', s: 'Documentos' },
+    { id: 'extintor', t: 'Extintor cargado y vigente', c: 'alta', s: 'Seguridad' },
+    { id: 'botiquin', t: 'Botiquín, conos o triángulos y herramientas', c: 'baja', s: 'Seguridad' },
+    { id: 'epp', g: 'Personal', t: 'EPP del chofer y los ayudantes: guantes, chaleco reflectivo, calzado y mascarilla', c: 'epp' },
+  ];
+  const AER_KTAG = { alta: ['Crítico', 'k-a'], media: ['Ambiental', 'k-m'], epp: ['SST', 'k-e'] };
+  const AER_MOT = { cambio: 'Cambio de unidad', turno: 'Inicio de turno', taller: 'Retorno de taller' };
+  // resultado: [texto, clase de la píldora, severidad para la ficha]
+  const AER_RES = { apta: ['Apta', 'p-ok', 0], observada: ['Apta con observación', 'p-adv', 1], condicionada: ['Sale tras reponer EPP', 'p-adv', 1], no_apta: ['No apta: no sale a ruta', 'p-crit', 2] };
+  const CHOFERES = Array.from({ length: 10 }, (_, i) => 'CH-' + p2(i + 1));
+  let aerSel = {};
+  function aerOpts() {
+    $('aerEnt').innerHTML = '<option value="">Seleccione</option><option value="BASE">Base o taller (sin chofer previo)</option>' + CHOFERES.map(c => `<option>${c}</option>`).join('');
+    $('aerRec').innerHTML = '<option value="">Seleccione</option>' + CHOFERES.map(c => `<option>${c}</option>`).join('');
+  }
+  function aerLista() {
+    $('aerList').innerHTML = '<legend>Lista de verificación</legend>' + AER_ITEMS.map(it => {
+      const k = AER_KTAG[it.c] ? `<span class="aer-k ${AER_KTAG[it.c][1]}">${AER_KTAG[it.c][0]}</span>` : '';
+      const v = aerSel[it.id], cls = v === 'no' ? 'bad' : v ? '' : 'pend';
+      return `${it.g ? `<div class="aer-g">${esc(it.g)}</div>` : ''}<div class="aer-row ${cls}" data-item="${it.id}"><span class="aer-t" id="aer-l-${it.id}">${esc(it.t)}${k}</span><span class="aer-seg" role="group" aria-labelledby="aer-l-${it.id}"><button type="button" data-it="${it.id}" data-v="ok" aria-pressed="${v === 'ok'}">Conforme</button><button type="button" data-it="${it.id}" data-v="no" aria-pressed="${v === 'no'}">No conforme</button></span></div>`;
+    }).join('');
+  }
+  // clasifica el acta con las reglas de la lista de verificación
+  // puntos del acta que el registro de documentos obliga a marcar como no conformes
+  function aerForzados(u) { const v = docVencidos(u), f = []; if (v.includes('soat') || v.includes('rt')) f.push('documentos'); if (v.includes('ext')) f.push('extintor'); return f; }
+  function aerAplicarForzados() { const f = aerForzados($('aerU').value); f.forEach(id => { aerSel[id] = 'no'; }); return f; }
+  function aerEvaluar(sel) {
+    const no = AER_ITEMS.filter(it => sel[it.id] === 'no');
+    const veh = no.filter(it => it.c !== 'epp'), epp = no.some(it => it.c === 'epp');
+    const crit = veh.filter(it => it.c === 'alta');
+    const prioridad = crit.length ? 'alta' : veh.some(it => it.c === 'media') ? 'media' : veh.length ? 'baja' : null;
+    const resultado = crit.length ? 'no_apta' : epp ? 'condicionada' : veh.length ? 'observada' : 'apta';
+    return { no, veh, epp, crit, prioridad, resultado, revisados: AER_ITEMS.filter(it => sel[it.id]).length };
+  }
+  function aerPreview() {
+    const e = aerEvaluar(aerSel), tot = AER_ITEMS.length;
+    $('aerCnt').textContent = `${e.revisados} de ${tot}`;
+    if (e.revisados < tot) { $('aerRes').textContent = '—'; $('aerAcc').textContent = `Faltan ${tot - e.revisados} puntos por revisar.`; return e; }
+    const r = AER_RES[e.resultado];
+    $('aerRes').innerHTML = `<span class="pill ${r[1]}">${esc(r[0])}</span>`;
+    const acc = [];
+    if (e.prioridad === 'alta') acc.push(`Orden de prioridad alta (${e.crit.map(it => it.t.split(/[,:]/)[0].toLowerCase()).join('; ')}); la unidad queda fuera de ruta`);
+    else if (e.prioridad) acc.push(`Orden de prioridad ${e.prioridad} programada; la unidad sale a ruta`);
+    if (e.epp) acc.push('reponer el EPP antes de salir y avisar al supervisor');
+    $('aerAcc').textContent = acc.length ? acc.join('; ') + '.' : 'La unidad sale a ruta; el acta queda en su hoja de vida.';
+    return e;
+  }
+  function aerLimpiar() {
+    aerSel = {}; $('aerKm').value = ''; $('aerComb').value = ''; $('aerObs').value = ''; $('aerOk').checked = false;
+    $('aerEnt').value = ''; $('aerRec').value = ''; $('aerMot').value = 'cambio';
+    ['aerKm', 'aerEnt', 'aerRec', 'aerComb'].forEach(i => $(i).removeAttribute('aria-invalid'));
+    aerLista(); aerPreview();
+  }
+  const aerUltimoKm = u => S.actas.filter(a => a.unidad === u).reduce((m, a) => Math.max(m, a.km), 0);
+  function aerError(id, txt) { $('aerMsg').textContent = txt; $('aerMsg').className = 'msg err'; if (id) { $(id).setAttribute('aria-invalid', 'true'); $(id).focus(); } return null; }
+  function registrarActa() {
+    ['aerKm', 'aerEnt', 'aerRec', 'aerComb'].forEach(i => $(i).removeAttribute('aria-invalid'));
+    const u = $('aerU').value, ent = $('aerEnt').value, rec = $('aerRec').value, kmRaw = $('aerKm').value, km = Number(kmRaw), comb = $('aerComb').value;
+    if (!ent) return aerError('aerEnt', 'Indique quién entrega la unidad.');
+    if (!rec) return aerError('aerRec', 'Indique quién recibe la unidad.');
+    if (ent === rec) return aerError('aerRec', 'Quien entrega y quien recibe deben ser personas distintas.');
+    if (kmRaw === '' || !Number.isInteger(km) || km < 0 || km > 2000000) return aerError('aerKm', 'Ingrese el kilometraje como un número entero entre 0 y 2 000 000.');
+    const prev = aerUltimoKm(u);
+    if (km < prev) return aerError('aerKm', `El kilometraje no puede ser menor que el del acta anterior de ${u} (${prev} km).`);
+    if (!comb) return aerError('aerComb', 'Indique el nivel de combustible.');
+    aerAplicarForzados();
+    const e = aerEvaluar(aerSel);
+    if (e.revisados < AER_ITEMS.length) { const f = AER_ITEMS.find(it => !aerSel[it.id]); const b = document.querySelector(`[data-it="${f.id}"]`); if (b) b.focus(); return aerError(null, `Faltan ${AER_ITEMS.length - e.revisados} puntos de la lista por revisar.`); }
+    if (!$('aerOk').checked) return aerError('aerOk', 'Quien recibe debe confirmar la revisión conjunta antes de registrar el acta.');
+    S.na = (S.na || 0) + 1;
+    const codigo = 'AER-' + String(S.na).padStart(3, '0'), obs = $('aerObs').value.trim().slice(0, 300);
+    let ot = null;
+    if (e.prioridad) {
+      const sist = [...new Set(e.veh.map(it => it.s))];
+      const lista = e.veh.map(it => it.t.split(/[,:]/)[0].toLowerCase()).join('; ');
+      ot = nuevaOt({ unidad: u, origen: 'Acta ' + codigo, sistema: sist.length === 1 ? sist[0] : 'Varios', sintoma: `No conforme en el acta de entrega-recepción: ${lista}`.slice(0, 140),
+        prioridad: e.prioridad, accion: e.prioridad === 'alta' ? 'No sale a ruta. Corregir y verificar los puntos críticos antes de entregar la unidad' : 'Programar la corrección sin retirar la unidad de ruta', motor: 'reglas' });
+    }
+    const acta = { id: 'a' + Date.now().toString(36) + S.na, codigo, t: new Date().toISOString(), unidad: u, motivo: $('aerMot').value, entrega: ent === 'BASE' ? 'Base' : ent, recibe: rec,
+      km, comb, items: { ...aerSel }, obs, resultado: e.resultado, epp: e.epp, ot: ot ? ot.codigo : null, otId: ot ? ot.id : null };
+    S.actas.push(acta); guardar();
+    if (ot) ultimoOt = ot.id;
+    const r = AER_RES[e.resultado];
+    $('aerMsg').className = 'msg ' + (e.resultado === 'no_apta' ? 'err' : 'okm');
+    $('aerMsg').textContent = `${codigo} registrada para ${u}: ${minus(r[0])}${ot ? `; se generó ${ot.codigo} de prioridad ${ot.prioridad}` : ''}${e.epp && e.resultado !== 'condicionada' ? '; reponer el EPP antes de salir' : ''}.`;
+    aerLimpiar(); renderAll();
+    toast(`${codigo} · ${u}: ${minus(r[0])}${ot ? ' · ' + ot.codigo : ''}`, e.resultado === 'no_apta' ? 'crit' : 'ok');
+    return acta;
+  }
+  function renderAer() {
+    const L = [...(S.actas || [])].sort((a, b) => String(b.t).localeCompare(String(a.t)));
+    if (!L.length) { $('aerBody').innerHTML = `<tr><td colspan="6" class="full"><div class="empty">${ico('inbox')}<b>Aún no hay actas registradas</b><span>Complete la lista de verificación para registrar la primera.</span></div></td></tr>`; return; }
+    $('aerBody').innerHTML = L.map(a => { const r = AER_RES[a.resultado];
+      return `<tr>
+        <td data-l="Acta"><div><span class="code">${esc(a.codigo)}</span><div class="tsm">${esc(fechaHora(a.t))}</div></div></td>
+        <td data-l="Unidad"><div><span class="code">${esc(a.unidad)}</span><div class="tsm">${esc(AER_MOT[a.motivo])}</div></div></td>
+        <td data-l="Entrega → recibe"><span class="code">${esc(a.entrega)} → ${esc(a.recibe)}</span></td>
+        <td data-l="Lectura" class="num"><div>${esc(a.km)} km<div class="tsm">Combustible ${esc(a.comb)}</div></div></td>
+        <td data-l="Resultado"><div><span class="pill ${r[1]}">${esc(r[0])}</span>${a.obs ? `<div class="tsm" style="margin-top:4px">${esc(a.obs)}</div>` : ''}</div></td>
+        <td data-l="Orden">${a.ot ? `<button type="button" class="btn sec sm" data-goot="${esc(a.otId)}">${esc(a.ot)}</button>` : '<span class="tsm">Sin orden</span>'}</td></tr>`; }).join('');
+  }
+  $('aerList').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-it]'); if (!b) return;
+    const forz = aerForzados($('aerU').value);
+    if (b.dataset.v === 'ok' && forz.includes(b.dataset.it)) { aerSel[b.dataset.it] = 'no'; aerLista(); aerPreview(); $('aerMsg').textContent = `El registro de documentos indica que ${b.dataset.it === 'extintor' ? 'el extintor' : 'un documento'} de ${$('aerU').value} está vencido: el punto no puede marcarse como conforme.`; $('aerMsg').className = 'msg err'; return; }
+    aerSel[b.dataset.it] = b.dataset.v; aerLista(); aerPreview();
+    const nb = document.querySelector(`[data-it="${b.dataset.it}"][data-v="${b.dataset.v}"]`); if (nb) nb.focus();
+    $('aerMsg').textContent = ''; $('aerMsg').className = 'msg';
+  });
+  $('aerForm').addEventListener('submit', ev => { ev.preventDefault(); registrarActa(); });
+  document.querySelectorAll('[data-aer]').forEach(b => b.addEventListener('click', () => {
+    const tipo = b.dataset.aer, u = $('aerU').value;
+    aerSel = {}; AER_ITEMS.forEach(it => { aerSel[it.id] = 'ok'; });
+    if (tipo === 'obs') aerSel.botiquin = 'no';
+    if (tipo === 'crit') aerSel.frenos = 'no';
+    $('aerMot').value = 'cambio'; $('aerEnt').value = 'CH-03'; $('aerRec').value = 'CH-07';
+    $('aerKm').value = String(Math.max(aerUltimoKm(u), 45210) + 12); $('aerComb').value = '3/4';
+    $('aerObs').value = tipo === 'crit' ? 'Pedal de freno largo; la unidad no frena de forma pareja' : tipo === 'obs' ? 'Botiquín sin gasas ni alcohol' : '';
+    $('aerOk').checked = false; $('aerMsg').textContent = 'Ejemplo cargado: falta la confirmación de quien recibe.'; $('aerMsg').className = 'msg';
+    if (aerAplicarForzados().length) $('aerMsg').textContent = `Ejemplo cargado. El registro de documentos de ${u} tiene un vencimiento: ese punto queda como no conforme.`;
+    aerLista(); aerPreview();
+  }));
+  $('aerU').addEventListener('change', () => { if (aerAplicarForzados().length) { $('aerMsg').textContent = `El registro de documentos de ${$('aerU').value} tiene un vencimiento: ese punto queda como no conforme.`; $('aerMsg').className = 'msg err'; } aerLista(); aerPreview(); });
+  aerOpts(); aerLista(); aerPreview();
+
+  // ---------- automatización: control de vencimientos de documentos (V13.1) ----------
+  function docTxt(u, t) { const n = diasA(S.docs[u][t]), e = docEstado(u, t); return e === 2 ? `Vencid${DOCG[t]} hace ${-n} ${n === -1 ? 'día' : 'días'}` : e === 1 ? `Vence en ${n} ${n === 1 ? 'día' : 'días'}` : `Vigente · ${n} días`; }
+  function renderDocs() {
+    let vig = 0, por = 0, ven = 0;
+    $('docBody').innerHTML = VEH.map(u => {
+      const celdas = DOCS.map(([t, nom]) => { const e = docEstado(u, t); if (e === 2) ven++; else if (e === 1) por++; else vig++;
+        return `<td data-l="${nom}"><div class="doc-c"><span class="code">${esc(fechaDoc(S.docs[u][t]))}</span><span class="pill ${['p-ok', 'p-adv', 'p-crit'][e]}">${docTxt(u, t)}</span>${e ? `<button type="button" class="btn sec sm" data-renov="${u}|${t}">Renovar</button>` : ''}</div></td>`; }).join('');
+      const v = docVencido(u), pv = DOCS.some(([t]) => docEstado(u, t) === 1);
+      return `<tr data-docu="${u}"><td data-l="Unidad"><span class="code">${u}</span></td>${celdas}<td data-l="Situación"><span class="pill ${v ? 'p-crit' : pv ? 'p-adv' : 'p-ok'}">${v ? 'No sale a ruta' : pv ? 'Renovar pronto' : 'Puede circular'}</span></td></tr>`;
+    }).join('');
+    $('docVig').textContent = vig; $('docPor').textContent = por; $('docVen').textContent = ven;
+  }
+  function docActualizar(u, t, f, origen) {
+    if (!VEH.includes(u) || !DOCN[t]) return null;
+    const n = diasA(f);
+    if (!f || n == null) { $('docMsg').textContent = 'Indique la nueva fecha de vencimiento.'; $('docMsg').className = 'msg err'; $('docF').setAttribute('aria-invalid', 'true'); $('docF').focus(); return null; }
+    if (Math.abs(n) > 1830) { $('docMsg').textContent = 'La fecha debe estar dentro de los cinco años anteriores o posteriores a hoy.'; $('docMsg').className = 'msg err'; $('docF').setAttribute('aria-invalid', 'true'); $('docF').focus(); return null; }
+    $('docF').removeAttribute('aria-invalid');
+    S.docs[u][t] = f; S.docLog.push({ t: new Date().toISOString(), unidad: u, doc: t, fecha: f, origen }); guardar();
+    const e = docEstado(u, t);
+    $('docMsg').className = 'msg ' + (e === 2 ? 'err' : 'okm');
+    $('docMsg').textContent = `${DOCN[t]} de ${u}: ${minus(docTxt(u, t))}${e === 2 && UNITS.includes(u) ? `; la unidad sale de ruta hasta renovarl${DOCG[t]}` : ''}.`;
+    renderAll(); toast(`${DOCN[t]} de ${u}: ${minus(docTxt(u, t))}`, e === 2 ? 'crit' : 'ok');
+    return e;
+  }
+  $('docForm').addEventListener('submit', ev => { ev.preventDefault(); docActualizar($('docU').value, $('docT').value, $('docF').value, 'Registro'); });
+  $('docBody').addEventListener('click', ev => { const b = ev.target.closest('[data-renov]'); if (!b) return; const [u, t] = b.dataset.renov.split('|'); docActualizar(u, t, masDias(365), 'Renovación'); });
+  document.querySelectorAll('[data-docej]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.docej === 'por') { $('docU').value = 'C-04'; $('docT').value = 'soat'; $('docF').value = masDias(12); docActualizar('C-04', 'soat', masDias(12), 'Ejemplo'); }
+    else { $('docU').value = 'C-06'; $('docT').value = 'rt'; $('docF').value = masDias(-3); docActualizar('C-06', 'rt', masDias(-3), 'Ejemplo'); }
+  }));
 
   // ---------- seguimiento y cierre de órdenes ----------
   function atender(id) { const o = S.ots.find(x => x.id === id); if (!o || o.estado !== 'pendiente') return null; o.estado = 'atencion'; o.inicio = new Date().toISOString(); guardar(); return o; }
@@ -1977,10 +2280,10 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   $('sReset').addEventListener('click', () => { S.sup = { ...SUP0 }; syncSup(); ['sTon', 'sLit', 'sAho'].forEach(i => $(i).removeAttribute('aria-invalid')); $('supMsg').textContent = 'Valores por defecto restaurados.'; $('supMsg').className = 'msg okm'; guardar(); renderAll(); });
 
   // ---------- reinicio ----------
-  function reiniciar() { S = estadoInicial(); guardar(); syncSup(); resolviendo = null; ultimoOt = null; filtroFlota = 'all'; $('cicloMsg').textContent = ''; $('otMsg').textContent = ''; $('fTexto').value = ''; preview(); ['flU', 'flP', 'flE'].forEach(i => { $(i).value = ''; }); hcLimpiarForm(); renderAll(); }
+  function reiniciar() { S = estadoInicial(); guardar(); syncSup(); resolviendo = null; ultimoOt = null; filtroFlota = 'all'; $('cicloMsg').textContent = ''; $('otMsg').textContent = ''; $('fTexto').value = ''; preview(); ['flU', 'flP', 'flE'].forEach(i => { $(i).value = ''; }); hcLimpiarForm(); aerLimpiar(); $('aerMsg').textContent = ''; $('docMsg').textContent = ''; $('docF').value = ''; renderAll(); }
   $('btnReset').addEventListener('click', async () => {
     menu(false);
-    if (await confirmar('Reiniciar la simulación', 'Se borrarán las órdenes creadas, las lecturas, los registros de combustible y los parámetros modificados, y la flota volverá a su estado inicial. ¿Desea continuar?', 'Reiniciar')) { reiniciar(); demoSalir(); toast('Simulación reiniciada a su estado inicial', 'ok'); }
+    if (await confirmar('Reiniciar la simulación', 'Se borrarán las órdenes creadas, las actas, las fechas de documentos modificadas, las lecturas, los registros de combustible y los parámetros modificados, y la flota volverá a su estado inicial. ¿Desea continuar?', 'Reiniciar')) { reiniciar(); demoSalir(); toast('Simulación reiniciada a su estado inicial', 'ok'); }
   });
 
   // ---------- demostración guiada C-03 ----------
