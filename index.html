@@ -930,7 +930,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
             <div class="kpi" id="kpDisp"><span class="l"><svg class="i"><use href="#i-gauge"/></svg>Disponibilidad de flota (actual / ensayo mensual)</span><span class="v tone" id="kDisp">–</span><div class="meter"><i id="kDispBar"></i></div><span class="m">Meta ≥ 90 %</span></div>
             <div class="kpi"><span class="l">MTBF · horas entre fallas</span><span class="v" id="kMtbf">–</span><span class="m">Meta +25 % vs. línea base</span></div>
             <div class="kpi"><span class="l">MTTR · horas de reparación</span><span class="v" id="kMttr">–</span><span class="m">Meta −20 % vs. línea base</span></div>
-            <div class="kpi" id="kpOt"><span class="l"><svg class="i"><use href="#i-wrench"/></svg>Órdenes de trabajo pendientes</span><span class="v tone" id="kOt">–</span><span class="m" id="kOtM">&nbsp;</span></div>
+            <div class="kpi" id="kpOt"><span class="l"><svg class="i"><use href="#i-wrench"/></svg>Órdenes de trabajo abiertas</span><span class="v tone" id="kOt">–</span><span class="m" id="kOtM">&nbsp;</span></div>
             <div class="kpi" id="kpAlert"><span class="l"><svg class="i"><use href="#i-alert"/></svg>Alertas prioritarias</span><span class="v tone" id="kAlert">–</span><span class="m" id="kAlertM">&nbsp;</span></div>
             <div class="kpi" id="kpSin"><span class="l"><svg class="i"><use href="#i-leaf"/></svg>Residuos sin recoger hoy</span><span class="v tone" id="kSin">–</span><span class="m">Estimación con supuestos · meta 0 t</span></div>
           </div>
@@ -1553,7 +1553,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   if (!Array.isArray(S.actas)) { S.actas = []; S.na = 0; }
   if (!S.docs || typeof S.docs !== 'object') { S.docs = docsIniciales(); S.docLog = []; }
   if (!Array.isArray(S.docLog)) S.docLog = [];
-  let modoCompartido = true, datosConfirmados = false, perfilCompartido = null, ordenesCompartidas = [];
+  let modoCompartido = true, datosConfirmados = false, perfilCompartido = null, ordenesCompartidas = [], errorCompartido = ''; 
   let estadoDemo = structuredClone(S);
   let registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]}, bloqueosCompartidos=()=>[];
   S = estadoInicial(); S.ots = []; S.hist = []; S.actas = []; S.hc.reg = []; S.docs=Object.fromEntries(VEH.map(u=>[u,{soat:null,rt:null,ext:null}]));
@@ -1646,7 +1646,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     $('kMtbf').textContent = K.mtbf == null ? '–' : fmt(K.mtbf, 0) + ' h';
     $('kMttr').textContent = K.mttr == null ? '–' : fmt(K.mttr, 1) + ' h';
     const c = p => K.ab.filter(o => o.prioridad === p).length;
-    $('kOt').textContent = K.ab.length; $('kOtM').textContent = `${c('alta')} alta · ${c('media')} media · ${c('baja')} baja`;
+    $('kOt').textContent = K.ab.length; $('kOtM').textContent = `${K.ab.filter(o=>o.estado==='pendiente').length} pendientes · ${K.ab.filter(o=>o.estado==='atencion').length} en atención · ${c('alta')} alta · ${c('media')} media · ${c('baja')} baja`;
     tone($('kpOt'), c('alta') ? 2 : K.ab.length ? 1 : 0);
     const ac = K.alertas.filter(a => a.sev === 2).length;
     $('kAlert').textContent = K.alertas.length; const na = K.alertas.length - ac; $('kAlertM').textContent = K.alertas.length ? `${ac} ${ac === 1 ? 'crítica' : 'críticas'} · ${na} ${na === 1 ? 'advertencia' : 'advertencias'}` : 'Sin alertas activas';
@@ -1899,14 +1899,14 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     $('hcC').textContent = fmt(t.co2 / 1000, 1) + ' t CO₂'; $('hcCM').textContent = t.co2e ? `CH₄ y N₂O: ${fmt((t.co2e - t.co2) / t.co2e * 100, 1)} % del CO₂e` : '–';
     $('hcI').textContent = t.int == null ? '–' : fmt(t.int, 1) + ' kg CO₂e/t'; $('hcIM').textContent = t.lpt == null ? 'sin toneladas registradas' : `${fmt(t.lpt, 2)} L de diésel por tonelada`;
     tone($('kpHcI'), null);
-    $('hcL').textContent = fmt(t.L, 0) + ' L'; $('hcLM').textContent = `${fmt(t.T, 1)} t recolectadas`;
+    $('hcL').textContent = fmt(t.L, modoCompartido?2:0) + ' L'; $('hcLM').textContent = `${fmt(t.T, 1)} t recolectadas`;
     const top = C.porU.filter(p => p.int != null).sort((a, b) => b.int - a.int)[0];
     $('hcMx').textContent = top ? top.u : '–'; $('hcMxM').textContent = top ? `${fmt(top.int, 1)} kg CO₂e/t · ${fmt(C.media ? (top.int / C.media - 1) * 100 : 0, 1)} % sobre la media` : '–';
     $('hcE').textContent = '−' + fmt(C.esc.ev, 2) + ' t CO₂e'; $('hcEM').textContent = `hipotético: −${fmt(H.red, 0)} % de diésel en el periodo`;
     $('hcEvo').innerHTML = hcEvoSvg(C.porM);
     $('hcCmpSub').textContent = `kg CO₂e por tonelada recolectada · ${etq}`; $('hcCmp').innerHTML = hcCmpSvg(C.porU, C.media);
     const regs = [...C.regs].sort((a, b) => a.periodo === b.periodo ? a.unidad.localeCompare(b.unidad) : b.periodo.localeCompare(a.periodo));
-    $('hcBody').innerHTML = regs.map(r => { const e = hcEm(Number(r.litros)); return `<tr data-hc="${esc(r.id)}"><td data-l="Unidad"><span class="code">${esc(r.unidad)}</span></td><td data-l="Periodo">${mesTxt(r.periodo)}</td><td data-l="Diésel (L)">${fmt(Number(r.litros), 0)}</td><td data-l="t recolectadas">${fmt(Number(r.toneladas), 1)}</td><td data-l="t CO₂e">${fmt(e.co2e / 1000, 2)}</td><td data-l="kg CO₂e/t">${Number(r.toneladas) > 0 ? fmt(e.co2e / Number(r.toneladas), 1) : '–'}</td><td data-l="Origen">${r.sim ? '<span class="pill p-ej">simulación</span>' : '<span class="pill p-ok">registrado</span>'}</td><td><button type="button" class="btn sec sm" data-hcdel="${esc(r.id)}" aria-label="Eliminar registro de ${esc(r.unidad)} ${mesTxt(r.periodo)}">Eliminar</button></td></tr>`; }).join('') || '<tr><td colspan="8">Sin registros en el periodo.</td></tr>';
+    $('hcBody').innerHTML = regs.map(r => { const e = hcEm(Number(r.litros)); return `<tr data-hc="${esc(r.id)}"><td data-l="Unidad"><span class="code">${esc(r.unidad)}</span></td><td data-l="Periodo">${mesTxt(r.periodo)}</td><td data-l="Diésel (L)">${fmt(Number(r.litros), modoCompartido?2:0)}</td><td data-l="t recolectadas">${modoCompartido && !r.toneladasRegistradas ? 'Sin registro' : fmt(Number(r.toneladas), 1)}</td><td data-l="t CO₂e">${fmt(e.co2e / 1000, 2)}</td><td data-l="kg CO₂e/t">${Number(r.toneladas) > 0 ? fmt(e.co2e / Number(r.toneladas), 1) : '–'}</td><td data-l="Origen">${r.sim ? '<span class="pill p-ej">simulación</span>' : '<span class="pill p-ok">registrado</span>'}</td><td>${modoCompartido ? '<span class="small muted">Historial compartido</span>' : `<button type="button" class="btn sec sm" data-hcdel="${esc(r.id)}" aria-label="Eliminar registro de ${esc(r.unidad)} ${mesTxt(r.periodo)}">Eliminar</button>`}</td></tr>`; }).join('') || '<tr><td colspan="8">Sin registros en el periodo.</td></tr>';
     if (document.activeElement !== $('hcRed')) $('hcRed').value = H.red;
     const m = Math.max(C.esc.base, 1e-9);
     $('hcEsc').innerHTML = `<div class="cmp-g"><h3>Emisiones del periodo (t CO₂e)</h3><div class="cb"><span>Registrado</span><span class="tr"><i style="width:100%;background:var(--faint)"></i></span><span class="pv">${fmt(C.esc.base, 1)} t</span></div><div class="cb"><span>Escenario</span><span class="tr"><i style="width:${C.esc.con / m * 100}%;background:var(--good)"></i></span><span class="pv">${fmt(C.esc.con, 1)} t</span></div></div><p class="foot">Diferencia: ${fmt(C.esc.ev, 2)} t CO₂e (${fmt(H.red, 0)} %). Intensidad en el escenario: ${t.int == null ? '–' : fmt(t.int * (1 - C.red), 1) + ' kg CO₂e/t'}.</p>`;
@@ -1960,7 +1960,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   $('hcForm').addEventListener('submit', ev => { ev.preventDefault(); hcRegistrar($('hcU').value, $('hcM').value, Number($('hcLi').value === '' ? NaN : $('hcLi').value), Number($('hcTo').value === '' ? NaN : $('hcTo').value)); });
   $('hcPer').addEventListener('change', () => { S.hc.per = $('hcPer').value; guardar(); renderHC(); });
   $('hcRed').addEventListener('input', () => { const raw = $('hcRed').value, v = Number(raw); if (raw === '' || !Number.isFinite(v) || v < 0 || v > 30) { $('hcRed').setAttribute('aria-invalid', 'true'); $('hcExpMsg').textContent = 'Reducción no válida: use un número entre 0 y 30. Se mantiene el último valor válido.'; $('hcExpMsg').className = 'msg err'; return; } $('hcRed').removeAttribute('aria-invalid'); $('hcExpMsg').textContent = ''; S.hc.red = v; guardar(); renderHC(); });
-  $('hcBody').addEventListener('click', ev => { const b = ev.target.closest('[data-hcdel]'); if (!b) return; S.hc.reg = S.hc.reg.filter(r => r.id !== b.dataset.hcdel); guardar(); renderHC(); $('hcMsg').textContent = 'Registro eliminado.'; $('hcMsg').className = 'msg okm'; });
+  $('hcBody').addEventListener('click', ev => { const b = ev.target.closest('[data-hcdel]'); if (!b || modoCompartido) return; S.hc.reg = S.hc.reg.filter(r => r.id !== b.dataset.hcdel); guardar(); renderHC(); $('hcMsg').textContent = 'Registro eliminado.'; $('hcMsg').className = 'msg okm'; });
   $('hcRep').addEventListener('click', () => { descargar('FlotaIA_reporte_huella_carbono.html', 'text/html;charset=utf-8', hcReporte()); $('hcExpMsg').textContent = 'Reporte generado.'; $('hcExpMsg').className = 'msg okm'; });
   $('hcCsv').addEventListener('click', () => { descargar('FlotaIA_huella_carbono_datos.csv', 'text/csv;charset=utf-8', '﻿' + hcCSV()); $('hcExpMsg').textContent = 'Datos exportados.'; $('hcExpMsg').className = 'msg okm'; });
 
@@ -2603,8 +2603,8 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   }
   function actualizarFuente(){
     const b=$('fuenteGlobal');if(!b)return;
-    b.querySelector('strong').textContent=modoCompartido?(datosConfirmados?'Operación compartida · Firebase':perfilCompartido?'Operación compartida · datos en caché':'Operación compartida · esperando datos'):'Demostración local · datos de ensayo';
-    b.querySelector('p').textContent=modoCompartido?'Órdenes, documentos, actas, combustible y lecturas de ensayo se comparten con móvil y tablet. Documentos vencidos, EPP pendiente y órdenes altas bloquean la ruta. El botón Registros compartidos permite consultar el historial y adjuntar archivos pequeños. Las lecturas hidráulicas siguen siendo simuladas y las emisiones se estiman a partir del combustible registrado. Catálogo académico.':'Los cambios de este escenario se guardan en esta PC y no crean ni modifican órdenes compartidas.';
+    b.querySelector('strong').textContent=modoCompartido?(errorCompartido?'Operación compartida · atención al acceso':datosConfirmados?'Operación compartida · Firebase':perfilCompartido?'Operación compartida · datos en caché':'Operación compartida · esperando datos')+(perfilCompartido?' · '+perfilCompartido.codigo:''):'Demostración local · datos de ensayo';
+    b.querySelector('p').textContent=modoCompartido?(errorCompartido?errorCompartido+' ':'')+'Órdenes, documentos, actas, combustible y lecturas de ensayo se comparten con móvil y tablet. Documentos vencidos, EPP pendiente y órdenes altas bloquean la ruta. El botón Registros compartidos permite consultar el historial y adjuntar archivos pequeños. Las lecturas hidráulicas siguen siendo simuladas y las emisiones se estiman a partir del combustible registrado. Catálogo académico.':'Los cambios de este escenario se guardan en esta PC y no crean ni modifican órdenes compartidas.';
     $('modoFuente').textContent=modoCompartido?'Abrir demostración local':'Volver a operación compartida';
     $('hcForm').hidden=modoCompartido;
     if($('abrirCarga'))$('abrirCarga').hidden=!modoCompartido;
@@ -2615,7 +2615,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
       $('kMtbf').textContent='Sin base de horas';
       $('kpDisp').querySelector('.m').textContent='Actual: unidades disponibles / 7; no es disponibilidad mensual.';
       if(!perfilCompartido){$('fCards').innerHTML='<div class="card">Inicie sesión en Cuenta y reportes compartidos para cargar la flota.</div>';}
-      if(!perfilCompartido){['kOper','kAdv','kCrit','kRutas','kDisp','kMttr'].forEach(i=>$(i).textContent='—');}
+      if(!perfilCompartido){['kOper','kAdv','kCrit','kRutas','kDisp','kMttr','kOt','kAlert'].forEach(i=>$(i).textContent='—');}
     }
   }
   const carga=document.createElement('button');carga.id='abrirCarga';carga.className='btn';carga.type='button';carga.textContent='Registrar carga de combustible compartida';carga.onclick=()=>window.FlotaIARegistros?.abrir('combustible');$('hcForm').before(carga);
@@ -2625,9 +2625,10 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   document.querySelector('main').prepend(fuente);
   $('modoFuente').onclick=()=>cambiarModo(!modoCompartido);
   window.FlotaIAIntegracion={
-    recibir(ordenes,perfil,meta){ordenesCompartidas=ordenes;perfilCompartido=perfil;datosConfirmados=!meta?.fromCache;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();},
+    problema(texto){errorCompartido=String(texto||'');actualizarFuente();},
+    recibir(ordenes,perfil,meta){errorCompartido='';ordenesCompartidas=ordenes;perfilCompartido=perfil;datosConfirmados=!meta?.fromCache;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();},
     recibirRegistros(reg,bloqueos){registrosCompartidos=structuredClone(reg);bloqueosCompartidos=bloqueos;if(modoCompartido){aplicarOrdenes();renderAll();}},
-    desconectar(){registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]};bloqueosCompartidos=()=>[];ordenesCompartidas=[];perfilCompartido=null;datosConfirmados=false;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();}
+    desconectar(){errorCompartido='';registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]};bloqueosCompartidos=()=>[];ordenesCompartidas=[];perfilCompartido=null;datosConfirmados=false;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();}
   };
   const idsRegistro={};
   async function registrarCompartido(tipo,d,msg){
@@ -3680,6 +3681,7 @@ google.onclick = async () => {
 };
 var error = (e) => {
   status.textContent = mensajeError(e);
+  window.FlotaIAIntegracion.problema(status.textContent);
 };
 salir.onclick = () => cerrarSesion().catch(error);
 form.onsubmit = async (e) => {
@@ -3717,12 +3719,14 @@ try {
     google.hidden = s.estado !== "sin_sesion";
     salir.hidden = !s.usuario;
     if (s.estado !== "ok") {
-      const mensajes = { sin_sesion: "Elija su cuenta de Google autorizada como supervisor o administrador.", cargando: "Comprobando perfil\u2026", incompleto: "Complete su nombre y c\xF3digo desde la interfaz tablet con ayuda del administrador.", sin_perfil: "La cuenta necesita un perfil v\xE1lido en usuarios/{uid}.", inactivo: "Cuenta desactivada." };
+      const mensajes = { sin_sesion: "Inicie sesi\xF3n con una cuenta autorizada de mec\xE1nico, supervisor o administrador.", cargando: "Comprobando perfil\u2026", incompleto: "Complete su nombre y c\xF3digo desde la interfaz tablet con ayuda del administrador.", sin_perfil: "La cuenta necesita un perfil v\xE1lido en usuarios/{uid}.", inactivo: "Cuenta desactivada." };
       status.textContent = mensajes[s.estado] || mensajeError(s.error);
+      window.FlotaIAIntegracion.problema(status.textContent);
       return;
     }
-    if (!["supervisor", "administrador"].includes(s.perfil.rol)) {
-      status.textContent = "Este panel requiere un supervisor o administrador. Use m\xF3vil o tablet para su rol.";
+    if (!["mecanico", "supervisor", "administrador"].includes(s.perfil.rol)) {
+      status.textContent = "El perfil de chofer consulta su unidad en la versi\xF3n m\xF3vil. Para el panel general use una cuenta de mec\xE1nico, supervisor o administrador.";
+      window.FlotaIAIntegracion.problema(status.textContent);
       return;
     }
     perfilActual = s.perfil;
