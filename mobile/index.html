@@ -255,640 +255,679 @@ input:disabled,select:disabled{background:var(--surface-2);color:var(--muted)}
 <div id="app" aria-live="polite"><main class="login"><p class="muted">Cargando FlotaIA Mobile…</p></main></div>
 <noscript><p style="padding:16px">FlotaIA Mobile necesita JavaScript activado.</p></noscript>
 <script type="module">
-// FlotaIA Mobile · archivo único (HTML + CSS + JavaScript), generado desde los módulos de shared/.
-// Prototipo académico con datos simulados · Municipalidad Distrital de El Tambo — Huancayo.
-// Publicación: guarde este archivo como mobile/index.html en el repositorio (https://ktakahashi-bit.github.io/flotaia/mobile/).
-// Opcional: si publica también mobile/manifest.webmanifest, mobile/sw.js y shared/icons/, la app se podrá instalar
-// con ícono propio y abrir sin señal; sin ellos funciona igual.
-//
-// >>> PASO OBLIGATORIO: pegue aquí la configuración web de Firebase (Consola > Configuración del proyecto > Tus apps).
-// >>> Reemplace cada PEGAR_AQUI. Son valores públicos; NO pegue claves de cuentas de servicio.
-const __M = {};
-// ===== firebase-config.js =====
-__M['firebase-config'] = (() => {
-// FlotaIA · configuración web PÚBLICA del proyecto Firebase flotaia-3de2c.
-// Estos valores no son secretos: identifican el proyecto ante Firebase. La protección real está en las reglas de Firestore.
-// PASO OBLIGATORIO antes de publicar: en la consola de Firebase, Configuración del proyecto > General > Tus apps > App web,
-// copie el bloque firebaseConfig y reemplace los valores marcados con PEGAR_AQUI.
-const firebaseConfig = {
-  apiKey: 'PEGAR_AQUI',
-  authDomain: 'flotaia-3de2c.firebaseapp.com',
-  projectId: 'flotaia-3de2c',
-  storageBucket: 'PEGAR_AQUI',
-  messagingSenderId: 'PEGAR_AQUI',
-  appId: 'PEGAR_AQUI',
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res, err2) => function __init() {
+  if (err2) throw err2[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err2 = [e], e;
+  }
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// Versión fija del SDK modular de Firebase (se carga desde el CDN oficial, sin compilación).
-const FIREBASE_SDK = '10.12.2';
+// shared/local-adapter.js
+var local_adapter_exports = {};
+__export(local_adapter_exports, {
+  CUENTAS_DEMO: () => CUENTAS_DEMO,
+  crearAdaptadorLocal: () => crearAdaptadorLocal
+});
+function semilla() {
+  const now = (/* @__PURE__ */ new Date()).toISOString(), docs = {};
+  CUENTAS_DEMO.forEach((c) => {
+    docs[`usuarios/${c.uid}`] = { ...c.perfil, activo: true, prototipo: true, creadoEn: now, actualizadoEn: now };
+  });
+  UNIDADES.forEach((u) => {
+    docs[`unidades/${u.codigo}`] = { ...u, simulado: true, prototipo: true };
+  });
+  return { docs, cuentas: CUENTAS_DEMO.map((c) => ({ email: c.email, pass: PASS_DEMO, uid: c.uid })) };
+}
+async function crearAdaptadorLocal() {
+  let db;
+  const leer = () => {
+    try {
+      const g = JSON.parse(localStorage.getItem(CLAVE) || "null");
+      if (g && g.docs && g.cuentas) return g;
+    } catch (e) {
+    }
+    return semilla();
+  };
+  const guardar = () => {
+    try {
+      localStorage.setItem(CLAVE, JSON.stringify(db));
+    } catch (e) {
+    }
+  };
+  db = leer();
+  guardar();
+  const oyentes = /* @__PURE__ */ new Set();
+  const canal = "BroadcastChannel" in window ? new BroadcastChannel("flotaia-local") : null;
+  const notificar = (remoto) => {
+    if (remoto) db = leer();
+    oyentes.forEach((f) => f());
+  };
+  if (canal) canal.onmessage = () => notificar(true);
+  window.addEventListener("storage", (e) => {
+    if (e.key === CLAVE) notificar(true);
+  });
+  const cambio = () => {
+    guardar();
+    if (canal) canal.postMessage("cambio");
+    notificar(false);
+  };
+  const authCbs = /* @__PURE__ */ new Set();
+  let usuario = null;
+  try {
+    const s = JSON.parse(sessionStorage.getItem(SESION) || "null");
+    if (s && db.cuentas.some((c) => c.uid === s.uid)) usuario = s;
+  } catch (e) {
+  }
+  const emitirAuth = () => authCbs.forEach((cb) => cb(usuario));
+  const key = (path) => path.join("/");
+  const conId = (k, d) => ({ id: k.split("/").pop(), ...d });
+  const prep = (data) => {
+    const o = {}, now = (/* @__PURE__ */ new Date()).toISOString();
+    for (const k in data) o[k] = data[k] === TS ? now : data[k];
+    return o;
+  };
+  const id = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6);
+  const ejecutar = (spec) => {
+    const pref = key(spec.path) + "/", prof = spec.path.length + 1;
+    let filas = Object.entries(db.docs).filter(([k]) => k.startsWith(pref) && k.split("/").length === prof).map(([k, d]) => conId(k, d));
+    (spec.where || []).forEach(([f, op, v]) => {
+      filas = filas.filter((r) => op === "==" ? r[f] === v : op === "in" ? v.includes(r[f]) : true);
+    });
+    if (spec.orderBy) {
+      const [f, dir] = spec.orderBy;
+      filas.sort((a, b) => String(a[f]).localeCompare(String(b[f])) * (dir === "desc" ? -1 : 1));
+    }
+    if (spec.limit) filas = filas.slice(0, spec.limit);
+    return filas;
+  };
+  const err2 = (code, msg) => {
+    const e = new Error(msg);
+    e.code = code;
+    return e;
+  };
+  return {
+    nombre: "local",
+    ts: () => TS,
+    onAuth(cb) {
+      authCbs.add(cb);
+      setTimeout(() => cb(usuario), 0);
+      return () => authCbs.delete(cb);
+    },
+    async signIn(email, pass) {
+      const c = db.cuentas.find((x) => x.email.toLowerCase() === String(email).trim().toLowerCase() && x.pass === pass);
+      if (!c) throw err2("auth/invalid-credential", "Credenciales no v\xE1lidas");
+      usuario = { uid: c.uid, email: c.email };
+      sessionStorage.setItem(SESION, JSON.stringify(usuario));
+      emitirAuth();
+      return usuario;
+    },
+    async signOut() {
+      usuario = null;
+      sessionStorage.removeItem(SESION);
+      emitirAuth();
+    },
+    async getDoc(path) {
+      const d = db.docs[key(path)];
+      return d ? conId(key(path), d) : null;
+    },
+    watch(spec, onData) {
+      const f = () => onData(ejecutar(spec), { fromCache: false, pendientes: false });
+      oyentes.add(f);
+      setTimeout(f, 0);
+      return () => oyentes.delete(f);
+    },
+    watchDoc(path, onData) {
+      const f = () => {
+        const d = db.docs[key(path)];
+        onData(d ? conId(key(path), d) : null, { fromCache: false, pendientes: false });
+      };
+      oyentes.add(f);
+      setTimeout(f, 0);
+      return () => oyentes.delete(f);
+    },
+    newId: () => id(),
+    async commit(ops) {
+      db = leer();
+      for (const o of ops) {
+        const k = key(o.path);
+        if (o.op === "update" && !db.docs[k]) throw err2("not-found", "Documento inexistente");
+      }
+      ops.forEach((o) => {
+        const k = key(o.path);
+        db.docs[k] = o.op === "set" ? prep(o.data) : { ...db.docs[k], ...prep(o.data) };
+      });
+      cambio();
+    },
+    async tx(fn) {
+      db = leer();
+      const pend = [];
+      const r = await fn({ get: async (p) => {
+        const d = db.docs[key(p)];
+        return d ? conId(key(p), d) : null;
+      }, set: (p, d) => pend.push({ op: "set", path: p, data: d }), update: (p, d) => pend.push({ op: "update", path: p, data: d }) });
+      pend.forEach((o) => {
+        const k = key(o.path);
+        db.docs[k] = o.op === "set" ? prep(o.data) : { ...db.docs[k], ...prep(o.data) };
+      });
+      cambio();
+      return r;
+    },
+    async crearCuenta(email, pass) {
+      db = leer();
+      if (db.cuentas.some((c) => c.email.toLowerCase() === email.toLowerCase())) throw err2("auth/email-already-in-use", "Correo ya registrado");
+      const uid = "u-" + id();
+      db.cuentas.push({ email, pass, uid });
+      cambio();
+      return uid;
+    },
+    onConexion(cb) {
+      const f = () => cb({ online: navigator.onLine });
+      window.addEventListener("online", f);
+      window.addEventListener("offline", f);
+      f();
+      return () => {
+        window.removeEventListener("online", f);
+        window.removeEventListener("offline", f);
+      };
+    },
+    reiniciarDemo() {
+      db = semilla();
+      cambio();
+    }
+  };
+}
+var CLAVE, SESION, TS, PASS_DEMO, CUENTAS_DEMO, UNIDADES;
+var init_local_adapter = __esm({
+  "shared/local-adapter.js"() {
+    CLAVE = "flotaia-multiplataforma-local-v1";
+    SESION = "flotaia-multiplataforma-local-sesion";
+    TS = "__SERVER_TS__";
+    PASS_DEMO = "demo1234";
+    CUENTAS_DEMO = [
+      { email: "chofer@demo.local", uid: "u-chofer-03", perfil: { rol: "chofer", nombre: "Chofer de prueba", codigo: "CH-03", unidadAsignada: "C-03" } },
+      { email: "chofer5@demo.local", uid: "u-chofer-05", perfil: { rol: "chofer", nombre: "Chofer de prueba 2", codigo: "CH-05", unidadAsignada: "C-05" } },
+      { email: "mecanico@demo.local", uid: "u-mecanico-01", perfil: { rol: "mecanico", nombre: "Mec\xE1nico de prueba", codigo: "ME-01", unidadAsignada: null } },
+      { email: "supervisor@demo.local", uid: "u-supervisor-01", perfil: { rol: "supervisor", nombre: "Supervisor de prueba", codigo: "SU-01", unidadAsignada: null } },
+      { email: "admin@demo.local", uid: "u-admin-01", perfil: { rol: "administrador", nombre: "Administrador de prueba", codigo: "AD-01", unidadAsignada: null } }
+    ];
+    UNIDADES = [...Array.from({ length: 7 }, (_, i) => ({ codigo: `C-0${i + 1}`, tipo: "compactadora", ruta: `R-0${i + 1}` })), { codigo: "B-01", tipo: "baranda", ruta: null }];
+  }
+});
 
-const configCompleta = () => Object.values(firebaseConfig).every(v => typeof v === 'string' && v && !v.includes('PEGAR_AQUI'));
-return { firebaseConfig, FIREBASE_SDK, configCompleta };
-})();
+// shared/firebase-config.js
+var firebaseConfig, FIREBASE_SDK, configCompleta;
+var init_firebase_config = __esm({
+  "shared/firebase-config.js"() {
+    firebaseConfig = {
+      apiKey: "AIzaSyCjJtpxrXrJD539z1gQvhNt4pZsQxSHwF8",
+      authDomain: "flotaia-3de2c.firebaseapp.com",
+      projectId: "flotaia-3de2c",
+      storageBucket: "flotaia-3de2c.firebasestorage.app",
+      messagingSenderId: "951580054033",
+      appId: "1:951580054033:web:77f45bd8f108f366be17b0"
+    };
+    FIREBASE_SDK = "10.12.2";
+    configCompleta = () => Object.values(firebaseConfig).every((v) => typeof v === "string" && v && !v.includes("PEGAR_AQUI"));
+  }
+});
 
-// ===== reglas.js =====
-__M['reglas'] = (() => {
-// FlotaIA · clasificación del reporte por REGLAS (no es IA).
-// Copia exacta de la función reglas() del escritorio index.html V13.1; tests/equivalencia.test.mjs comprueba que dan el mismo resultado.
+// shared/firestore-adapter.js
+var firestore_adapter_exports = {};
+__export(firestore_adapter_exports, {
+  crearAdaptadorFirestore: () => crearAdaptadorFirestore
+});
+async function crearAdaptadorFirestore() {
+  if (!configCompleta()) {
+    const e = new Error("Falta completar shared/firebase-config.js");
+    e.code = "flotaia/config";
+    throw e;
+  }
+  let appMod, A4, F2;
+  try {
+    [appMod, A4, F2] = await Promise.all([import(`${CDN}/firebase-app.js`), import(`${CDN}/firebase-auth.js`), import(`${CDN}/firebase-firestore.js`)]);
+  } catch (err2) {
+    const e = new Error("No se pudo cargar el SDK de Firebase");
+    e.code = "flotaia/sdk";
+    e.cause = err2;
+    throw e;
+  }
+  const app = appMod.initializeApp(firebaseConfig);
+  const auth = A4.getAuth(app);
+  await A4.setPersistence(auth, A4.browserLocalPersistence);
+  let db;
+  try {
+    db = F2.initializeFirestore(app, { localCache: F2.persistentLocalCache({ tabManager: F2.persistentMultipleTabManager() }) });
+  } catch (e) {
+    db = F2.getFirestore(app);
+  }
+  const ref = (path) => F2.doc(db, ...path);
+  const col = (path) => F2.collection(db, ...path);
+  const conv = (v) => v && typeof v.toDate === "function" ? v.toDate().toISOString() : v;
+  const fromSnap = (s) => {
+    const d = s.data({ serverTimestamps: "estimate" }) || {};
+    const o = { id: s.id, _pend: s.metadata.hasPendingWrites };
+    for (const k in d) o[k] = conv(d[k]);
+    return o;
+  };
+  const TS2 = /* @__PURE__ */ Symbol("serverTimestamp");
+  const prep = (data) => {
+    const o = {};
+    for (const k in data) o[k] = data[k] === TS2 ? F2.serverTimestamp() : data[k];
+    return o;
+  };
+  const conexionCbs = /* @__PURE__ */ new Set();
+  const avisar = () => conexionCbs.forEach((cb) => cb({ online: navigator.onLine }));
+  window.addEventListener("online", avisar);
+  window.addEventListener("offline", avisar);
+  return {
+    nombre: "firestore",
+    ts: () => TS2,
+    onAuth: (cb) => A4.onAuthStateChanged(auth, (u) => cb(u ? { uid: u.uid, email: u.email } : null)),
+    signIn: (email, pass) => A4.signInWithEmailAndPassword(auth, email, pass).then((c) => ({ uid: c.user.uid, email: c.user.email })),
+    signInGoogle: async () => {
+      const provider = new A4.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      const c = await A4.signInWithPopup(auth, provider);
+      return { uid: c.user.uid, email: c.user.email };
+    },
+    signOut: () => A4.signOut(auth),
+    async getDoc(path) {
+      const s = await F2.getDoc(ref(path));
+      return s.exists() ? fromSnap(s) : null;
+    },
+    watch(spec, onData, onError) {
+      const cons = [];
+      (spec.where || []).forEach(([f, op, v]) => cons.push(F2.where(f, op, v)));
+      if (spec.orderBy) cons.push(F2.orderBy(spec.orderBy[0], spec.orderBy[1] || "asc"));
+      if (spec.limit) cons.push(F2.limit(spec.limit));
+      const q = F2.query(col(spec.path), ...cons);
+      return F2.onSnapshot(
+        q,
+        { includeMetadataChanges: true },
+        (snap) => onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites }),
+        (err2) => onError && onError(err2)
+      );
+    },
+    watchDoc(path, onData, onError) {
+      return F2.onSnapshot(
+        ref(path),
+        { includeMetadataChanges: true },
+        (s) => onData(s.exists() ? fromSnap(s) : null, { fromCache: s.metadata.fromCache, pendientes: s.metadata.hasPendingWrites }),
+        (err2) => onError && onError(err2)
+      );
+    },
+    newId: (path) => F2.doc(col(path)).id,
+    commit(ops) {
+      const b = F2.writeBatch(db);
+      ops.forEach((o) => {
+        if (o.op === "set") b.set(ref(o.path), prep(o.data));
+        else b.update(ref(o.path), prep(o.data));
+      });
+      return b.commit();
+    },
+    tx(fn) {
+      return F2.runTransaction(db, async (t) => fn({
+        get: async (p) => {
+          const s = await t.get(ref(p));
+          return s.exists() ? fromSnap(s) : null;
+        },
+        set: (p, d) => t.set(ref(p), prep(d)),
+        update: (p, d) => t.update(ref(p), prep(d))
+      }));
+    },
+    // Alta de una cuenta por el administrador sin cerrar su propia sesión: se usa una instancia secundaria de Firebase.
+    async crearCuenta(email, pass) {
+      const sec = appMod.initializeApp(firebaseConfig, "flotaia-alta-" + Date.now());
+      try {
+        const sAuth = A4.getAuth(sec);
+        await A4.setPersistence(sAuth, A4.inMemoryPersistence);
+        const cred = await A4.createUserWithEmailAndPassword(sAuth, email, pass);
+        const uid = cred.user.uid;
+        await A4.signOut(sAuth);
+        return uid;
+      } finally {
+        await appMod.deleteApp(sec);
+      }
+    },
+    onConexion(cb) {
+      conexionCbs.add(cb);
+      cb({ online: navigator.onLine });
+      return () => conexionCbs.delete(cb);
+    }
+  };
+}
+var CDN;
+var init_firestore_adapter = __esm({
+  "shared/firestore-adapter.js"() {
+    init_firebase_config();
+    CDN = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK}`;
+  }
+});
+
+// shared/reglas.js
 function reglas(t) {
   const x = t.toLowerCase();
-  const sistema = /bomba|prensa|hidr|aceite|cilindro|compuerta|fuga|acumulador|enfriador|pala|manguera/.test(x) ? 'Hidráulico'
-    : /motor|humo|escape|arranca|temperatura|recalienta|turbo/.test(x) ? 'Motor'
-    : /luz|luces|bater|eléctr|electr|tablero|alternador|fusible/.test(x) ? 'Eléctrico'
-    : /llanta|neum|freno|suspens|dirección|direccion/.test(x) ? 'Chasis' : 'Por confirmar';
-  const prioridad = /no (puede )?sal|no arranca|varad|detenid|no funciona|no sale|sin frenos/.test(x) ? 'alta'
-    : /pierde|ruido|silbido|fuga|humo|recalienta|goteo/.test(x) ? 'media' : 'baja';
-  const acc = { 'Hidráulico': 'Inspeccionar bomba, mangueras y cilindros; medir presión del sistema', 'Motor': 'Diagnóstico del motor por el mecánico de turno', 'Eléctrico': 'Revisar fusibles, batería y cableado', 'Chasis': 'Revisar frenos, dirección y neumáticos', 'Por confirmar': 'Inspección general por el mecánico de turno' }[sistema];
+  const sistema = /bomba|prensa|hidr|aceite|cilindro|compuerta|fuga|acumulador|enfriador|pala|manguera/.test(x) ? "Hidr\xE1ulico" : /motor|humo|escape|arranca|temperatura|recalienta|turbo/.test(x) ? "Motor" : /luz|luces|bater|eléctr|electr|tablero|alternador|fusible/.test(x) ? "El\xE9ctrico" : /llanta|neum|freno|suspens|dirección|direccion/.test(x) ? "Chasis" : "Por confirmar";
+  const prioridad = /no (puede )?sal|no arranca|varad|detenid|no funciona|no sale|sin frenos/.test(x) ? "alta" : /pierde|ruido|silbido|fuga|humo|recalienta|goteo/.test(x) ? "media" : "baja";
+  const acc = { "Hidr\xE1ulico": "Inspeccionar bomba, mangueras y cilindros; medir presi\xF3n del sistema", "Motor": "Diagn\xF3stico del motor por el mec\xE1nico de turno", "El\xE9ctrico": "Revisar fusibles, bater\xEDa y cableado", "Chasis": "Revisar frenos, direcci\xF3n y neum\xE1ticos", "Por confirmar": "Inspecci\xF3n general por el mec\xE1nico de turno" }[sistema];
   return { sistema, prioridad, accion: acc };
 }
-const SISTEMAS = ['Hidráulico', 'Motor', 'Eléctrico', 'Chasis', 'Por confirmar'];
-const EJEMPLOS = [
-  ['Prensa sin fuerza', 'La prensa pierde fuerza y se escucha un silbido en la bomba'],
-  ['Humo en el motor', 'Sale humo negro del escape y el motor no levanta en subida'],
-  ['Fuga, no sale', 'Fuga de aceite en el cilindro de la compuerta, la unidad no puede salir a ruta'],
+var EJEMPLOS = [
+  ["Prensa sin fuerza", "La prensa pierde fuerza y se escucha un silbido en la bomba"],
+  ["Humo en el motor", "Sale humo negro del escape y el motor no levanta en subida"],
+  ["Fuga, no sale", "Fuga de aceite en el cilindro de la compuerta, la unidad no puede salir a ruta"]
 ];
-return { reglas, SISTEMAS, EJEMPLOS };
-})();
 
-// ===== permissions.js =====
-__M['permissions'] = (() => {
-// FlotaIA · permisos por rol.
-// Esta matriz decide qué muestra la interfaz. La protección real la aplican las reglas de Firestore (firestore.rules),
-// que repiten las mismas restricciones: ocultar un botón no protege la base de datos.
-
-const ROLES = ['chofer', 'mecanico', 'supervisor', 'administrador'];
-const ROL_NOMBRE = { chofer: 'Chofer', mecanico: 'Mecánico', supervisor: 'Supervisor', administrador: 'Administrador' };
-
-const T = true, F = false;
-const MATRIZ = {
+// shared/permissions.js
+var ROLES = ["chofer", "mecanico", "supervisor", "administrador"];
+var ROL_NOMBRE = { chofer: "Chofer", mecanico: "Mec\xE1nico", supervisor: "Supervisor", administrador: "Administrador" };
+var T = true;
+var F = false;
+var MATRIZ = {
   //                         chofer       mecánico  supervisor  administrador
-  verTodasLasUnidades:     { chofer: F,         mecanico: T, supervisor: T, administrador: T },
-  reportarIncidencia:      { chofer: T,         mecanico: T, supervisor: T, administrador: T },
-  verAlertas:              { chofer: T,         mecanico: T, supervisor: T, administrador: T },
-  registrarInspeccion:     { chofer: F,         mecanico: T, supervisor: T, administrador: T },
-  atenderOrden:            { chofer: F,         mecanico: T, supervisor: F, administrador: T },
-  observarSeguimiento:     { chofer: F,         mecanico: T, supervisor: T, administrador: T },
-  generarOrdenModelo:      { chofer: F,         mecanico: T, supervisor: F, administrador: T },
-  verIndicadores:          { chofer: 'limitado', mecanico: T, supervisor: T, administrador: T },
-  administrarUsuarios:     { chofer: F,         mecanico: F, supervisor: F, administrador: T },
+  verTodasLasUnidades: { chofer: F, mecanico: T, supervisor: T, administrador: T },
+  reportarIncidencia: { chofer: T, mecanico: T, supervisor: T, administrador: T },
+  verAlertas: { chofer: T, mecanico: T, supervisor: T, administrador: T },
+  registrarInspeccion: { chofer: F, mecanico: T, supervisor: T, administrador: T },
+  atenderOrden: { chofer: F, mecanico: T, supervisor: F, administrador: T },
+  observarSeguimiento: { chofer: F, mecanico: T, supervisor: T, administrador: T },
+  generarOrdenModelo: { chofer: F, mecanico: T, supervisor: F, administrador: T },
+  verIndicadores: { chofer: "limitado", mecanico: T, supervisor: T, administrador: T },
+  administrarUsuarios: { chofer: F, mecanico: F, supervisor: F, administrador: T }
 };
-
 function puede(rol, accion) {
   const fila = MATRIZ[accion];
   if (!fila || !ROLES.includes(rol)) return false;
   return fila[rol];
 }
-
-// Qué perfiles usa cada interfaz (el administrador puede entrar a ambas).
-const PERFILES_INTERFAZ = {
-  mobile: ['chofer', 'mecanico', 'administrador'],
-  tablet: ['mecanico', 'supervisor', 'administrador'],
+var PERFILES_INTERFAZ = {
+  mobile: ["chofer", "mecanico", "administrador"],
+  tablet: ["mecanico", "supervisor", "administrador"]
 };
-return { ROLES, ROL_NOMBRE, puede, PERFILES_INTERFAZ };
-})();
 
-// ===== firestore-service.js =====
-__M['firestore-service'] = (() => {
-// FlotaIA · servicio de datos compartido por Mobile y Tablet.
-// Toda lectura y escritura pasa por aquí. La forma de cada documento coincide campo por campo con firestore.rules.
-// Funciona igual con el adaptador de Firestore o con el modo local de prueba.
-const { reglas, SISTEMAS } = __M['reglas'];
-const { puede } = __M['permissions'];
-
-let A = null;
-const usarAdaptador = a => { A = a; };
-const adaptador = () => A;
-
-const ESTADOS = { pendiente: 'Pendiente', atencion: 'En atención', resuelta: 'Resuelta' };
-const PRIORIDADES = ['alta', 'media', 'baja'];
-const CONDICIONES = { conforme: 'Conforme', observada: 'Observada', critica: 'Crítica' };
-const RESULTADO_POR_CONDICION = { conforme: 'apta', observada: 'apta_con_observacion', critica: 'no_apta' };
-const RESULTADOS = { apta: 'Apta', apta_con_observacion: 'Apta con observación', no_apta: 'No apta: no sale a ruta' };
-const PRIORIDAD_POR_CONDICION = { observada: 'media', critica: 'alta' };
-// Mismas acciones que asigna reglas() en el escritorio para cada sistema.
-const ACCION_POR_SISTEMA = { 'Hidráulico': 'Inspeccionar bomba, mangueras y cilindros; medir presión del sistema', 'Motor': 'Diagnóstico del motor por el mecánico de turno', 'Eléctrico': 'Revisar fusibles, batería y cableado', 'Chasis': 'Revisar frenos, dirección y neumáticos', 'Por confirmar': 'Inspección general por el mecánico de turno' };
-const UNIDADES_CATALOGO = [...Array.from({ length: 7 }, (_, i) => ({ codigo: `C-0${i + 1}`, tipo: 'compactadora', ruta: `R-0${i + 1}` })), { codigo: 'B-01', tipo: 'baranda', ruta: null }];
-
-const p2 = n => String(n).padStart(2, '0');
-// Código legible sin contador global (evita transacciones y choques entre dispositivos): OT-AAMMDD-HHMM-XXX.
-function codigoOT(id, f = new Date()) {
-  return `OT-${String(f.getFullYear()).slice(2)}${p2(f.getMonth() + 1)}${p2(f.getDate())}-${p2(f.getHours())}${p2(f.getMinutes())}-${id.replace(/[^a-z0-9]/gi, '').slice(0, 3).toUpperCase()}`;
+// shared/firestore-service.js
+var A = null;
+var usarAdaptador = (a) => {
+  A = a;
+};
+var ESTADOS = { pendiente: "Pendiente", atencion: "En atenci\xF3n", resuelta: "Resuelta" };
+var CONDICIONES = { conforme: "Conforme", observada: "Observada", critica: "Cr\xEDtica" };
+var RESULTADOS = { apta: "Apta", apta_con_observacion: "Apta con observaci\xF3n", no_apta: "No apta: no sale a ruta" };
+var ACCION_POR_SISTEMA = { "Hidr\xE1ulico": "Inspeccionar bomba, mangueras y cilindros; medir presi\xF3n del sistema", "Motor": "Diagn\xF3stico del motor por el mec\xE1nico de turno", "El\xE9ctrico": "Revisar fusibles, bater\xEDa y cableado", "Chasis": "Revisar frenos, direcci\xF3n y neum\xE1ticos", "Por confirmar": "Inspecci\xF3n general por el mec\xE1nico de turno" };
+var UNIDADES_CATALOGO = [...Array.from({ length: 7 }, (_, i) => ({ codigo: `C-0${i + 1}`, tipo: "compactadora", ruta: `R-0${i + 1}` })), { codigo: "B-01", tipo: "baranda", ruta: null }];
+var p2 = (n) => String(n).padStart(2, "0");
+function codigoOT(id, f = /* @__PURE__ */ new Date()) {
+  return `OT-${String(f.getFullYear()).slice(2)}${p2(f.getMonth() + 1)}${p2(f.getDate())}-${p2(f.getHours())}${p2(f.getMinutes())}-${id.replace(/[^a-z0-9]/gi, "").slice(0, 3).toUpperCase()}`;
 }
-const err = (code, msg) => { const e = new Error(msg); e.code = code; return e; };
-const firma = perfil => ({ uid: perfil.uid, codigo: perfil.codigo, rol: perfil.rol });
-// Transacciones (tomar o cerrar una orden) requieren conexión: así dos mecánicos no toman la misma orden sin enterarse.
-const exigirConexion = () => { if (A.nombre === 'firestore' && !navigator.onLine) throw err('flotaia/sin-conexion', 'Iniciar o cerrar una orden requiere conexión, para que dos mecánicos no tomen la misma orden. Inténtelo cuando tenga señal.'); };
-
-// ---------- reporte de falla: incidencia + orden de trabajo + seguimiento, en un solo lote ----------
-function validarReporte(perfil, d) {
+var err = (code, msg) => {
+  const e = new Error(msg);
+  e.code = code;
+  return e;
+};
+var firma = (perfil2) => ({ uid: perfil2.uid, codigo: perfil2.codigo, rol: perfil2.rol });
+var exigirConexion = () => {
+  if (A.nombre === "firestore" && !navigator.onLine) throw err("flotaia/sin-conexion", "Iniciar o cerrar una orden requiere conexi\xF3n, para que dos mec\xE1nicos no tomen la misma orden. Int\xE9ntelo cuando tenga se\xF1al.");
+};
+function validarReporte(perfil2, d) {
   const e = {};
-  if (!d.unidadId) e.unidadId = 'Elija la compactadora.';
-  else if (perfil.rol === 'chofer' && d.unidadId !== perfil.unidadAsignada) e.unidadId = 'Solo puede reportar sobre su unidad asignada.';
-  const t = String(d.descripcion || '').trim();
-  if (t.length < 8) e.descripcion = 'Describa la falla con al menos 8 caracteres.';
-  else if (t.length > 400) e.descripcion = 'Máximo 400 caracteres.';
-  if (String(d.observaciones || '').length > 400) e.observaciones = 'Máximo 400 caracteres.';
+  if (!d.unidadId) e.unidadId = "Elija la compactadora.";
+  else if (perfil2.rol === "chofer" && d.unidadId !== perfil2.unidadAsignada) e.unidadId = "Solo puede reportar sobre su unidad asignada.";
+  const t = String(d.descripcion || "").trim();
+  if (t.length < 8) e.descripcion = "Describa la falla con al menos 8 caracteres.";
+  else if (t.length > 400) e.descripcion = "M\xE1ximo 400 caracteres.";
+  if (String(d.observaciones || "").length > 400) e.observaciones = "M\xE1ximo 400 caracteres.";
   return e;
 }
-function nuevosIdsReporte() { return { inc: A.newId(['incidencias']), ot: A.newId(['ordenes_trabajo']), seg: A.newId(['ordenes_trabajo', 'x', 'seguimiento']) }; }
-
-async function crearReporte(perfil, d, ids, origen) {
-  if (!puede(perfil.rol, 'reportarIncidencia')) throw err('flotaia/permiso', 'Su perfil no puede reportar incidencias.');
-  const e = validarReporte(perfil, d); if (Object.keys(e).length) throw Object.assign(err('flotaia/validacion', 'Revise los campos marcados.'), { campos: e });
-  const descripcion = String(d.descripcion).trim(), c = reglas(descripcion), sistema = c.sistema;
-  const f = firma(perfil), ts = A.ts(), codigo = codigoOT(ids.ot);
-  const ops = [
-    { op: 'set', path: ['incidencias', ids.inc], data: { unidadId: d.unidadId, sistema, descripcion, observaciones: String(d.observaciones || '').trim(), prioridad: c.prioridad, prioridadOrigen: 'reglas', origen, autorUid: f.uid, autorCodigo: f.codigo, autorRol: f.rol, otId: ids.ot, creadoEn: ts, prototipo: true } },
-    { op: 'set', path: ['ordenes_trabajo', ids.ot], data: nuevaOT({ codigo, unidadId: d.unidadId, sistema, prioridad: c.prioridad, accion: ACCION_POR_SISTEMA[sistema], resumen: descripcion, origen: 'incidencia', incidenciaId: ids.inc, inspeccionId: null, motor: 'reglas', detalleModelo: null }, f, ts) },
-    { op: 'set', path: ['ordenes_trabajo', ids.ot, 'seguimiento', ids.seg], data: entradaSeguimiento('creacion', `Reporte registrado desde ${origen === 'mobile' ? 'el celular' : 'la tablet'}. Clasificación por reglas: ${sistema}, prioridad ${c.prioridad}.`, null, 'pendiente', f, ts) },
-  ];
-  return enviar(ops, { incidenciaId: ids.inc, otId: ids.ot, codigo, sistema, prioridad: c.prioridad, accion: ACCION_POR_SISTEMA[sistema] },
-    async () => !!(await A.getDoc(['incidencias', ids.inc]).catch(() => null)));
+function nuevosIdsReporte() {
+  return { inc: A.newId(["incidencias"]), ot: A.newId(["ordenes_trabajo"]), seg: A.newId(["ordenes_trabajo", "x", "seguimiento"]) };
 }
-
+async function crearReporte(perfil2, d, ids, origen) {
+  if (!puede(perfil2.rol, "reportarIncidencia")) throw err("flotaia/permiso", "Su perfil no puede reportar incidencias.");
+  const e = validarReporte(perfil2, d);
+  if (Object.keys(e).length) throw Object.assign(err("flotaia/validacion", "Revise los campos marcados."), { campos: e });
+  const descripcion = String(d.descripcion).trim(), c = reglas(descripcion), sistema = c.sistema;
+  const f = firma(perfil2), ts = A.ts(), codigo = codigoOT(ids.ot);
+  const ops = [
+    { op: "set", path: ["incidencias", ids.inc], data: { unidadId: d.unidadId, sistema, descripcion, observaciones: String(d.observaciones || "").trim(), prioridad: c.prioridad, prioridadOrigen: "reglas", origen, autorUid: f.uid, autorCodigo: f.codigo, autorRol: f.rol, otId: ids.ot, creadoEn: ts, prototipo: true } },
+    { op: "set", path: ["ordenes_trabajo", ids.ot], data: nuevaOT({ codigo, unidadId: d.unidadId, sistema, prioridad: c.prioridad, accion: ACCION_POR_SISTEMA[sistema], resumen: descripcion, origen: "incidencia", incidenciaId: ids.inc, inspeccionId: null, motor: "reglas", detalleModelo: null }, f, ts) },
+    { op: "set", path: ["ordenes_trabajo", ids.ot, "seguimiento", ids.seg], data: entradaSeguimiento("creacion", `Reporte registrado desde ${origen === "mobile" ? "el celular" : "la tablet"}. Clasificaci\xF3n por reglas: ${sistema}, prioridad ${c.prioridad}.`, null, "pendiente", f, ts) }
+  ];
+  return enviar(
+    ops,
+    { incidenciaId: ids.inc, otId: ids.ot, codigo, sistema, prioridad: c.prioridad, accion: ACCION_POR_SISTEMA[sistema] },
+    async () => !!await A.getDoc(["incidencias", ids.inc]).catch(() => null)
+  );
+}
 function nuevaOT(o, f, ts) {
-  return { codigo: o.codigo, unidadId: o.unidadId, sistema: o.sistema, prioridad: o.prioridad, accion: o.accion, resumen: o.resumen, origen: o.origen, incidenciaId: o.incidenciaId, inspeccionId: o.inspeccionId,
-    reportadoPorUid: f.uid, reportadoPorCodigo: f.codigo, motor: o.motor, estado: 'pendiente', mecanicoUid: null, mecanicoCodigo: null, inicioEn: null, resueltaEn: null,
-    trabajosRealizados: '', horasReparacion: 0, horasParada: 0, detalleModelo: o.detalleModelo, creadoEn: ts, actualizadoEn: ts, prototipo: true };
+  return {
+    codigo: o.codigo,
+    unidadId: o.unidadId,
+    sistema: o.sistema,
+    prioridad: o.prioridad,
+    accion: o.accion,
+    resumen: o.resumen,
+    origen: o.origen,
+    incidenciaId: o.incidenciaId,
+    inspeccionId: o.inspeccionId,
+    reportadoPorUid: f.uid,
+    reportadoPorCodigo: f.codigo,
+    motor: o.motor,
+    estado: "pendiente",
+    mecanicoUid: null,
+    mecanicoCodigo: null,
+    inicioEn: null,
+    resueltaEn: null,
+    trabajosRealizados: "",
+    horasReparacion: 0,
+    horasParada: 0,
+    detalleModelo: o.detalleModelo,
+    creadoEn: ts,
+    actualizadoEn: ts,
+    prototipo: true
+  };
 }
 function entradaSeguimiento(tipo, texto, estadoAnterior, estadoNuevo, f, ts) {
   return { tipo, texto, estadoAnterior, estadoNuevo, autorUid: f.uid, autorCodigo: f.codigo, autorRol: f.rol, en: ts, prototipo: true };
 }
-
-// Envía un lote. Sin conexión, Firestore lo deja en cola y lo enviará al reconectar: se informa como «en cola».
-// Si un reintento choca con un documento ya creado (las reglas impiden sobrescribir), se comprueba y se informa como duplicado evitado.
-const ESPERA_CONFIRMACION_MS = 12000;
+var ESPERA_CONFIRMACION_MS = 12e3;
 async function enviar(ops, resultado, yaExiste) {
   const p = A.commit(ops);
-  if (A.nombre === 'firestore') {
-    // Si la confirmación del servidor no llega (sin señal), Firestore conserva el cambio en el equipo y lo envía al reconectar.
-    // Si al enviarlo el servidor lo rechazara, se avisa con el evento flotaia:fallo-cola (la interfaz lo muestra).
-    const aviso = e => window.dispatchEvent(new CustomEvent('flotaia:fallo-cola', { detail: { error: e, resultado } }));
-    if (!navigator.onLine) { p.catch(aviso); return { ...resultado, enCola: true }; }
-    const espera = new Promise(r => setTimeout(() => r('espera'), ESPERA_CONFIRMACION_MS));
+  if (A.nombre === "firestore") {
+    const aviso = (e) => window.dispatchEvent(new CustomEvent("flotaia:fallo-cola", { detail: { error: e, resultado } }));
+    if (!navigator.onLine) {
+      p.catch(aviso);
+      return { ...resultado, enCola: true };
+    }
+    const espera = new Promise((r) => setTimeout(() => r("espera"), ESPERA_CONFIRMACION_MS));
     try {
-      if (await Promise.race([p, espera]) === 'espera') { p.catch(aviso); return { ...resultado, enCola: true }; }
+      if (await Promise.race([p, espera]) === "espera") {
+        p.catch(aviso);
+        return { ...resultado, enCola: true };
+      }
       return { ...resultado, enCola: false };
     } catch (e) {
-      if (e && e.code === 'permission-denied' && yaExiste && await yaExiste()) return { ...resultado, enCola: false, duplicadoEvitado: true };
+      if (e && e.code === "permission-denied" && yaExiste && await yaExiste()) return { ...resultado, enCola: false, duplicadoEvitado: true };
       throw e;
     }
   }
-  try { await p; return { ...resultado, enCola: false }; }
-  catch (e) {
-    if (e && e.code === 'permission-denied' && yaExiste && await yaExiste()) return { ...resultado, enCola: false, duplicadoEvitado: true };
+  try {
+    await p;
+    return { ...resultado, enCola: false };
+  } catch (e) {
+    if (e && e.code === "permission-denied" && yaExiste && await yaExiste()) return { ...resultado, enCola: false, duplicadoEvitado: true };
     throw e;
   }
 }
-
-// ---------- atención de órdenes ----------
-async function iniciarAtencion(perfil, otId) {
-  if (!puede(perfil.rol, 'atenderOrden')) throw err('flotaia/permiso', 'Su perfil no puede atender órdenes.');
+async function iniciarAtencion(perfil2, otId) {
+  if (!puede(perfil2.rol, "atenderOrden")) throw err("flotaia/permiso", "Su perfil no puede atender \xF3rdenes.");
   exigirConexion();
-  const f = firma(perfil), ts = A.ts(), segId = A.newId(['ordenes_trabajo', otId, 'seguimiento']);
-  return A.tx(async t => {
-    const o = await t.get(['ordenes_trabajo', otId]);
-    if (!o) throw err('flotaia/no-existe', 'La orden ya no existe.');
-    if (o.estado !== 'pendiente') throw err('flotaia/estado', `La orden ya está ${ESTADOS[o.estado].toLowerCase()}.`);
-    t.update(['ordenes_trabajo', otId], { estado: 'atencion', mecanicoUid: f.uid, mecanicoCodigo: f.codigo, inicioEn: ts, actualizadoEn: ts });
-    t.set(['ordenes_trabajo', otId, 'seguimiento', segId], entradaSeguimiento('inicio', `Atención iniciada por ${f.codigo}.`, 'pendiente', 'atencion', f, ts));
+  const f = firma(perfil2), ts = A.ts(), segId = A.newId(["ordenes_trabajo", otId, "seguimiento"]);
+  return A.tx(async (t) => {
+    const o = await t.get(["ordenes_trabajo", otId]);
+    if (!o) throw err("flotaia/no-existe", "La orden ya no existe.");
+    if (o.estado !== "pendiente") throw err("flotaia/estado", `La orden ya est\xE1 ${ESTADOS[o.estado].toLowerCase()}.`);
+    t.update(["ordenes_trabajo", otId], { estado: "atencion", mecanicoUid: f.uid, mecanicoCodigo: f.codigo, inicioEn: ts, actualizadoEn: ts });
+    t.set(["ordenes_trabajo", otId, "seguimiento", segId], entradaSeguimiento("inicio", `Atenci\xF3n iniciada por ${f.codigo}.`, "pendiente", "atencion", f, ts));
     return true;
   });
 }
-
 function validarCierre(c) {
-  const e = {}, trabajos = String(c.trabajosRealizados || '').trim();
-  const rep = c.horasReparacion === '' || c.horasReparacion == null ? NaN : Number(c.horasReparacion);
-  const par = c.horasParada === '' || c.horasParada == null ? rep : Number(c.horasParada);
-  if (trabajos.length < 5) e.trabajosRealizados = 'Describa los trabajos realizados (mínimo 5 caracteres).';
-  else if (trabajos.length > 600) e.trabajosRealizados = 'Máximo 600 caracteres.';
-  if (!(rep > 0) || rep > 720) e.horasReparacion = 'Ingrese las horas de reparación (mayor que 0 y hasta 720).';
-  if (!(par >= 0) || par > 720) e.horasParada = 'Las horas fuera de servicio deben estar entre 0 y 720.';
+  const e = {}, trabajos = String(c.trabajosRealizados || "").trim();
+  const rep = c.horasReparacion === "" || c.horasReparacion == null ? NaN : Number(c.horasReparacion);
+  const par = c.horasParada === "" || c.horasParada == null ? rep : Number(c.horasParada);
+  if (trabajos.length < 5) e.trabajosRealizados = "Describa los trabajos realizados (m\xEDnimo 5 caracteres).";
+  else if (trabajos.length > 600) e.trabajosRealizados = "M\xE1ximo 600 caracteres.";
+  if (!(rep > 0) || rep > 720) e.horasReparacion = "Ingrese las horas de reparaci\xF3n (mayor que 0 y hasta 720).";
+  if (!(par >= 0) || par > 720) e.horasParada = "Las horas fuera de servicio deben estar entre 0 y 720.";
   return { errores: e, valores: { trabajosRealizados: trabajos, horasReparacion: rep, horasParada: par } };
 }
-
-async function resolverOrden(perfil, otId, cierre) {
-  if (!puede(perfil.rol, 'atenderOrden')) throw err('flotaia/permiso', 'Su perfil no puede cerrar órdenes.');
+async function resolverOrden(perfil2, otId, cierre) {
+  if (!puede(perfil2.rol, "atenderOrden")) throw err("flotaia/permiso", "Su perfil no puede cerrar \xF3rdenes.");
   const { errores, valores } = validarCierre(cierre);
-  if (Object.keys(errores).length) throw Object.assign(err('flotaia/validacion', 'Revise los campos marcados.'), { campos: errores });
+  if (Object.keys(errores).length) throw Object.assign(err("flotaia/validacion", "Revise los campos marcados."), { campos: errores });
   exigirConexion();
-  const f = firma(perfil), ts = A.ts(), segId = A.newId(['ordenes_trabajo', otId, 'seguimiento']);
-  return A.tx(async t => {
-    const o = await t.get(['ordenes_trabajo', otId]);
-    if (!o) throw err('flotaia/no-existe', 'La orden ya no existe.');
-    if (o.estado !== 'atencion') throw err('flotaia/estado', 'Solo se puede cerrar una orden en atención.');
-    if (o.mecanicoUid !== f.uid && perfil.rol !== 'administrador') throw err('flotaia/permiso', `La atiende ${o.mecanicoCodigo}; solo esa persona o el administrador puede cerrarla.`);
-    t.update(['ordenes_trabajo', otId], { estado: 'resuelta', trabajosRealizados: valores.trabajosRealizados, horasReparacion: valores.horasReparacion, horasParada: valores.horasParada, resueltaEn: ts, actualizadoEn: ts });
-    t.set(['ordenes_trabajo', otId, 'seguimiento', segId], entradaSeguimiento('resolucion', `Orden resuelta: ${valores.trabajosRealizados} (${valores.horasReparacion} h de reparación, ${valores.horasParada} h fuera de servicio).`, 'atencion', 'resuelta', f, ts));
+  const f = firma(perfil2), ts = A.ts(), segId = A.newId(["ordenes_trabajo", otId, "seguimiento"]);
+  return A.tx(async (t) => {
+    const o = await t.get(["ordenes_trabajo", otId]);
+    if (!o) throw err("flotaia/no-existe", "La orden ya no existe.");
+    if (o.estado !== "atencion") throw err("flotaia/estado", "Solo se puede cerrar una orden en atenci\xF3n.");
+    if (o.mecanicoUid !== f.uid && perfil2.rol !== "administrador") throw err("flotaia/permiso", `La atiende ${o.mecanicoCodigo}; solo esa persona o el administrador puede cerrarla.`);
+    t.update(["ordenes_trabajo", otId], { estado: "resuelta", trabajosRealizados: valores.trabajosRealizados, horasReparacion: valores.horasReparacion, horasParada: valores.horasParada, resueltaEn: ts, actualizadoEn: ts });
+    t.set(["ordenes_trabajo", otId, "seguimiento", segId], entradaSeguimiento("resolucion", `Orden resuelta: ${valores.trabajosRealizados} (${valores.horasReparacion} h de reparaci\xF3n, ${valores.horasParada} h fuera de servicio).`, "atencion", "resuelta", f, ts));
     return true;
   });
 }
-
-async function agregarObservacion(perfil, otId, texto) {
-  if (!puede(perfil.rol, 'observarSeguimiento')) throw err('flotaia/permiso', 'Su perfil no puede agregar observaciones.');
-  const t = String(texto || '').trim();
-  if (t.length < 3 || t.length > 400) throw Object.assign(err('flotaia/validacion', 'La observación debe tener entre 3 y 400 caracteres.'), { campos: { texto: 'Entre 3 y 400 caracteres.' } });
-  const f = firma(perfil), segId = A.newId(['ordenes_trabajo', otId, 'seguimiento']);
-  return enviar([{ op: 'set', path: ['ordenes_trabajo', otId, 'seguimiento', segId], data: entradaSeguimiento('observacion', t, null, null, f, A.ts()) }], { segId });
+async function agregarObservacion(perfil2, otId, texto) {
+  if (!puede(perfil2.rol, "observarSeguimiento")) throw err("flotaia/permiso", "Su perfil no puede agregar observaciones.");
+  const t = String(texto || "").trim();
+  if (t.length < 3 || t.length > 400) throw Object.assign(err("flotaia/validacion", "La observaci\xF3n debe tener entre 3 y 400 caracteres."), { campos: { texto: "Entre 3 y 400 caracteres." } });
+  const f = firma(perfil2), segId = A.newId(["ordenes_trabajo", otId, "seguimiento"]);
+  return enviar([{ op: "set", path: ["ordenes_trabajo", otId, "seguimiento", segId], data: entradaSeguimiento("observacion", t, null, null, f, A.ts()) }], { segId });
 }
-
-// ---------- inspecciones ----------
-async function crearInspeccion(perfil, d) {
-  if (!puede(perfil.rol, 'registrarInspeccion')) throw err('flotaia/permiso', 'Su perfil no puede registrar inspecciones.');
-  const e = {};
-  if (!d.unidadId) e.unidadId = 'Elija la unidad.';
-  if (!SISTEMAS.includes(d.sistema)) e.sistema = 'Elija el sistema inspeccionado.';
-  if (!CONDICIONES[d.condicion]) e.condicion = 'Indique la condición observada.';
-  const obs = String(d.observaciones || '').trim();
-  if (d.condicion && d.condicion !== 'conforme' && obs.length < 5) e.observaciones = 'Describa lo observado (mínimo 5 caracteres).';
-  if (obs.length > 600) e.observaciones = 'Máximo 600 caracteres.';
-  if (Object.keys(e).length) throw Object.assign(err('flotaia/validacion', 'Revise los campos marcados.'), { campos: e });
-  const f = firma(perfil), ts = A.ts(), insId = A.newId(['inspecciones']);
-  // Crítica: la unidad no sale a ruta, así que la orden es obligatoria. Observada: el responsable decide.
-  const generar = d.condicion === 'critica' || (d.condicion === 'observada' && d.generarOrden !== false);
-  const otId = generar ? A.newId(['ordenes_trabajo']) : null;
-  const ops = [{ op: 'set', path: ['inspecciones', insId], data: { unidadId: d.unidadId, sistema: d.sistema, condicion: d.condicion, resultado: RESULTADO_POR_CONDICION[d.condicion], observaciones: obs, responsableUid: f.uid, responsableCodigo: f.codigo, responsableRol: f.rol, otId, creadoEn: ts, prototipo: true } }];
-  let codigo = null;
-  if (generar) {
-    codigo = codigoOT(otId); const segId = A.newId(['ordenes_trabajo', otId, 'seguimiento']);
-    ops.push({ op: 'set', path: ['ordenes_trabajo', otId], data: nuevaOT({ codigo, unidadId: d.unidadId, sistema: d.sistema, prioridad: PRIORIDAD_POR_CONDICION[d.condicion], accion: ACCION_POR_SISTEMA[d.sistema], resumen: obs, origen: 'inspeccion', incidenciaId: null, inspeccionId: insId, motor: 'reglas', detalleModelo: null }, f, ts) });
-    ops.push({ op: 'set', path: ['ordenes_trabajo', otId, 'seguimiento', segId], data: entradaSeguimiento('creacion', `Orden generada por inspección (${CONDICIONES[d.condicion].toLowerCase()}): ${obs}`, null, 'pendiente', f, ts) });
-  }
-  return enviar(ops, { inspeccionId: insId, otId, codigo, resultado: RESULTADO_POR_CONDICION[d.condicion] },
-    async () => !!(await A.getDoc(['inspecciones', insId]).catch(() => null)));
-}
-
-// ---------- orden decidida por el mecánico a partir de una lectura del modelo de IA ----------
-async function crearOrdenModelo(perfil, { unidadId, cicloEnsayo, probabilidad }) {
-  if (!puede(perfil.rol, 'generarOrdenModelo')) throw err('flotaia/permiso', 'Su perfil no puede generar órdenes desde el diagnóstico.');
-  const f = firma(perfil), ts = A.ts(), otId = A.newId(['ordenes_trabajo']), segId = A.newId(['ordenes_trabajo', otId, 'seguimiento']), codigo = codigoOT(otId);
-  const prob = Math.round(probabilidad * 1000) / 1000;
-  const resumen = `El modelo clasificó «fuga severa» de la bomba (ciclo de laboratorio n.° ${cicloEnsayo}, probabilidad ${Math.round(prob * 100)} %). Lectura simulada: confirmar en la unidad.`;
-  return enviar([
-    { op: 'set', path: ['ordenes_trabajo', otId], data: nuevaOT({ codigo, unidadId, sistema: 'Hidráulico', prioridad: 'alta', accion: 'Retirar de ruta; inspeccionar bomba y sellos; medir caudal y presión', resumen, origen: 'modelo', incidenciaId: null, inspeccionId: null, motor: 'modelo', detalleModelo: { cicloEnsayo, clase: 2, probabilidad: prob } }, f, ts) },
-    { op: 'set', path: ['ordenes_trabajo', otId, 'seguimiento', segId], data: entradaSeguimiento('creacion', `Orden registrada por ${f.codigo} tras la clasificación «fuga severa» del modelo (ciclo de laboratorio n.° ${cicloEnsayo}, probabilidad ${Math.round(prob * 100)} %).`, null, 'pendiente', f, ts) },
-  ], { otId, codigo });
-}
-
-// ---------- lecturas en tiempo real ----------
-// El chofer solo consulta sus propias órdenes: la consulta filtra igual que las reglas (las reglas no filtran por sí solas).
-function vigilarOrdenes(perfil, cb, onError) {
-  const spec = perfil.rol === 'chofer'
-    ? { path: ['ordenes_trabajo'], where: [['reportadoPorUid', '==', perfil.uid]], orderBy: ['creadoEn', 'desc'], limit: 100 }
-    : { path: ['ordenes_trabajo'], orderBy: ['creadoEn', 'desc'], limit: 300 };
+function vigilarOrdenes(perfil2, cb, onError) {
+  const spec = perfil2.rol === "chofer" ? { path: ["ordenes_trabajo"], where: [["reportadoPorUid", "==", perfil2.uid]], orderBy: ["creadoEn", "desc"], limit: 100 } : { path: ["ordenes_trabajo"], orderBy: ["creadoEn", "desc"], limit: 300 };
   return A.watch(spec, cb, onError);
 }
-// Órdenes de la unidad asignada al chofer (incluye las generadas por inspección o por el mecánico): así sabe si puede salir a ruta.
-const vigilarOrdenesUnidad = (unidadId, cb, onError) => A.watch({ path: ['ordenes_trabajo'], where: [['unidadId', '==', unidadId]], orderBy: ['creadoEn', 'desc'], limit: 50 }, cb, onError);
-const vigilarInspeccionesUnidad = (unidadId, cb, onError) => A.watch({ path: ['inspecciones'], where: [['unidadId', '==', unidadId]], orderBy: ['creadoEn', 'desc'], limit: 20 }, cb, onError);
-const vigilarOrden = (otId, cb, onError) => A.watchDoc(['ordenes_trabajo', otId], cb, onError);
-const vigilarSeguimiento = (otId, cb, onError) => A.watch({ path: ['ordenes_trabajo', otId, 'seguimiento'], orderBy: ['en', 'asc'] }, cb, onError);
-const vigilarInspecciones = (cb, onError) => A.watch({ path: ['inspecciones'], orderBy: ['creadoEn', 'desc'], limit: 200 }, cb, onError);
-const vigilarUnidades = (cb, onError) => A.watch({ path: ['unidades'], orderBy: ['codigo', 'asc'] }, cb, onError);
-const vigilarUsuarios = (cb, onError) => A.watch({ path: ['usuarios'] }, cb, onError);
-const obtenerIncidencia = id => A.getDoc(['incidencias', id]);
-const obtenerPerfil = uid => A.getDoc(['usuarios', uid]);
-
-// ---------- cálculos con operaciones registradas (no se guardan: evitan una segunda fuente de verdad) ----------
+var vigilarOrdenesUnidad = (unidadId, cb, onError) => A.watch({ path: ["ordenes_trabajo"], where: [["unidadId", "==", unidadId]], orderBy: ["creadoEn", "desc"], limit: 50 }, cb, onError);
+var vigilarInspeccionesUnidad = (unidadId, cb, onError) => A.watch({ path: ["inspecciones"], where: [["unidadId", "==", unidadId]], orderBy: ["creadoEn", "desc"], limit: 20 }, cb, onError);
+var vigilarOrden = (otId, cb, onError) => A.watchDoc(["ordenes_trabajo", otId], cb, onError);
+var vigilarSeguimiento = (otId, cb, onError) => A.watch({ path: ["ordenes_trabajo", otId, "seguimiento"], orderBy: ["en", "asc"] }, cb, onError);
+var vigilarUnidades = (cb, onError) => A.watch({ path: ["unidades"], orderBy: ["codigo", "asc"] }, cb, onError);
 function estadoUnidad(unidadId, ordenes) {
-  const ab = ordenes.filter(o => o.unidadId === unidadId && o.estado !== 'resuelta');
-  if (ab.some(o => o.prioridad === 'alta')) return { nivel: 2, texto: 'Fuera de ruta', detalle: 'Orden de prioridad alta abierta', abiertas: ab.length };
-  if (ab.some(o => o.prioridad === 'media')) return { nivel: 1, texto: 'En ruta con advertencia', detalle: 'Orden de prioridad media abierta', abiertas: ab.length };
-  return { nivel: 0, texto: 'En ruta', detalle: ab.length ? 'Solo órdenes de prioridad baja' : 'Sin órdenes abiertas', abiertas: ab.length };
-}
-const horas = (a, b) => (new Date(b) - new Date(a)) / 36e5;
-function indicadores(ordenes, inspecciones = []) {
-  const por = e => ordenes.filter(o => o.estado === e).length;
-  const abiertas = ordenes.filter(o => o.estado !== 'resuelta');
-  const conInicio = ordenes.filter(o => o.inicioEn && o.creadoEn);
-  const resueltas = ordenes.filter(o => o.estado === 'resuelta');
-  const fuera = UNIDADES_CATALOGO.filter(u => u.ruta).filter(u => estadoUnidad(u.codigo, ordenes).nivel === 2).length;
-  const media = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
-  const hallazgos = inspecciones.filter(i => i.condicion !== 'conforme');
-  return {
-    total: ordenes.length, pendientes: por('pendiente'), enAtencion: por('atencion'), resueltas: por('resuelta'),
-    abiertasPorPrioridad: { alta: abiertas.filter(o => o.prioridad === 'alta').length, media: abiertas.filter(o => o.prioridad === 'media').length, baja: abiertas.filter(o => o.prioridad === 'baja').length },
-    horasHastaAtencion: media(conInicio.map(o => horas(o.creadoEn, o.inicioEn))),
-    mttrRegistrado: media(resueltas.map(o => Number(o.horasReparacion) || 0)),
-    rutasCubiertas: 7 - fuera, unidadesFuera: fuera,
-    inspecciones: inspecciones.length, hallazgos: hallazgos.length,
-    hallazgosAbiertos: hallazgos.filter(i => i.otId && ordenes.some(o => o.id === i.otId && o.estado !== 'resuelta')).length,
-    porOrigen: { incidencia: ordenes.filter(o => o.origen === 'incidencia').length, inspeccion: ordenes.filter(o => o.origen === 'inspeccion').length, modelo: ordenes.filter(o => o.origen === 'modelo').length },
-  };
-}
-
-// ---------- administración (solo administrador; las reglas lo exigen también) ----------
-async function inicializarCatalogo(perfil) {
-  if (!puede(perfil.rol, 'administrarUsuarios')) throw err('flotaia/permiso', 'Solo el administrador inicializa el catálogo.');
-  const faltan = [];
-  for (const u of UNIDADES_CATALOGO) { if (!(await A.getDoc(['unidades', u.codigo]))) faltan.push(u); }
-  if (!faltan.length) return { creadas: 0 };
-  await A.commit(faltan.map(u => ({ op: 'set', path: ['unidades', u.codigo], data: { codigo: u.codigo, tipo: u.tipo, ruta: u.ruta, simulado: true, prototipo: true } })));
-  return { creadas: faltan.length };
+  const ab = ordenes.filter((o) => o.unidadId === unidadId && o.estado !== "resuelta");
+  if (ab.some((o) => o.prioridad === "alta")) return { nivel: 2, texto: "Fuera de ruta", detalle: "Orden de prioridad alta abierta", abiertas: ab.length };
+  if (ab.some((o) => o.prioridad === "media")) return { nivel: 1, texto: "En ruta con advertencia", detalle: "Orden de prioridad media abierta", abiertas: ab.length };
+  return { nivel: 0, texto: "En ruta", detalle: ab.length ? "Solo \xF3rdenes de prioridad baja" : "Sin \xF3rdenes abiertas", abiertas: ab.length };
 }
 function validarPerfil(d, unidades) {
   const e = {};
-  if (!['chofer', 'mecanico', 'supervisor', 'administrador'].includes(d.rol)) e.rol = 'Elija el rol.';
-  if (!String(d.nombre || '').trim()) e.nombre = 'Ingrese el nombre.';
-  if (!/^[A-Z]{2}-\d{2,3}$/.test(String(d.codigo || '').trim())) e.codigo = 'Use un código como CH-03 o ME-01.';
-  if (d.rol === 'chofer' && d.unidadAsignada && !unidades.includes(d.unidadAsignada)) e.unidadAsignada = 'Unidad no válida.';
+  if (!["chofer", "mecanico", "supervisor", "administrador"].includes(d.rol)) e.rol = "Elija el rol.";
+  if (!String(d.nombre || "").trim()) e.nombre = "Ingrese el nombre.";
+  if (!/^[A-Z]{2}-\d{2,3}$/.test(String(d.codigo || "").trim())) e.codigo = "Use un c\xF3digo como CH-03 o ME-01.";
+  if (d.rol === "chofer" && d.unidadAsignada && !unidades.includes(d.unidadAsignada)) e.unidadAsignada = "Unidad no v\xE1lida.";
   return e;
 }
 async function guardarPerfil(perfilAdmin, uid, d, nuevo) {
-  if (!puede(perfilAdmin.rol, 'administrarUsuarios')) throw err('flotaia/permiso', 'Solo el administrador gestiona usuarios.');
-  if (uid === perfilAdmin.uid && (d.rol !== 'administrador' || d.activo !== true)) throw err('flotaia/validacion', 'No puede quitarse el rol de administrador ni desactivarse a sí mismo.');
-  const data = { rol: d.rol, activo: !!d.activo, prototipo: true, nombre: String(d.nombre).trim(), codigo: String(d.codigo).trim().toUpperCase(), unidadAsignada: d.rol === 'chofer' ? (d.unidadAsignada || null) : null, actualizadoEn: A.ts() };
+  if (!puede(perfilAdmin.rol, "administrarUsuarios")) throw err("flotaia/permiso", "Solo el administrador gestiona usuarios.");
+  if (uid === perfilAdmin.uid && (d.rol !== "administrador" || d.activo !== true)) throw err("flotaia/validacion", "No puede quitarse el rol de administrador ni desactivarse a s\xED mismo.");
+  const data = { rol: d.rol, activo: !!d.activo, prototipo: true, nombre: String(d.nombre).trim(), codigo: String(d.codigo).trim().toUpperCase(), unidadAsignada: d.rol === "chofer" ? d.unidadAsignada || null : null, actualizadoEn: A.ts() };
   if (nuevo) data.creadoEn = A.ts();
-  await A.commit([{ op: nuevo ? 'set' : 'update', path: ['usuarios', uid], data }]);
-}
-async function crearUsuario(perfilAdmin, d) {
-  if (!puede(perfilAdmin.rol, 'administrarUsuarios')) throw err('flotaia/permiso', 'Solo el administrador crea usuarios.');
-  if (!/^\S+@\S+\.\S+$/.test(String(d.email || ''))) throw Object.assign(err('flotaia/validacion', 'Correo no válido.'), { campos: { email: 'Correo no válido.' } });
-  if (String(d.password || '').length < 8) throw Object.assign(err('flotaia/validacion', 'La contraseña temporal debe tener al menos 8 caracteres.'), { campos: { password: 'Mínimo 8 caracteres.' } });
-  const uid = await A.crearCuenta(String(d.email).trim(), d.password);
-  await guardarPerfil(perfilAdmin, uid, d, true);
-  return uid;
-}
-return { usarAdaptador, adaptador, ESTADOS, PRIORIDADES, CONDICIONES, RESULTADO_POR_CONDICION, RESULTADOS, PRIORIDAD_POR_CONDICION, ACCION_POR_SISTEMA, UNIDADES_CATALOGO, codigoOT, validarReporte, nuevosIdsReporte, crearReporte, iniciarAtencion, validarCierre, resolverOrden, agregarObservacion, crearInspeccion, crearOrdenModelo, vigilarOrdenes, vigilarOrdenesUnidad, vigilarInspeccionesUnidad, vigilarOrden, vigilarSeguimiento, vigilarInspecciones, vigilarUnidades, vigilarUsuarios, obtenerIncidencia, obtenerPerfil, estadoUnidad, indicadores, inicializarCatalogo, validarPerfil, guardarPerfil, crearUsuario };
-})();
-
-// ===== local-adapter.js =====
-__M['local-adapter'] = (() => {
-// FlotaIA · MODO LOCAL DE PRUEBA (?modo=local). NO ES FIREBASE.
-// Guarda los datos en el navegador para ensayar la interfaz sin conexión. Las pestañas de un mismo navegador se avisan
-// los cambios con BroadcastChannel; eso NO demuestra sincronización entre dispositivos ni aplica las reglas de Firestore.
-// La interfaz muestra una franja roja permanente mientras este modo está activo.
-
-const CLAVE = 'flotaia-multiplataforma-local-v1';
-const SESION = 'flotaia-multiplataforma-local-sesion';
-const TS = '__SERVER_TS__';
-const PASS_DEMO = 'demo1234';
-
-const CUENTAS_DEMO = [
-  { email: 'chofer@demo.local', uid: 'u-chofer-03', perfil: { rol: 'chofer', nombre: 'Chofer de prueba', codigo: 'CH-03', unidadAsignada: 'C-03' } },
-  { email: 'chofer5@demo.local', uid: 'u-chofer-05', perfil: { rol: 'chofer', nombre: 'Chofer de prueba 2', codigo: 'CH-05', unidadAsignada: 'C-05' } },
-  { email: 'mecanico@demo.local', uid: 'u-mecanico-01', perfil: { rol: 'mecanico', nombre: 'Mecánico de prueba', codigo: 'ME-01', unidadAsignada: null } },
-  { email: 'supervisor@demo.local', uid: 'u-supervisor-01', perfil: { rol: 'supervisor', nombre: 'Supervisor de prueba', codigo: 'SU-01', unidadAsignada: null } },
-  { email: 'admin@demo.local', uid: 'u-admin-01', perfil: { rol: 'administrador', nombre: 'Administrador de prueba', codigo: 'AD-01', unidadAsignada: null } },
-];
-
-const UNIDADES = [...Array.from({ length: 7 }, (_, i) => ({ codigo: `C-0${i + 1}`, tipo: 'compactadora', ruta: `R-0${i + 1}` })), { codigo: 'B-01', tipo: 'baranda', ruta: null }];
-
-function semilla() {
-  const now = new Date().toISOString(), docs = {};
-  CUENTAS_DEMO.forEach(c => { docs[`usuarios/${c.uid}`] = { ...c.perfil, activo: true, prototipo: true, creadoEn: now, actualizadoEn: now }; });
-  UNIDADES.forEach(u => { docs[`unidades/${u.codigo}`] = { ...u, simulado: true, prototipo: true }; });
-  return { docs, cuentas: CUENTAS_DEMO.map(c => ({ email: c.email, pass: PASS_DEMO, uid: c.uid })) };
+  await A.commit([{ op: nuevo ? "set" : "update", path: ["usuarios", uid], data }]);
 }
 
-async function crearAdaptadorLocal() {
-  let db;
-  const leer = () => { try { const g = JSON.parse(localStorage.getItem(CLAVE) || 'null'); if (g && g.docs && g.cuentas) return g; } catch (e) {} return semilla(); };
-  const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(db)); } catch (e) {} };
-  db = leer(); guardar();
-
-  const oyentes = new Set();
-  const canal = 'BroadcastChannel' in window ? new BroadcastChannel('flotaia-local') : null;
-  const notificar = (remoto) => { if (remoto) db = leer(); oyentes.forEach(f => f()); };
-  if (canal) canal.onmessage = () => notificar(true);
-  window.addEventListener('storage', e => { if (e.key === CLAVE) notificar(true); });
-  const cambio = () => { guardar(); if (canal) canal.postMessage('cambio'); notificar(false); };
-
-  const authCbs = new Set();
-  let usuario = null;
-  try { const s = JSON.parse(sessionStorage.getItem(SESION) || 'null'); if (s && db.cuentas.some(c => c.uid === s.uid)) usuario = s; } catch (e) {}
-  const emitirAuth = () => authCbs.forEach(cb => cb(usuario));
-
-  const key = path => path.join('/');
-  const conId = (k, d) => ({ id: k.split('/').pop(), ...d });
-  const prep = data => { const o = {}, now = new Date().toISOString(); for (const k in data) o[k] = data[k] === TS ? now : data[k]; return o; };
-  const id = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6);
-  const ejecutar = spec => {
-    const pref = key(spec.path) + '/', prof = spec.path.length + 1;
-    let filas = Object.entries(db.docs).filter(([k]) => k.startsWith(pref) && k.split('/').length === prof).map(([k, d]) => conId(k, d));
-    (spec.where || []).forEach(([f, op, v]) => { filas = filas.filter(r => op === '==' ? r[f] === v : op === 'in' ? v.includes(r[f]) : true); });
-    if (spec.orderBy) { const [f, dir] = spec.orderBy; filas.sort((a, b) => String(a[f]).localeCompare(String(b[f])) * (dir === 'desc' ? -1 : 1)); }
-    if (spec.limit) filas = filas.slice(0, spec.limit);
-    return filas;
-  };
-  const err = (code, msg) => { const e = new Error(msg); e.code = code; return e; };
-
-  return {
-    nombre: 'local',
-    ts: () => TS,
-    onAuth(cb) { authCbs.add(cb); setTimeout(() => cb(usuario), 0); return () => authCbs.delete(cb); },
-    async signIn(email, pass) {
-      const c = db.cuentas.find(x => x.email.toLowerCase() === String(email).trim().toLowerCase() && x.pass === pass);
-      if (!c) throw err('auth/invalid-credential', 'Credenciales no válidas');
-      usuario = { uid: c.uid, email: c.email }; sessionStorage.setItem(SESION, JSON.stringify(usuario)); emitirAuth(); return usuario;
-    },
-    async signOut() { usuario = null; sessionStorage.removeItem(SESION); emitirAuth(); },
-    async getDoc(path) { const d = db.docs[key(path)]; return d ? conId(key(path), d) : null; },
-    watch(spec, onData) { const f = () => onData(ejecutar(spec), { fromCache: false, pendientes: false }); oyentes.add(f); setTimeout(f, 0); return () => oyentes.delete(f); },
-    watchDoc(path, onData) { const f = () => { const d = db.docs[key(path)]; onData(d ? conId(key(path), d) : null, { fromCache: false, pendientes: false }); }; oyentes.add(f); setTimeout(f, 0); return () => oyentes.delete(f); },
-    newId: () => id(),
-    async commit(ops) {
-      db = leer();
-      for (const o of ops) { const k = key(o.path); if (o.op === 'update' && !db.docs[k]) throw err('not-found', 'Documento inexistente'); }
-      ops.forEach(o => { const k = key(o.path); db.docs[k] = o.op === 'set' ? prep(o.data) : { ...db.docs[k], ...prep(o.data) }; });
-      cambio();
-    },
-    async tx(fn) {
-      db = leer(); const pend = [];
-      const r = await fn({ get: async p => { const d = db.docs[key(p)]; return d ? conId(key(p), d) : null; }, set: (p, d) => pend.push({ op: 'set', path: p, data: d }), update: (p, d) => pend.push({ op: 'update', path: p, data: d }) });
-      pend.forEach(o => { const k = key(o.path); db.docs[k] = o.op === 'set' ? prep(o.data) : { ...db.docs[k], ...prep(o.data) }; });
-      cambio(); return r;
-    },
-    async crearCuenta(email, pass) {
-      db = leer();
-      if (db.cuentas.some(c => c.email.toLowerCase() === email.toLowerCase())) throw err('auth/email-already-in-use', 'Correo ya registrado');
-      const uid = 'u-' + id(); db.cuentas.push({ email, pass, uid }); cambio(); return uid;
-    },
-    onConexion(cb) { const f = () => cb({ online: navigator.onLine }); window.addEventListener('online', f); window.addEventListener('offline', f); f(); return () => { window.removeEventListener('online', f); window.removeEventListener('offline', f); }; },
-    reiniciarDemo() { db = semilla(); cambio(); },
-  };
-}
-return { CUENTAS_DEMO, crearAdaptadorLocal };
-})();
-
-// ===== firestore-adapter.js =====
-__M['firestore-adapter'] = (() => {
-// FlotaIA · adaptador de datos para Firebase (Authentication + Cloud Firestore), SDK modular sin compilación.
-// Traduce las operaciones genéricas del servicio (firestore-service.js) a llamadas del SDK. No contiene lógica de negocio.
-const { firebaseConfig, FIREBASE_SDK, configCompleta } = __M['firebase-config'];
-
-const CDN = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK}`;
-
-async function crearAdaptadorFirestore() {
-  if (!configCompleta()) { const e = new Error('Falta completar shared/firebase-config.js'); e.code = 'flotaia/config'; throw e; }
-  let appMod, A, F;
-  try {
-    [appMod, A, F] = await Promise.all([import(`${CDN}/firebase-app.js`), import(`${CDN}/firebase-auth.js`), import(`${CDN}/firebase-firestore.js`)]);
-  } catch (err) { const e = new Error('No se pudo cargar el SDK de Firebase'); e.code = 'flotaia/sdk'; e.cause = err; throw e; }
-
-  const app = appMod.initializeApp(firebaseConfig);
-  const auth = A.getAuth(app);
-  await A.setPersistence(auth, A.browserLocalPersistence);
-  let db;
-  try {
-    // Caché persistente: las lecturas siguen disponibles sin señal y las escrituras quedan en cola hasta reconectar.
-    db = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) });
-  } catch (e) { db = F.getFirestore(app); }
-
-  const ref = path => F.doc(db, ...path);
-  const col = path => F.collection(db, ...path);
-  const conv = v => (v && typeof v.toDate === 'function') ? v.toDate().toISOString() : v;
-  // _pend: el documento tiene cambios guardados en este equipo que el servidor aún no confirmó (se muestra como «pendiente de envío»).
-  const fromSnap = s => { const d = s.data({ serverTimestamps: 'estimate' }) || {}; const o = { id: s.id, _pend: s.metadata.hasPendingWrites }; for (const k in d) o[k] = conv(d[k]); return o; };
-  const TS = Symbol('serverTimestamp');
-  const prep = data => { const o = {}; for (const k in data) o[k] = data[k] === TS ? F.serverTimestamp() : data[k]; return o; };
-
-  const conexionCbs = new Set();
-  const avisar = () => conexionCbs.forEach(cb => cb({ online: navigator.onLine }));
-  window.addEventListener('online', avisar); window.addEventListener('offline', avisar);
-
-  return {
-    nombre: 'firestore',
-    ts: () => TS,
-    onAuth: cb => A.onAuthStateChanged(auth, u => cb(u ? { uid: u.uid, email: u.email } : null)),
-    signIn: (email, pass) => A.signInWithEmailAndPassword(auth, email, pass).then(c => ({ uid: c.user.uid, email: c.user.email })),
-    signOut: () => A.signOut(auth),
-    async getDoc(path) { const s = await F.getDoc(ref(path)); return s.exists() ? fromSnap(s) : null; },
-    watch(spec, onData, onError) {
-      const cons = [];
-      (spec.where || []).forEach(([f, op, v]) => cons.push(F.where(f, op, v)));
-      if (spec.orderBy) cons.push(F.orderBy(spec.orderBy[0], spec.orderBy[1] || 'asc'));
-      if (spec.limit) cons.push(F.limit(spec.limit));
-      const q = F.query(col(spec.path), ...cons);
-      return F.onSnapshot(q, { includeMetadataChanges: true },
-        snap => onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites }),
-        err => onError && onError(err));
-    },
-    watchDoc(path, onData, onError) {
-      return F.onSnapshot(ref(path), { includeMetadataChanges: true },
-        s => onData(s.exists() ? fromSnap(s) : null, { fromCache: s.metadata.fromCache, pendientes: s.metadata.hasPendingWrites }),
-        err => onError && onError(err));
-    },
-    newId: path => F.doc(col(path)).id,
-    commit(ops) {
-      const b = F.writeBatch(db);
-      ops.forEach(o => { if (o.op === 'set') b.set(ref(o.path), prep(o.data)); else b.update(ref(o.path), prep(o.data)); });
-      return b.commit();
-    },
-    tx(fn) {
-      return F.runTransaction(db, async t => fn({
-        get: async p => { const s = await t.get(ref(p)); return s.exists() ? fromSnap(s) : null; },
-        set: (p, d) => t.set(ref(p), prep(d)),
-        update: (p, d) => t.update(ref(p), prep(d)),
-      }));
-    },
-    // Alta de una cuenta por el administrador sin cerrar su propia sesión: se usa una instancia secundaria de Firebase.
-    async crearCuenta(email, pass) {
-      const sec = appMod.initializeApp(firebaseConfig, 'flotaia-alta-' + Date.now());
-      try {
-        const sAuth = A.getAuth(sec);
-        await A.setPersistence(sAuth, A.inMemoryPersistence);
-        const cred = await A.createUserWithEmailAndPassword(sAuth, email, pass);
-        const uid = cred.user.uid;
-        await A.signOut(sAuth);
-        return uid;
-      } finally { await appMod.deleteApp(sec); }
-    },
-    onConexion(cb) { conexionCbs.add(cb); cb({ online: navigator.onLine }); return () => conexionCbs.delete(cb); },
-  };
-}
-return { crearAdaptadorFirestore };
-})();
-
-// ===== auth.js =====
-__M['auth'] = (() => {
-// FlotaIA · sesión y perfil del usuario.
-// Elige el adaptador (Firebase o modo local de prueba con ?modo=local), inicia sesión con correo y contraseña
-// y vigila en tiempo real el documento usuarios/{uid}: si el administrador desactiva la cuenta o cambia el rol,
-// la interfaz se actualiza sin recargar.
-const { usarAdaptador } = __M['firestore-service'];
-const { ROLES } = __M['permissions'];
-const { configCompleta } = __M['firebase-config'];
-
-// Modo de demostración local: si se pide con ?modo=local o si todavía no se pegó la configuración de Firebase.
-// Así la página publicada en GitHub Pages abre funcionando para cualquiera, siempre con la franja roja que lo aclara.
-const MODO_LOCAL = new URLSearchParams(location.search).get('modo') === 'local' || !configCompleta();
-let A = null;
-
+// shared/auth.js
+var MODO_LOCAL = new URLSearchParams(location.search).get("modo") === "local";
+var A2 = null;
 async function iniciarDatos() {
-  if (A) return A;
-  if (MODO_LOCAL) { const m = await Promise.resolve(__M['local-adapter']); A = await m.crearAdaptadorLocal(); }
-  else { const m = await Promise.resolve(__M['firestore-adapter']); A = await m.crearAdaptadorFirestore(); }
-  usarAdaptador(A);
-  return A;
+  if (A2) return A2;
+  if (MODO_LOCAL) {
+    const m = await Promise.resolve().then(() => (init_local_adapter(), local_adapter_exports));
+    A2 = await m.crearAdaptadorLocal();
+  } else {
+    const m = await Promise.resolve().then(() => (init_firestore_adapter(), firestore_adapter_exports));
+    A2 = await m.crearAdaptadorFirestore();
+  }
+  usarAdaptador(A2);
+  return A2;
 }
-
-const iniciarSesion = (email, pass) => A.signIn(String(email).trim(), pass);
-const cerrarSesion = () => A.signOut();
-
-// Estados: cargando · sin_sesion · sin_perfil · incompleto (administrador sin nombre o código) · inactivo · error · ok
+var iniciarSesion = (email, pass) => A2.signIn(String(email).trim(), pass);
+var iniciarSesionGoogle = () => {
+  if (!A2?.signInGoogle) return Promise.reject(new Error("Google no est\xE1 disponible en el modo local de prueba."));
+  return A2.signInGoogle();
+};
+var cerrarSesion = () => A2.signOut();
 function observarSesion(cb) {
   let dejarPerfil = null;
-  const dejarAuth = A.onAuth(u => {
-    if (dejarPerfil) { dejarPerfil(); dejarPerfil = null; }
-    if (!u) { cb({ estado: 'sin_sesion' }); return; }
-    cb({ estado: 'cargando', usuario: u });
-    dejarPerfil = A.watchDoc(['usuarios', u.uid], (d, meta) => {
-      // Primera lectura desde la caché del equipo sin el perfil guardado: se espera la respuesta del servidor.
+  const dejarAuth = A2.onAuth((u) => {
+    if (dejarPerfil) {
+      dejarPerfil();
+      dejarPerfil = null;
+    }
+    if (!u) {
+      cb({ estado: "sin_sesion" });
+      return;
+    }
+    cb({ estado: "cargando", usuario: u });
+    dejarPerfil = A2.watchDoc(["usuarios", u.uid], (d, meta) => {
       if (!d && meta && meta.fromCache) {
         if (navigator.onLine) return;
-        return cb({ estado: 'error', usuario: u, error: { code: 'unavailable', message: 'Sin conexión: no se pudo leer su perfil. Conéctese una vez para que quede guardado en este equipo.' } });
+        return cb({ estado: "error", usuario: u, error: { code: "unavailable", message: "Sin conexi\xF3n: no se pudo leer su perfil. Con\xE9ctese una vez para que quede guardado en este equipo." } });
       }
-      if (!d) return cb({ estado: 'sin_perfil', usuario: u });
-      const perfil = { ...d, uid: u.uid, email: u.email };
-      if (!ROLES.includes(d.rol)) return cb({ estado: 'sin_perfil', usuario: u, perfil });
-      if (d.activo !== true) return cb({ estado: 'inactivo', usuario: u, perfil });
-      if (!d.codigo || !d.nombre) return cb({ estado: 'incompleto', usuario: u, perfil });
-      cb({ estado: 'ok', usuario: u, perfil });
-    }, e => cb({ estado: 'error', usuario: u, error: e }));
+      if (!d) return cb({ estado: "sin_perfil", usuario: u });
+      const perfil2 = { ...d, uid: u.uid, email: u.email };
+      if (!ROLES.includes(d.rol)) return cb({ estado: "sin_perfil", usuario: u, perfil: perfil2 });
+      if (d.activo !== true) return cb({ estado: "inactivo", usuario: u, perfil: perfil2 });
+      if (!d.codigo || !d.nombre) return cb({ estado: "incompleto", usuario: u, perfil: perfil2 });
+      cb({ estado: "ok", usuario: u, perfil: perfil2 });
+    }, (e) => cb({ estado: "error", usuario: u, error: e }));
   });
-  return () => { if (dejarPerfil) dejarPerfil(); dejarAuth(); };
+  return () => {
+    if (dejarPerfil) dejarPerfil();
+    dejarAuth();
+  };
 }
-
-const MENSAJES = {
-  'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-  'auth/wrong-password': 'Correo o contraseña incorrectos.',
-  'auth/user-not-found': 'Correo o contraseña incorrectos.',
-  'auth/invalid-email': 'El correo no tiene un formato válido.',
-  'auth/missing-password': 'Ingrese la contraseña.',
-  'auth/too-many-requests': 'Demasiados intentos. Espere unos minutos e inténtelo de nuevo.',
-  'auth/network-request-failed': 'Sin conexión. Revise la señal e inténtelo de nuevo.',
-  'auth/user-disabled': 'Esta cuenta está deshabilitada en Firebase.',
-  'auth/email-already-in-use': 'Ese correo ya tiene una cuenta.',
-  'auth/weak-password': 'La contraseña es demasiado débil.',
-  'auth/operation-not-allowed': 'El acceso con correo y contraseña no está habilitado en Firebase Authentication.',
-  'auth/unauthorized-domain': 'Este dominio no está autorizado en Firebase Authentication (agregue ktakahashi-bit.github.io).',
-  'permission-denied': 'Firestore rechazó la operación: su perfil no tiene permiso o los datos no cumplen las reglas de seguridad.',
-  'unavailable': 'Sin conexión con Firestore en este momento. Inténtelo de nuevo cuando tenga señal.',
-  'failed-precondition': 'Falta un índice en Firestore. Despliegue firestore.indexes.json (ver README).',
-  'not-found': 'El documento ya no existe.',
-  'aborted': 'Otro usuario modificó la orden al mismo tiempo. Revise su estado e inténtelo de nuevo.',
-  'flotaia/config': 'Falta completar shared/firebase-config.js con la configuración web del proyecto (ver README).',
-  'flotaia/sdk': 'No se pudo cargar Firebase. Revise la conexión a internet.',
+var MENSAJES = {
+  "auth/popup-closed-by-user": "Se cerr\xF3 la ventana de Google. Puede volver a intentarlo.",
+  "auth/popup-blocked": "Permita la ventana emergente de Google para iniciar sesi\xF3n.",
+  "auth/cancelled-popup-request": "Ya hay un inicio de sesi\xF3n en curso.",
+  "auth/account-exists-with-different-credential": "Esta cuenta utiliza otro m\xE9todo de acceso. El administrador debe revisar la vinculaci\xF3n de la cuenta.",
+  "auth/invalid-credential": "Correo o contrase\xF1a incorrectos.",
+  "auth/wrong-password": "Correo o contrase\xF1a incorrectos.",
+  "auth/user-not-found": "Correo o contrase\xF1a incorrectos.",
+  "auth/invalid-email": "El correo no tiene un formato v\xE1lido.",
+  "auth/missing-password": "Ingrese la contrase\xF1a.",
+  "auth/too-many-requests": "Demasiados intentos. Espere unos minutos e int\xE9ntelo de nuevo.",
+  "auth/network-request-failed": "Sin conexi\xF3n. Revise la se\xF1al e int\xE9ntelo de nuevo.",
+  "auth/user-disabled": "Esta cuenta est\xE1 deshabilitada en Firebase.",
+  "auth/email-already-in-use": "Ese correo ya tiene una cuenta.",
+  "auth/weak-password": "La contrase\xF1a es demasiado d\xE9bil.",
+  "auth/operation-not-allowed": "Este m\xE9todo de acceso no est\xE1 habilitado en Firebase Authentication.",
+  "auth/unauthorized-domain": "Este dominio no est\xE1 autorizado en Firebase Authentication (agregue ktakahashi-bit.github.io).",
+  "permission-denied": "Firestore rechaz\xF3 la operaci\xF3n: su perfil no tiene permiso o los datos no cumplen las reglas de seguridad.",
+  "unavailable": "Sin conexi\xF3n con Firestore en este momento. Int\xE9ntelo de nuevo cuando tenga se\xF1al.",
+  "failed-precondition": "Falta un \xEDndice en Firestore. Despliegue firestore.indexes.json (ver README).",
+  "not-found": "El documento ya no existe.",
+  "aborted": "Otro usuario modific\xF3 la orden al mismo tiempo. Revise su estado e int\xE9ntelo de nuevo.",
+  "flotaia/config": "Falta completar shared/firebase-config.js con la configuraci\xF3n web del proyecto (ver README).",
+  "flotaia/sdk": "No se pudo cargar Firebase. Revise la conexi\xF3n a internet."
 };
 function mensajeError(e) {
-  if (!e) return 'Error desconocido.';
-  if (e.code && String(e.code).startsWith('flotaia/') && !MENSAJES[e.code]) return e.message;
-  return MENSAJES[e.code] || e.message || 'Error desconocido.';
+  if (!e) return "Error desconocido.";
+  if (e.code && String(e.code).startsWith("flotaia/") && !MENSAJES[e.code]) return e.message;
+  return MENSAJES[e.code] || e.message || "Error desconocido.";
 }
-return { MODO_LOCAL, iniciarDatos, iniciarSesion, cerrarSesion, observarSesion, mensajeError };
-})();
 
-// ===== ui.js =====
-__M['ui'] = (() => {
-// FlotaIA · utilidades de interfaz compartidas por Mobile y Tablet.
-const { ESTADOS, RESULTADOS } = __M['firestore-service'];
-const { ROL_NOMBRE } = __M['permissions'];
-
-const LOGO = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="6" fill="#F2B300"/><path d="M9 27.5l7-9.5 6.5 5.5L31 12" fill="none" stroke="#1F2A2E" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="27.5" r="2.6" fill="#1F2A2E"/><circle cx="16" cy="18" r="2.6" fill="#1F2A2E"/><circle cx="22.5" cy="23.5" r="2.6" fill="#1F2A2E"/><circle cx="31" cy="12" r="3.6" fill="#1F2A2E"/></svg>';
-
-// Íconos del escritorio V13 más los que necesitan las vistas de campo (mismo trazo de 1.8).
-const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+// shared/ui.js
+var LOGO = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="6" fill="#F2B300"/><path d="M9 27.5l7-9.5 6.5 5.5L31 12" fill="none" stroke="#1F2A2E" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="27.5" r="2.6" fill="#1F2A2E"/><circle cx="16" cy="18" r="2.6" fill="#1F2A2E"/><circle cx="22.5" cy="23.5" r="2.6" fill="#1F2A2E"/><circle cx="31" cy="12" r="3.6" fill="#1F2A2E"/></svg>';
+var SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
 <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6.5h11v9.5h-11z"/><path d="M13.5 9.5h4.2l3.3 3.4v3.1h-7.5"/><circle cx="6.5" cy="17.5" r="1.9"/><circle cx="17" cy="17.5" r="1.9"/></symbol>
 <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.3 5.2L3.5 17.4a1.4 1.4 0 0 0 0 2l1.1 1.1a1.4 1.4 0 0 0 2 0l5.9-5.9a4 4 0 0 0 5.2-5.3l-2.4 2.4-2.3-.5-.5-2.3z"/></symbol>
@@ -911,383 +950,548 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></symbol>
 <symbol id="i-send" viewBox="0 0 24 24"><path d="M20.5 3.5L10 14"/><path d="M20.5 3.5L14 20.5l-4-6.5-6.5-4z"/></symbol>
 </svg>`;
-const ic = (id, extra = '') => `<svg class="i ${extra}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
-function montarSprite() { if (!document.getElementById('i-grid')) document.body.insertAdjacentHTML('afterbegin', SPRITE); }
-
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const $ = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-
-const fmtFecha = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-const fFecha = iso => iso ? fmtFecha.format(new Date(iso)) : '—';
+var ic = (id, extra = "") => `<svg class="i ${extra}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+function montarSprite() {
+  if (!document.getElementById("i-grid")) document.body.insertAdjacentHTML("afterbegin", SPRITE);
+}
+var esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+var $ = (sel, root2 = document) => root2.querySelector(sel);
+var $$ = (sel, root2 = document) => [...root2.querySelectorAll(sel)];
+var fmtFecha = new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
+var fFecha = (iso) => iso ? fmtFecha.format(new Date(iso)) : "\u2014";
 function fRel(iso) {
-  if (!iso) return '—';
-  const s = (Date.now() - new Date(iso)) / 1000;
-  if (s < 60) return 'hace un momento';
+  if (!iso) return "\u2014";
+  const s = (Date.now() - new Date(iso)) / 1e3;
+  if (s < 60) return "hace un momento";
   if (s < 3600) return `hace ${Math.round(s / 60)} min`;
   if (s < 86400) return `hace ${Math.round(s / 3600)} h`;
   return fFecha(iso);
 }
-const fHoras = h => h == null ? '—' : `${h.toLocaleString('es-PE', { maximumFractionDigits: 1 })} h`;
-
-const pillEstado = (e, pend) => `<span class="pill ${{ pendiente: 'p-pend', atencion: 'p-aten', resuelta: 'p-res' }[e] || ''}">${esc(ESTADOS[e] || e)}</span>${pend ? ' <span class="pill p-cola" title="Guardado en este equipo; el servidor aún no lo confirma">Pendiente de envío</span>' : ''}`;
-const pillPrioridad = p => `<span class="pill ${{ alta: 'p-crit', media: 'p-adv', baja: 'p-ok' }[p] || ''}">Prioridad ${esc(p)}</span>`;
-const pillResultado = r => `<span class="pill ${{ apta: 'p-ok', apta_con_observacion: 'p-adv', no_apta: 'p-crit' }[r] || ''}">${esc(RESULTADOS[r] || r)}</span>`;
-const ORIGEN = { incidencia: 'Reporte de falla', inspeccion: 'Inspección', modelo: 'Diagnóstico del modelo de IA' };
-const badgeMotor = o => o.motor === 'modelo' ? '<span class="badge b-ia">IA</span>' : '<span class="badge b-auto">Reglas</span>';
-
-// ---------- avisos ----------
-let cajaToasts;
-function toast(msg, tipo = '', ms = 4200) {
-  if (!cajaToasts) { cajaToasts = document.createElement('div'); cajaToasts.className = 'toasts'; cajaToasts.setAttribute('role', 'status'); cajaToasts.setAttribute('aria-live', 'polite'); document.body.append(cajaToasts); }
-  const t = document.createElement('div'); t.className = `toast ${tipo}`;
-  t.innerHTML = `<span>${esc(msg)}</span><button type="button" aria-label="Cerrar aviso">×</button>`;
-  t.querySelector('button').onclick = () => t.remove();
+var fHoras = (h) => h == null ? "\u2014" : `${h.toLocaleString("es-PE", { maximumFractionDigits: 1 })} h`;
+var pillEstado = (e, pend) => `<span class="pill ${{ pendiente: "p-pend", atencion: "p-aten", resuelta: "p-res" }[e] || ""}">${esc(ESTADOS[e] || e)}</span>${pend ? ' <span class="pill p-cola" title="Guardado en este equipo; el servidor a\xFAn no lo confirma">Pendiente de env\xEDo</span>' : ""}`;
+var pillPrioridad = (p) => `<span class="pill ${{ alta: "p-crit", media: "p-adv", baja: "p-ok" }[p] || ""}">Prioridad ${esc(p)}</span>`;
+var pillResultado = (r) => `<span class="pill ${{ apta: "p-ok", apta_con_observacion: "p-adv", no_apta: "p-crit" }[r] || ""}">${esc(RESULTADOS[r] || r)}</span>`;
+var ORIGEN = { incidencia: "Reporte de falla", inspeccion: "Inspecci\xF3n", modelo: "Diagn\xF3stico del modelo de IA" };
+var badgeMotor = (o) => o.motor === "modelo" ? '<span class="badge b-ia">IA</span>' : '<span class="badge b-auto">Reglas</span>';
+var cajaToasts;
+function toast(msg, tipo = "", ms = 4200) {
+  if (!cajaToasts) {
+    cajaToasts = document.createElement("div");
+    cajaToasts.className = "toasts";
+    cajaToasts.setAttribute("role", "status");
+    cajaToasts.setAttribute("aria-live", "polite");
+    document.body.append(cajaToasts);
+  }
+  const t = document.createElement("div");
+  t.className = `toast ${tipo}`;
+  t.innerHTML = `<span>${esc(msg)}</span><button type="button" aria-label="Cerrar aviso">\xD7</button>`;
+  t.querySelector("button").onclick = () => t.remove();
   cajaToasts.append(t);
   if (ms) setTimeout(() => t.remove(), ms);
   return t;
 }
-
-// ---------- franja permanente del modo local ----------
-function franjaModoLocal(A) {
-  const d = document.createElement('div'); d.className = 'modo-local'; d.setAttribute('role', 'note');
-  d.innerHTML = 'MODO LOCAL — NO ES FIREBASE <button type="button">Reiniciar datos</button><span>Datos de prueba solo en este navegador: no demuestra la sincronización entre dispositivos ni aplica las reglas de seguridad.</span>';
-  d.querySelector('button').onclick = () => { if (confirm('¿Borrar todos los datos de prueba de este navegador?')) { A.reiniciarDemo(); toast('Datos de prueba reiniciados.'); } };
+function franjaModoLocal(A4) {
+  const d = document.createElement("div");
+  d.className = "modo-local";
+  d.setAttribute("role", "note");
+  d.innerHTML = 'MODO LOCAL \u2014 NO ES FIREBASE <button type="button">Reiniciar datos</button><span>Datos de prueba solo en este navegador: no demuestra la sincronizaci\xF3n entre dispositivos ni aplica las reglas de seguridad.</span>';
+  d.querySelector("button").onclick = () => {
+    if (confirm("\xBFBorrar todos los datos de prueba de este navegador?")) {
+      A4.reiniciarDemo();
+      toast("Datos de prueba reiniciados.");
+    }
+  };
   document.body.prepend(d);
-  document.documentElement.classList.add('es-local');
-  const alto = () => document.documentElement.style.setProperty('--local-h', d.offsetHeight + 'px');
-  alto(); window.addEventListener('resize', alto);
+  document.documentElement.classList.add("es-local");
+  const alto = () => document.documentElement.style.setProperty("--local-h", d.offsetHeight + "px");
+  alto();
+  window.addEventListener("resize", alto);
 }
-
-// ---------- indicador de conexión (solo lo que informa el SDK; en modo local lo dice) ----------
-function indicadorConexion(el, A) {
+function indicadorConexion(el, A4) {
   const est = { online: navigator.onLine, fromCache: true, pendientes: false };
   const pintar = () => {
-    if (A.nombre === 'local') { el.className = 'conn local'; el.textContent = 'Modo local · sin Firebase'; return; }
-    if (!est.online) { el.className = 'conn off'; el.textContent = est.pendientes ? 'Sin conexión · cambios por enviar' : 'Sin conexión · datos del equipo'; return; }
-    if (est.fromCache) { el.className = 'conn cache'; el.textContent = 'Conectando con Firestore…'; return; }
-    el.className = 'conn ok'; el.textContent = est.pendientes ? 'En línea · enviando cambios' : 'En línea · Firestore';
+    if (A4.nombre === "local") {
+      el.className = "conn local";
+      el.textContent = "Modo local \xB7 sin Firebase";
+      return;
+    }
+    if (!est.online) {
+      el.className = "conn off";
+      el.textContent = est.pendientes ? "Sin conexi\xF3n \xB7 cambios por enviar" : "Sin conexi\xF3n \xB7 datos del equipo";
+      return;
+    }
+    if (est.fromCache) {
+      el.className = "conn cache";
+      el.textContent = "Conectando con Firestore\u2026";
+      return;
+    }
+    el.className = "conn ok";
+    el.textContent = est.pendientes ? "En l\xEDnea \xB7 enviando cambios" : "En l\xEDnea \xB7 Firestore";
   };
-  const pintarT = () => { pintar(); el.title = el.textContent; };
-  A.onConexion(c => { est.online = c.online; pintarT(); });
+  const pintarT = () => {
+    pintar();
+    el.title = el.textContent;
+  };
+  A4.onConexion((c) => {
+    est.online = c.online;
+    pintarT();
+  });
   pintarT();
-  return meta => { if (meta) { est.fromCache = meta.fromCache; est.pendientes = meta.pendientes; } pintarT(); };
+  return (meta) => {
+    if (meta) {
+      est.fromCache = meta.fromCache;
+      est.pendientes = meta.pendientes;
+    }
+    pintarT();
+  };
 }
-
-// ---------- formularios ----------
 function marcarErrores(form, campos = {}) {
-  $$('.f', form).forEach(f => { f.classList.remove('has-err'); const e = $('.ferr', f); if (e) e.textContent = ''; });
+  $$(".f", form).forEach((f) => {
+    f.classList.remove("has-err");
+    const e = $(".ferr", f);
+    if (e) e.textContent = "";
+  });
   let primero = null;
   Object.entries(campos).forEach(([k, msg]) => {
-    const inp = form.querySelector(`[name="${k}"]`); if (!inp) return;
-    const f = inp.closest('.f'); if (!f) return;
-    f.classList.add('has-err'); let e = $('.ferr', f);
-    if (!e) { e = document.createElement('span'); e.className = 'ferr'; f.append(e); }
-    e.textContent = msg; inp.setAttribute('aria-invalid', 'true');
+    const inp = form.querySelector(`[name="${k}"]`);
+    if (!inp) return;
+    const f = inp.closest(".f");
+    if (!f) return;
+    f.classList.add("has-err");
+    let e = $(".ferr", f);
+    if (!e) {
+      e = document.createElement("span");
+      e.className = "ferr";
+      f.append(e);
+    }
+    e.textContent = msg;
+    inp.setAttribute("aria-invalid", "true");
     if (!primero) primero = inp;
   });
   if (primero) primero.focus();
 }
 function ocupado(btn, on, texto) {
-  if (on) { btn.dataset.txt = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<span class="spin" aria-hidden="true"></span>${esc(texto || 'Enviando…')}`; }
-  else { btn.disabled = false; if (btn.dataset.txt) btn.innerHTML = btn.dataset.txt; }
+  if (on) {
+    btn.dataset.txt = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spin" aria-hidden="true"></span>${esc(texto || "Enviando\u2026")}`;
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.txt) btn.innerHTML = btn.dataset.txt;
+  }
 }
-
-// ---------- hoja inferior / diálogo ----------
 function hoja(titulo, html, { onClose } = {}) {
-  const bg = document.createElement('div'); bg.className = 'sheet-bg';
-  bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(titulo)}"><div class="sheet-h"><h2>${esc(titulo)}</h2><button type="button" class="iconbtn" style="color:var(--ink);border-color:var(--line-2)" aria-label="Cerrar">${ic('x')}</button></div><div class="sheet-b" style="display:grid;gap:12px">${html}</div></div>`;
+  const bg = document.createElement("div");
+  bg.className = "sheet-bg";
+  bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(titulo)}"><div class="sheet-h"><h2>${esc(titulo)}</h2><button type="button" class="iconbtn" style="color:var(--ink);border-color:var(--line-2)" aria-label="Cerrar">${ic("x")}</button></div><div class="sheet-b" style="display:grid;gap:12px">${html}</div></div>`;
   const previo = document.activeElement;
-  const cerrar = () => { bg.remove(); document.removeEventListener('keydown', tecla); if (onClose) onClose(); if (previo && previo.focus) previo.focus(); };
-  const tecla = e => { if (e.key === 'Escape') cerrar(); };
-  bg.addEventListener('click', e => { if (e.target === bg) cerrar(); });
-  bg.querySelector('.sheet-h button').onclick = cerrar;
-  document.addEventListener('keydown', tecla);
+  const cerrar = () => {
+    bg.remove();
+    document.removeEventListener("keydown", tecla);
+    if (onClose) onClose();
+    if (previo && previo.focus) previo.focus();
+  };
+  const tecla = (e) => {
+    if (e.key === "Escape") cerrar();
+  };
+  bg.addEventListener("click", (e) => {
+    if (e.target === bg) cerrar();
+  });
+  bg.querySelector(".sheet-h button").onclick = cerrar;
+  document.addEventListener("keydown", tecla);
   document.body.append(bg);
-  setTimeout(() => (bg.querySelector('.sheet-b [autofocus]') || bg.querySelector('.sheet-h button')).focus(), 0);
-  return { el: bg.querySelector('.sheet-b'), cerrar };
+  setTimeout(() => (bg.querySelector(".sheet-b [autofocus]") || bg.querySelector(".sheet-h button")).focus(), 0);
+  return { el: bg.querySelector(".sheet-b"), cerrar };
 }
-
-// ---------- pantallas de acceso ----------
-function pantallaLogin(root, { interfaz, otraUrl, modoLocal, cuentasDemo, onSubmit, mensaje = '' }) {
-  root.innerHTML = `<main class="login">
+function pantallaLogin(root2, { interfaz, otraUrl, modoLocal, cuentasDemo, onSubmit, onGoogle, mensaje = "" }) {
+  root2.innerHTML = `<main class="login">
     <div class="panel">
       <div class="panel-h">
-        <div class="brand">${LOGO}<div><div class="bname">Flota<span>IA</span></div><div class="bsub">Sistema Inteligente de Gestión de Flota y Mantenimiento</div></div></div>
+        <div class="brand">${LOGO}<div><div class="bname">Flota<span>IA</span></div><div class="bsub">Sistema Inteligente de Gesti\xF3n de Flota y Mantenimiento</div></div></div>
         <div class="eyebrow">FlotaIA ${esc(interfaz)}</div>
-        <h1>Iniciar sesión</h1>
+        <h1>Iniciar sesi\xF3n</h1>
       </div>
+      ${!modoLocal && onGoogle ? '<div style="padding:20px"><button type="button" class="btn block" data-google>Iniciar sesi\xF3n con Google</button><p data-google-error class="msg" role="alert"></p><p class="small muted">Elija su cuenta de Google. Su acceso depende del perfil autorizado en FlotaIA.</p></div><details style="padding:0 20px 20px"><summary>Usar correo y contrase\xF1a</summary>' : ""}
       <form novalidate>
-        ${modoLocal ? `<div class="demo"><b>Entrar a la demostración</b><p class="small muted">Toque un perfil de prueba. Los datos se guardan solo en este navegador.</p>
-          <div class="demo-btns">${cuentasDemo.map(c => `<button type="button" class="btn sec" data-demo="${esc(c.email)}">${esc(ROL_NOMBRE[c.perfil.rol])} <span class="small muted">${esc(c.perfil.codigo)}${c.perfil.unidadAsignada ? ' · ' + esc(c.perfil.unidadAsignada) : ''}</span></button>`).join('')}</div>
-          <p class="small muted" style="margin-top:4px">O escriba el correo del perfil y la contraseña <code>demo1234</code>:</p></div>` : ''}
         <label class="f">Correo<input name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" required></label>
-        <label class="f">Contraseña<input name="pass" type="password" autocomplete="current-password" required></label>
+        <label class="f">Contrase\xF1a<input name="pass" type="password" autocomplete="current-password" required></label>
         <p class="msg" role="alert">${esc(mensaje)}</p>
         <button class="btn block" type="submit">Ingresar</button>
-        <p class="foot">Prototipo académico con datos simulados · Municipalidad Distrital de El Tambo — Huancayo. Las cuentas las crea el administrador.</p>
+        <p class="foot">Prototipo acad\xE9mico con datos simulados \xB7 Municipalidad Distrital de El Tambo \u2014 Huancayo. Las cuentas las crea el administrador.</p>
       </form>
+      ${!modoLocal && onGoogle ? "</details>" : ""}
     </div>
-    <p class="small muted">¿Otra interfaz? <a href="${esc(otraUrl)}">${esc(interfaz === 'Mobile' ? 'FlotaIA Tablet' : 'FlotaIA Mobile')}</a> · <a href="../">Prototipo de escritorio</a></p>
+    ${modoLocal ? `<div class="demo note warn"><b>Cuentas de prueba del modo local</b> (contrase\xF1a <code>demo1234</code>). No existen en Firebase.<table>${cuentasDemo.map((c) => `<tr><td>${esc(c.email)}</td><td>${esc(ROL_NOMBRE[c.perfil.rol])}${c.perfil.unidadAsignada ? " \xB7 " + esc(c.perfil.unidadAsignada) : ""}</td></tr>`).join("")}</table></div>` : ""}
+    <p class="small muted">\xBFOtra interfaz? <a href="${esc(otraUrl)}">${esc(interfaz === "Mobile" ? "FlotaIA Tablet" : "FlotaIA Mobile")}</a> \xB7 <a href="../">Prototipo de escritorio</a></p>
   </main>`;
-  const form = $('form', root), msg = $('.msg', root), btn = $('button[type=submit]', root);
-  form.onsubmit = async e => {
-    e.preventDefault(); msg.textContent = '';
+  const form = $("form", root2), msg = $("form .msg", root2), btn = $("button[type=submit]", root2);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    msg.textContent = "";
     const email = form.email.value.trim(), pass = form.pass.value;
-    if (!email || !pass) { msg.textContent = 'Ingrese su correo y su contraseña.'; return; }
-    ocupado(btn, true, 'Ingresando…');
-    try { await onSubmit(email, pass); } catch (err) { msg.textContent = err.mensaje || err.message; ocupado(btn, false); }
+    if (!email || !pass) {
+      msg.textContent = "Ingrese su correo y su contrase\xF1a.";
+      return;
+    }
+    ocupado(btn, true, "Ingresando\u2026");
+    try {
+      await onSubmit(email, pass);
+    } catch (err2) {
+      msg.textContent = err2.mensaje || err2.message;
+      ocupado(btn, false);
+    }
   };
-  root.querySelectorAll('[data-demo]').forEach(bt => bt.onclick = () => { form.email.value = bt.dataset.demo; form.pass.value = 'demo1234'; form.requestSubmit(); });
-  if (!modoLocal) setTimeout(() => form.email.focus(), 0);
+  const google = $("[data-google]", root2);
+  if (google) google.onclick = async () => {
+    const error = $("[data-google-error]", root2);
+    error.textContent = "";
+    ocupado(google, true, "Abriendo Google\u2026");
+    try {
+      await onGoogle();
+    } catch (e) {
+      error.textContent = e.mensaje || e.message;
+    } finally {
+      ocupado(google, false);
+    }
+  };
+  if (modoLocal) setTimeout(() => form.email.focus(), 0);
 }
-function pantallaEstado(root, { titulo, texto, acciones = '' }) {
-  root.innerHTML = `<main class="login"><div class="estado-sesion"><div class="brand">${LOGO}<div class="bname" style="color:var(--ink)">Flota<span style="color:var(--senal-hover)">IA</span></div></div><h1>${esc(titulo)}</h1><p>${texto}</p><div style="display:flex;gap:8px;flex-wrap:wrap">${acciones}</div></div></main>`;
+function pantallaEstado(root2, { titulo, texto, acciones = "" }) {
+  root2.innerHTML = `<main class="login"><div class="estado-sesion"><div class="brand">${LOGO}<div class="bname" style="color:var(--ink)">Flota<span style="color:var(--senal-hover)">IA</span></div></div><h1>${esc(titulo)}</h1><p>${texto}</p><div style="display:flex;gap:8px;flex-wrap:wrap">${acciones}</div></div></main>`;
 }
-return { LOGO, ic, montarSprite, esc, $, $$, fFecha, fRel, fHoras, pillEstado, pillPrioridad, pillResultado, ORIGEN, badgeMotor, toast, franjaModoLocal, indicadorConexion, marcarErrores, ocupado, hoja, pantallaLogin, pantallaEstado };
-})();
 
-// ===== arranque.js =====
-__M['arranque'] = (() => {
-// FlotaIA · arranque común de Mobile y Tablet: datos, sesión, perfil y pantallas de acceso.
-const { iniciarDatos, observarSesion, iniciarSesion, cerrarSesion, MODO_LOCAL, mensajeError } = __M['auth'];
-const S = __M['firestore-service'];
-const { ROL_NOMBRE, PERFILES_INTERFAZ } = __M['permissions'];
-const { esc, $, $$, montarSprite, franjaModoLocal, pantallaLogin, pantallaEstado, toast, marcarErrores, ocupado } = __M['ui'];
-
-const Q = MODO_LOCAL ? '?modo=local' : '';
-
-// interfaz: 'mobile' | 'tablet'. onPerfil(perfil, A) se llama al entrar y cada vez que cambian rol, unidad, código o nombre.
-// onSalir() se llama cuando la sesión deja de ser válida (cerrar sesión, cuenta desactivada, perfil borrado).
-async function arrancarInterfaz({ interfaz, root, onPerfil, onSalir }) {
-  const NOMBRE = interfaz === 'mobile' ? 'Mobile' : 'Tablet', OTRA = interfaz === 'mobile' ? 'tablet' : 'mobile';
+// shared/arranque.js
+var Q = MODO_LOCAL ? "?modo=local" : "";
+async function arrancarInterfaz({ interfaz, root: root2, onPerfil, onSalir }) {
+  const NOMBRE = interfaz === "mobile" ? "Mobile" : "Tablet", OTRA = interfaz === "mobile" ? "tablet" : "mobile";
   montarSprite();
-  // El service worker (copia de la página para abrirla sin señal) es opcional: solo se registra si sw.js está publicado junto a la página.
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost'))
-    fetch('sw.js', { method: 'HEAD', cache: 'no-store' }).then(r => { if (r.ok) navigator.serviceWorker.register('sw.js').catch(() => {}); }).catch(() => {});
-  let A;
-  try { A = await iniciarDatos(); }
-  catch (e) {
-    pantallaEstado(root, { titulo: 'No se pudo iniciar FlotaIA', texto: esc(mensajeError(e)) + (e.code === 'flotaia/config' ? ' Mientras tanto puede revisar la interfaz en el <a href="?modo=local">modo local de prueba</a>, que no usa Firebase.' : ''), acciones: '<button type="button" class="btn" data-recargar>Reintentar</button>' });
-    $('[data-recargar]', root).onclick = () => location.reload();
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {
+  });
+  let A4;
+  try {
+    A4 = await iniciarDatos();
+  } catch (e) {
+    pantallaEstado(root2, { titulo: "No se pudo iniciar FlotaIA", texto: esc(mensajeError(e)) + (e.code === "flotaia/config" ? ' Mientras tanto puede revisar la interfaz en el <a href="?modo=local">modo local de prueba</a>, que no usa Firebase.' : ""), acciones: '<button type="button" class="btn" data-recargar>Reintentar</button>' });
+    $("[data-recargar]", root2).onclick = () => location.reload();
     return null;
   }
-  if (A.nombre === 'local') franjaModoLocal(A);
-  window.addEventListener('flotaia:fallo-cola', e => toast('Un cambio guardado sin señal fue rechazado por el servidor al enviarse: ' + mensajeError(e.detail.error), 'crit', 0));
-
-  const botonSalir = '<button type="button" class="btn sec" data-salir>Cerrar sesión</button>';
-  const enlazarSalir = () => $$('[data-salir]', root).forEach(b => b.onclick = () => cerrarSesion());
-  let clave = '', activo = false;
-  const salir = () => { clave = ''; if (activo) { activo = false; onSalir(); } };
-
-  observarSesion(s => {
-    if (s.estado === 'cargando') { if (!activo) root.innerHTML = '<main class="login"><p class="muted">Leyendo su perfil…</p></main>'; return; }
-    if (s.estado !== 'ok') salir();
+  if (A4.nombre === "local") franjaModoLocal(A4);
+  window.addEventListener("flotaia:fallo-cola", (e) => toast("Un cambio guardado sin se\xF1al fue rechazado por el servidor al enviarse: " + mensajeError(e.detail.error), "crit", 0));
+  const botonSalir = '<button type="button" class="btn sec" data-salir>Cerrar sesi\xF3n</button>';
+  const enlazarSalir2 = () => $$("[data-salir]", root2).forEach((b) => b.onclick = () => cerrarSesion());
+  let clave = "", activo = false;
+  const salir = () => {
+    clave = "";
+    if (activo) {
+      activo = false;
+      onSalir();
+    }
+  };
+  observarSesion((s) => {
+    if (s.estado === "cargando") {
+      if (!activo) root2.innerHTML = '<main class="login"><p class="muted">Leyendo su perfil\u2026</p></main>';
+      return;
+    }
+    if (s.estado !== "ok") salir();
     const u = s.usuario;
     switch (s.estado) {
-      case 'sin_sesion':
-        Promise.resolve(__M['local-adapter']).then(m => pantallaLogin(root, { interfaz: NOMBRE, otraUrl: `../${OTRA}/${Q}`, modoLocal: MODO_LOCAL,
-          cuentasDemo: m.CUENTAS_DEMO.filter(c => PERFILES_INTERFAZ[interfaz].includes(c.perfil.rol)),
-          onSubmit: async (email, pass) => { try { await iniciarSesion(email, pass); } catch (e) { e.mensaje = mensajeError(e); throw e; } } }));
+      case "sin_sesion":
+        Promise.resolve().then(() => (init_local_adapter(), local_adapter_exports)).then((m) => pantallaLogin(root2, {
+          interfaz: NOMBRE,
+          otraUrl: `../${OTRA}/${Q}`,
+          modoLocal: MODO_LOCAL,
+          cuentasDemo: m.CUENTAS_DEMO.filter((c) => PERFILES_INTERFAZ[interfaz].includes(c.perfil.rol)),
+          onGoogle: async () => {
+            try {
+              await iniciarSesionGoogle();
+            } catch (e) {
+              e.mensaje = mensajeError(e);
+              throw e;
+            }
+          },
+          onSubmit: async (email, pass) => {
+            try {
+              await iniciarSesion(email, pass);
+            } catch (e) {
+              e.mensaje = mensajeError(e);
+              throw e;
+            }
+          }
+        }));
         return;
-      case 'sin_perfil':
-        pantallaEstado(root, { titulo: 'Cuenta sin perfil en FlotaIA', texto: `La cuenta ${esc(u.email)} existe, pero no tiene un perfil válido. Pida al administrador que lo registre con este identificador (UID): <code>${esc(u.uid)}</code>.`, acciones: botonSalir });
-        enlazarSalir(); return;
-      case 'inactivo':
-        pantallaEstado(root, { titulo: 'Cuenta desactivada', texto: 'El administrador desactivó esta cuenta. Si es un error, comuníquese con el administrador.', acciones: botonSalir });
-        enlazarSalir(); return;
-      case 'error':
-        pantallaEstado(root, { titulo: 'No se pudo leer su perfil', texto: esc(mensajeError(s.error)), acciones: botonSalir });
-        enlazarSalir(); return;
-      case 'incompleto':
-        completarPerfil(root, s.perfil, botonSalir); enlazarSalir(); return;
+      case "sin_perfil":
+        pantallaEstado(root2, { titulo: "Cuenta sin perfil en FlotaIA", texto: `La cuenta ${esc(u.email)} existe, pero no tiene un perfil v\xE1lido. Pida al administrador que lo registre con este identificador (UID): <code>${esc(u.uid)}</code>.`, acciones: botonSalir });
+        enlazarSalir2();
+        return;
+      case "inactivo":
+        pantallaEstado(root2, { titulo: "Cuenta desactivada", texto: "El administrador desactiv\xF3 esta cuenta. Si es un error, comun\xEDquese con el administrador.", acciones: botonSalir });
+        enlazarSalir2();
+        return;
+      case "error":
+        pantallaEstado(root2, { titulo: "No se pudo leer su perfil", texto: esc(mensajeError(s.error)), acciones: botonSalir });
+        enlazarSalir2();
+        return;
+      case "incompleto":
+        completarPerfil(root2, s.perfil, botonSalir);
+        enlazarSalir2();
+        return;
     }
     const p = s.perfil;
     if (!PERFILES_INTERFAZ[interfaz].includes(p.rol)) {
       salir();
-      pantallaEstado(root, { titulo: `Use FlotaIA ${OTRA === 'mobile' ? 'Mobile' : 'Tablet'}`, texto: OTRA === 'tablet'
-        ? `El perfil de ${esc(ROL_NOMBRE[p.rol].toLowerCase())} trabaja en la tablet: seguimiento operativo, inspecciones e indicadores.`
-        : `El perfil de ${esc(ROL_NOMBRE[p.rol].toLowerCase())} trabaja en el celular: reporte de fallas y seguimiento de sus reportes.`,
-        acciones: `<a class="btn" href="../${OTRA}/${Q}">Abrir FlotaIA ${OTRA === 'mobile' ? 'Mobile' : 'Tablet'}</a>${botonSalir}` });
-      enlazarSalir(); return;
+      pantallaEstado(root2, {
+        titulo: `Use FlotaIA ${OTRA === "mobile" ? "Mobile" : "Tablet"}`,
+        texto: OTRA === "tablet" ? `El perfil de ${esc(ROL_NOMBRE[p.rol].toLowerCase())} trabaja en la tablet: seguimiento operativo, inspecciones e indicadores.` : `El perfil de ${esc(ROL_NOMBRE[p.rol].toLowerCase())} trabaja en el celular: reporte de fallas y seguimiento de sus reportes.`,
+        acciones: `<a class="btn" href="../${OTRA}/${Q}">Abrir FlotaIA ${OTRA === "mobile" ? "Mobile" : "Tablet"}</a>${botonSalir}`
+      });
+      enlazarSalir2();
+      return;
     }
-    const k = [p.uid, p.rol, p.unidadAsignada, p.codigo, p.nombre].join('|');
-    if (k !== clave) { clave = k; activo = true; onPerfil(p, A); }
+    const k = [p.uid, p.rol, p.unidadAsignada, p.codigo, p.nombre].join("|");
+    if (k !== clave) {
+      clave = k;
+      activo = true;
+      onPerfil(p, A4);
+    }
   });
-  return A;
+  return A4;
 }
-
-function completarPerfil(root, p, botonSalir) {
-  if (p.rol !== 'administrador') { pantallaEstado(root, { titulo: 'Perfil incompleto', texto: 'Falta registrar su nombre o su código de trabajador. Pida al administrador que complete su perfil.', acciones: botonSalir }); return; }
-  pantallaEstado(root, { titulo: 'Complete su perfil', texto: `Su documento <code>usuarios/${esc(p.uid)}</code> tiene el rol de administrador, pero le faltan el nombre y el código. Cada operación queda firmada con ese código.`, acciones: '' });
-  $('.estado-sesion', root).insertAdjacentHTML('beforeend', `<form novalidate style="display:grid;gap:12px"><label class="f">Nombre<input name="nombre" value="${esc(p.nombre || '')}" autocomplete="name"></label><label class="f">Código de trabajador<input name="codigo" value="${esc(p.codigo || 'AD-01')}" autocapitalize="characters"></label><button class="btn" type="submit">Guardar perfil</button>${botonSalir}</form>`);
-  const f = $('.estado-sesion form', root);
-  f.onsubmit = async e => {
+function completarPerfil(root2, p, botonSalir) {
+  if (p.rol !== "administrador") {
+    pantallaEstado(root2, { titulo: "Perfil incompleto", texto: "Falta registrar su nombre o su c\xF3digo de trabajador. Pida al administrador que complete su perfil.", acciones: botonSalir });
+    return;
+  }
+  pantallaEstado(root2, { titulo: "Complete su perfil", texto: `Su documento <code>usuarios/${esc(p.uid)}</code> tiene el rol de administrador, pero le faltan el nombre y el c\xF3digo. Cada operaci\xF3n queda firmada con ese c\xF3digo.`, acciones: "" });
+  $(".estado-sesion", root2).insertAdjacentHTML("beforeend", `<form novalidate style="display:grid;gap:12px"><label class="f">Nombre<input name="nombre" value="${esc(p.nombre || "")}" autocomplete="name"></label><label class="f">C\xF3digo de trabajador<input name="codigo" value="${esc(p.codigo || "AD-01")}" autocapitalize="characters"></label><button class="btn" type="submit">Guardar perfil</button>${botonSalir}</form>`);
+  const f = $(".estado-sesion form", root2);
+  f.onsubmit = async (e) => {
     e.preventDefault();
-    const d = { rol: 'administrador', activo: true, nombre: f.nombre.value, codigo: f.codigo.value.trim().toUpperCase(), unidadAsignada: null };
-    const errs = S.validarPerfil(d, []); if (Object.keys(errs).length) { marcarErrores(f, errs); return; }
-    const b = $('button[type=submit]', f); ocupado(b, true, 'Guardando…');
-    try { await S.guardarPerfil(p, p.uid, d, false); } catch (err) { toast(mensajeError(err), 'crit', 8000); ocupado(b, false); }
+    const d = { rol: "administrador", activo: true, nombre: f.nombre.value, codigo: f.codigo.value.trim().toUpperCase(), unidadAsignada: null };
+    const errs = validarPerfil(d, []);
+    if (Object.keys(errs).length) {
+      marcarErrores(f, errs);
+      return;
+    }
+    const b = $("button[type=submit]", f);
+    ocupado(b, true, "Guardando\u2026");
+    try {
+      await guardarPerfil(p, p.uid, d, false);
+    } catch (err2) {
+      toast(mensajeError(err2), "crit", 8e3);
+      ocupado(b, false);
+    }
   };
 }
-return { Q, arrancarInterfaz };
-})();
 
-// ===== componentes.js =====
-__M['componentes'] = (() => {
-// FlotaIA · componentes de interfaz usados por Mobile y Tablet:
-// formulario de reporte, detalle de una orden con su seguimiento en tiempo real, filas de lista y alertas.
-const S = __M['firestore-service'];
-const { reglas, EJEMPLOS } = __M['reglas'];
-const { puede } = __M['permissions'];
-const { mensajeError } = __M['auth'];
-const { esc, ic, $, fFecha, fRel, fHoras, pillEstado, pillPrioridad, pillResultado, badgeMotor, ORIGEN, toast, marcarErrores, ocupado } = __M['ui'];
-
-const ORDEN_PRIO = { alta: 0, media: 1, baja: 2 };
-const porPrioridad = (a, b) => (ORDEN_PRIO[a.prioridad] - ORDEN_PRIO[b.prioridad]) || String(a.creadoEn).localeCompare(String(b.creadoEn));
-const recientes = (a, b) => String(b.actualizadoEn || b.creadoEn).localeCompare(String(a.actualizadoEn || a.creadoEn));
-
+// shared/componentes.js
+var ORDEN_PRIO = { alta: 0, media: 1, baja: 2 };
+var porPrioridad = (a, b) => ORDEN_PRIO[a.prioridad] - ORDEN_PRIO[b.prioridad] || String(a.creadoEn).localeCompare(String(b.creadoEn));
+var recientes = (a, b) => String(b.actualizadoEn || b.creadoEn).localeCompare(String(a.actualizadoEn || a.creadoEn));
 function filaOrden(o, { sel = false, mostrarUnidad = true } = {}) {
-  return `<button type="button" class="row prio-${esc(o.prioridad)}${sel ? ' sel' : ''}" data-ot="${esc(o.id)}" aria-label="Orden ${esc(o.codigo)}, unidad ${esc(o.unidadId)}, ${esc(S.ESTADOS[o.estado])}">
-    ${mostrarUnidad ? `<span class="u">${esc(o.unidadId)}</span>` : '<span></span>'}
+  return `<button type="button" class="row prio-${esc(o.prioridad)}${sel ? " sel" : ""}" data-ot="${esc(o.id)}" aria-label="Orden ${esc(o.codigo)}, unidad ${esc(o.unidadId)}, ${esc(ESTADOS[o.estado])}">
+    ${mostrarUnidad ? `<span class="u">${esc(o.unidadId)}</span>` : "<span></span>"}
     <span class="t">${esc(o.resumen || o.accion)}</span>
     <span class="r">${pillEstado(o.estado, o._pend)}</span>
-    <span class="s"><span class="num">${esc(o.codigo)}</span><span>${esc(o.sistema)}</span>${pillPrioridad(o.prioridad)}${badgeMotor(o)}<span>${esc(fRel(o.actualizadoEn || o.creadoEn))}</span>${o.mecanicoCodigo ? `<span>Atiende ${esc(o.mecanicoCodigo)}</span>` : ''}</span>
+    <span class="s"><span class="num">${esc(o.codigo)}</span><span>${esc(o.sistema)}</span>${pillPrioridad(o.prioridad)}${badgeMotor(o)}<span>${esc(fRel(o.actualizadoEn || o.creadoEn))}</span>${o.mecanicoCodigo ? `<span>Atiende ${esc(o.mecanicoCodigo)}</span>` : ""}</span>
   </button>`;
 }
-const vacio = (texto, icono = 'inbox') => `<div class="empty">${ic(icono)}<span>${esc(texto)}</span></div>`;
-const errorCarga = e => `<div class="note crit">${esc(mensajeError(e))}</div>`;
-
-// ---------- formulario de reporte de falla ----------
-function formularioReporte(cont, perfil, { origen, unidades = [], onVer } = {}) {
-  const fijo = perfil.rol === 'chofer';
+var vacio = (texto, icono = "inbox") => `<div class="empty">${ic(icono)}<span>${esc(texto)}</span></div>`;
+var errorCarga = (e) => `<div class="note crit">${esc(mensajeError(e))}</div>`;
+function formularioReporte(cont, perfil2, { origen, unidades = [], onVer } = {}) {
+  const fijo = perfil2.rol === "chofer";
   cont.innerHTML = `<form class="card" novalidate>
-    <div class="card-h"><div><h2>Reportar una falla</h2><p>Las reglas asignan sistema, prioridad y acción</p></div><span class="badge b-auto">Automatización</span></div>
-    <label class="f">Unidad<select name="unidadId" ${fijo ? 'disabled' : ''}></select>${fijo ? '<span class="hint">Su unidad asignada. Para cambiarla, consulte al administrador.</span>' : ''}</label>
-    <label class="f">Descripción de la falla <span class="hint">Escríbala como la contaría por radio o WhatsApp.</span>
+    <div class="card-h"><div><h2>Reportar una falla</h2><p>Las reglas asignan sistema, prioridad y acci\xF3n</p></div><span class="badge b-auto">Automatizaci\xF3n</span></div>
+    <label class="f">Unidad<select name="unidadId" ${fijo ? "disabled" : ""}></select>${fijo ? '<span class="hint">Su unidad asignada. Para cambiarla, consulte al administrador.</span>' : ""}</label>
+    <label class="f">Descripci\xF3n de la falla <span class="hint">Escr\xEDbala como la contar\xEDa por radio o WhatsApp.</span>
       <textarea name="descripcion" maxlength="400" placeholder="Ej.: la prensa pierde fuerza y se escucha un silbido en la bomba"></textarea>
       <span class="hint cnt">0 / 400</span></label>
-    <div class="chips" aria-label="Ejemplos de reporte">${EJEMPLOS.map(([t, d]) => `<button type="button" class="chipx" data-t="${esc(d)}">${esc(t)}</button>`).join('')}</div>
-    <label class="f">Observaciones (opcional) <span class="hint">Lugar, kilometraje u otro dato útil.</span><input name="observaciones" maxlength="400" autocomplete="off"></label>
+    <div class="chips" aria-label="Ejemplos de reporte">${EJEMPLOS.map(([t, d]) => `<button type="button" class="chipx" data-t="${esc(d)}">${esc(t)}</button>`).join("")}</div>
+    <label class="f">Observaciones (opcional) <span class="hint">Lugar, kilometraje u otro dato \xFAtil.</span><input name="observaciones" maxlength="400" autocomplete="off"></label>
     <div class="preview" aria-live="polite">
-      <span class="badge b-auto" style="justify-self:start">Clasificación automática</span>
-      <div class="pv"><span>Sistema</span><b class="pvS">—</b><span>Prioridad</span><span class="pvP">—</span><span>Acción</span><span class="pvA">Escriba la descripción para ver la clasificación.</span></div>
+      <span class="badge b-auto" style="justify-self:start">Clasificaci\xF3n autom\xE1tica</span>
+      <div class="pv"><span>Sistema</span><b class="pvS">\u2014</b><span>Prioridad</span><span class="pvP">\u2014</span><span>Acci\xF3n</span><span class="pvA">Escriba la descripci\xF3n para ver la clasificaci\xF3n.</span></div>
       <p class="foot">Reglas de palabras clave (no es IA). La fecha y la hora las registra el servidor al recibir el reporte.</p>
     </div>
-    <button class="btn block" type="submit">${ic('send')}Enviar reporte</button>
+    <button class="btn block" type="submit">${ic("send")}Enviar reporte</button>
   </form>
   <div class="res-rep" hidden></div>`;
-  const form = $('form', cont), sel = form.unidadId, txt = form.descripcion, res = $('.res-rep', cont), btn = $('button[type=submit]', form);
+  const form = $("form", cont), sel = form.unidadId, txt = form.descripcion, res = $(".res-rep", cont), btn = $("button[type=submit]", form);
   let ids = null, enviando = false;
-  const pintarUnidades = lista => {
+  const pintarUnidades = (lista) => {
     const actual = sel.value;
-    const opciones = fijo ? (perfil.unidadAsignada ? [perfil.unidadAsignada] : []) : lista.map(u => u.codigo);
-    sel.innerHTML = opciones.length ? (fijo ? '' : '<option value="">Elija la unidad…</option>') + opciones.map(c => `<option>${esc(c)}</option>`).join('') : '<option value="">Sin unidad asignada</option>';
+    const opciones = fijo ? perfil2.unidadAsignada ? [perfil2.unidadAsignada] : [] : lista.map((u) => u.codigo);
+    sel.innerHTML = opciones.length ? (fijo ? "" : '<option value="">Elija la unidad\u2026</option>') + opciones.map((c) => `<option>${esc(c)}</option>`).join("") : '<option value="">Sin unidad asignada</option>';
     if (opciones.includes(actual)) sel.value = actual;
-    btn.disabled = fijo && !perfil.unidadAsignada;
+    btn.disabled = fijo && !perfil2.unidadAsignada;
   };
-  const vista = () => {
-    const t = txt.value.trim(); $('.cnt', form).textContent = `${txt.value.length} / 400`;
-    if (t.length < 3) { $('.pvS', form).textContent = '—'; $('.pvP', form).textContent = '—'; $('.pvA', form).textContent = 'Escriba la descripción para ver la clasificación.'; return; }
-    const c = reglas(t); $('.pvS', form).textContent = c.sistema; $('.pvP', form).innerHTML = pillPrioridad(c.prioridad); $('.pvA', form).textContent = c.accion;
+  const vista2 = () => {
+    const t = txt.value.trim();
+    $(".cnt", form).textContent = `${txt.value.length} / 400`;
+    if (t.length < 3) {
+      $(".pvS", form).textContent = "\u2014";
+      $(".pvP", form).textContent = "\u2014";
+      $(".pvA", form).textContent = "Escriba la descripci\xF3n para ver la clasificaci\xF3n.";
+      return;
+    }
+    const c = reglas(t);
+    $(".pvS", form).textContent = c.sistema;
+    $(".pvP", form).innerHTML = pillPrioridad(c.prioridad);
+    $(".pvA", form).textContent = c.accion;
   };
-  txt.addEventListener('input', vista);
-  form.querySelectorAll('.chipx').forEach(b => b.onclick = () => { txt.value = b.dataset.t; vista(); txt.focus(); });
-  form.onsubmit = async e => {
-    e.preventDefault(); if (enviando) return;
-    const d = { unidadId: fijo ? perfil.unidadAsignada : sel.value, descripcion: txt.value, observaciones: form.observaciones.value };
-    const errs = S.validarReporte(perfil, d);
-    if (Object.keys(errs).length) { marcarErrores(form, errs); return; }
+  txt.addEventListener("input", vista2);
+  form.querySelectorAll(".chipx").forEach((b) => b.onclick = () => {
+    txt.value = b.dataset.t;
+    vista2();
+    txt.focus();
+  });
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (enviando) return;
+    const d = { unidadId: fijo ? perfil2.unidadAsignada : sel.value, descripcion: txt.value, observaciones: form.observaciones.value };
+    const errs = validarReporte(perfil2, d);
+    if (Object.keys(errs).length) {
+      marcarErrores(form, errs);
+      return;
+    }
     marcarErrores(form, {});
-    // Los identificadores se generan una vez y se reutilizan si hay que reintentar: así un doble toque o un reintento no duplica el reporte.
-    if (!ids) ids = S.nuevosIdsReporte();
-    enviando = true; ocupado(btn, true, 'Enviando…');
+    if (!ids) ids = nuevosIdsReporte();
+    enviando = true;
+    ocupado(btn, true, "Enviando\u2026");
     try {
-      const r = await S.crearReporte(perfil, d, ids, origen);
+      const r = await crearReporte(perfil2, d, ids, origen);
       ids = null;
       mostrarResultado(r);
-    } catch (err) {
-      if (err.campos) marcarErrores(form, err.campos);
-      toast(mensajeError(err) + ' Puede reintentar: el reporte no se duplicará.', 'crit', 8000);
-    } finally { enviando = false; ocupado(btn, false); }
+    } catch (err2) {
+      if (err2.campos) marcarErrores(form, err2.campos);
+      toast(mensajeError(err2) + " Puede reintentar: el reporte no se duplicar\xE1.", "crit", 8e3);
+    } finally {
+      enviando = false;
+      ocupado(btn, false);
+    }
   };
   function mostrarResultado(r) {
-    form.hidden = true; res.hidden = false;
-    const tono = r.enCola ? 'warn' : 'good';
-    const texto = r.duplicadoEvitado ? `El reporte ya estaba registrado como ${esc(r.codigo)}; no se duplicó.`
-      : r.enCola ? `Sin confirmación del servidor: el reporte quedó guardado en este equipo y se enviará al recuperar la señal. Código asignado: <b class="num">${esc(r.codigo)}</b>.`
-      : `Reporte enviado. Se creó la orden <b class="num">${esc(r.codigo)}</b> en estado Pendiente.`;
+    form.hidden = true;
+    res.hidden = false;
+    const tono = r.enCola ? "warn" : "good";
+    const texto = r.duplicadoEvitado ? `El reporte ya estaba registrado como ${esc(r.codigo)}; no se duplic\xF3.` : r.enCola ? `Sin confirmaci\xF3n del servidor: el reporte qued\xF3 guardado en este equipo y se enviar\xE1 al recuperar la se\xF1al. C\xF3digo asignado: <b class="num">${esc(r.codigo)}</b>.` : `Reporte enviado. Se cre\xF3 la orden <b class="num">${esc(r.codigo)}</b> en estado Pendiente.`;
     res.innerHTML = `<div class="card"><div class="note ${tono}">${texto}</div>
-      <dl class="dl"><dt>Unidad</dt><dd>${esc(form.unidadId.value || perfil.unidadAsignada)}</dd><dt>Sistema</dt><dd>${esc(r.sistema)}</dd><dt>Prioridad</dt><dd>${pillPrioridad(r.prioridad)}</dd><dt>Acción</dt><dd>${esc(r.accion)}</dd></dl>
-      <div style="display:grid;gap:8px">${onVer ? '<button type="button" class="btn dark block" data-a="ver">Ver seguimiento</button>' : ''}<button type="button" class="btn sec block" data-a="otro">Registrar otro reporte</button></div></div>`;
-    res.querySelector('[data-a=otro]').onclick = () => { form.reset(); vista(); res.hidden = true; form.hidden = false; txt.focus(); };
-    const v = res.querySelector('[data-a=ver]'); if (v) v.onclick = () => onVer(r.otId);
-    toast(r.enCola ? `${r.codigo} guardado en el equipo; se enviará al reconectar.` : `${r.codigo} registrado.`, r.enCola ? 'warn' : 'ok');
-  }
-  pintarUnidades(unidades); vista();
-  return { unidades: lista => pintarUnidades(lista) };
-}
-
-// ---------- detalle de una orden: datos, acciones según rol y estado, seguimiento en tiempo real ----------
-function detalleOrden(cont, perfil, otId) {
-  cont.innerHTML = `<div class="dOt"><div class="card"><p class="muted">Cargando la orden…</p></div></div><div class="dAcc" style="display:grid;gap:12px"></div>
-    <section class="card"><div class="card-h"><div><h3>Seguimiento</h3><p>Cada cambio queda con autor y hora del servidor</p></div></div><ol class="tl"><li><p class="muted">Cargando…</p></li></ol></section>`;
-  const dOt = $('.dOt', cont), dAcc = $('.dAcc', cont), tl = $('.tl', cont);
-  let ot = null, clave = '';
-  const u1 = S.vigilarOrden(otId, o => {
-    ot = o;
-    if (!o) { dOt.innerHTML = '<div class="note crit">La orden no existe o no tiene permiso para verla.</div>'; dAcc.innerHTML = ''; return; }
-    dOt.innerHTML = datosOrden(o);
-    const k = `${o.estado}|${o.mecanicoUid}`; if (k !== clave) { clave = k; acciones(); }
-  }, e => { dOt.innerHTML = errorCarga(e); });
-  const u2 = S.vigilarSeguimiento(otId, filas => {
-    tl.innerHTML = filas.length ? filas.map(s => `<li class="${esc(s.tipo)}"><div class="when">${esc(fFecha(s.en))} · <span class="who">${esc(s.autorCodigo)}</span> (${esc(rolTexto(s.autorRol))})${s._pend ? ' · <span class="pill p-cola">Pendiente de envío</span>' : ''}</div><p>${esc(s.texto)}</p></li>`).join('') : '<li><p class="muted">Sin movimientos todavía.</p></li>';
-  }, e => { tl.innerHTML = `<li>${errorCarga(e)}</li>`; });
-
-  function acciones() {
-    const o = ot, yo = perfil.uid, admin = perfil.rol === 'administrador', partes = [];
-    if (puede(perfil.rol, 'atenderOrden')) {
-      if (o.estado === 'pendiente') partes.push(`<div class="card"><p>Al iniciar la atención, la orden queda a su nombre y el chofer ve el cambio.</p><button type="button" class="btn block" data-a="iniciar">${ic('wrench')}Iniciar atención</button></div>`);
-      else if (o.estado === 'atencion' && (o.mecanicoUid === yo || admin)) partes.push(`<form class="card fRes" novalidate><div class="card-h"><h3>Cerrar la orden</h3></div>
-        <label class="f">Trabajos realizados<textarea name="trabajosRealizados" maxlength="600" placeholder="Ej.: cambio de sellos de la bomba y prueba de presión"></textarea></label>
-        <div class="frow"><label class="f">Horas de reparación<input name="horasReparacion" type="number" inputmode="decimal" min="0.1" max="720" step="0.1"></label>
-        <label class="f">Horas fuera de servicio <span class="hint">Si lo deja vacío, se usan las de reparación.</span><input name="horasParada" type="number" inputmode="decimal" min="0" max="720" step="0.1"></label></div>
-        <button class="btn ok block" type="submit">${ic('check')}Marcar como resuelta</button></form>`);
-      else if (o.estado === 'atencion') partes.push(`<div class="note">La atiende ${esc(o.mecanicoCodigo)}. Solo esa persona o el administrador puede cerrarla.</div>`);
-    }
-    if (puede(perfil.rol, 'observarSeguimiento')) partes.push(`<form class="card fObs" novalidate><label class="f">Agregar observación al seguimiento<textarea name="texto" maxlength="400" style="min-height:80px" placeholder="Ej.: repuesto solicitado al almacén"></textarea></label><button class="btn sec block" type="submit">Agregar observación</button></form>`);
-    if (perfil.rol === 'chofer') partes.push('<div class="note">Aquí ve el avance de la orden. El mecánico registra la atención y el cierre.</div>');
-    dAcc.innerHTML = partes.join('');
-    const bI = $('[data-a=iniciar]', dAcc);
-    if (bI) bI.onclick = async () => {
-      ocupado(bI, true, 'Iniciando…');
-      try { await S.iniciarAtencion(perfil, otId); toast(`${o.codigo} en atención.`, 'ok'); }
-      catch (e) { toast(mensajeError(e), 'crit', 8000); ocupado(bI, false); }
+      <dl class="dl"><dt>Unidad</dt><dd>${esc(form.unidadId.value || perfil2.unidadAsignada)}</dd><dt>Sistema</dt><dd>${esc(r.sistema)}</dd><dt>Prioridad</dt><dd>${pillPrioridad(r.prioridad)}</dd><dt>Acci\xF3n</dt><dd>${esc(r.accion)}</dd></dl>
+      <div style="display:grid;gap:8px">${onVer ? '<button type="button" class="btn dark block" data-a="ver">Ver seguimiento</button>' : ""}<button type="button" class="btn sec block" data-a="otro">Registrar otro reporte</button></div></div>`;
+    res.querySelector("[data-a=otro]").onclick = () => {
+      form.reset();
+      vista2();
+      res.hidden = true;
+      form.hidden = false;
+      txt.focus();
     };
-    const fR = $('.fRes', dAcc);
-    if (fR) fR.onsubmit = async e => {
+    const v = res.querySelector("[data-a=ver]");
+    if (v) v.onclick = () => onVer(r.otId);
+    toast(r.enCola ? `${r.codigo} guardado en el equipo; se enviar\xE1 al reconectar.` : `${r.codigo} registrado.`, r.enCola ? "warn" : "ok");
+  }
+  pintarUnidades(unidades);
+  vista2();
+  return { unidades: (lista) => pintarUnidades(lista) };
+}
+function detalleOrden(cont, perfil2, otId) {
+  cont.innerHTML = `<div class="dOt"><div class="card"><p class="muted">Cargando la orden\u2026</p></div></div><div class="dAcc" style="display:grid;gap:12px"></div>
+    <section class="card"><div class="card-h"><div><h3>Seguimiento</h3><p>Cada cambio queda con autor y hora del servidor</p></div></div><ol class="tl"><li><p class="muted">Cargando\u2026</p></li></ol></section>`;
+  const dOt = $(".dOt", cont), dAcc = $(".dAcc", cont), tl = $(".tl", cont);
+  let ot = null, clave = "";
+  const u1 = vigilarOrden(otId, (o) => {
+    ot = o;
+    if (!o) {
+      dOt.innerHTML = '<div class="note crit">La orden no existe o no tiene permiso para verla.</div>';
+      dAcc.innerHTML = "";
+      return;
+    }
+    dOt.innerHTML = datosOrden(o);
+    const k = `${o.estado}|${o.mecanicoUid}`;
+    if (k !== clave) {
+      clave = k;
+      acciones();
+    }
+  }, (e) => {
+    dOt.innerHTML = errorCarga(e);
+  });
+  const u2 = vigilarSeguimiento(otId, (filas) => {
+    tl.innerHTML = filas.length ? filas.map((s) => `<li class="${esc(s.tipo)}"><div class="when">${esc(fFecha(s.en))} \xB7 <span class="who">${esc(s.autorCodigo)}</span> (${esc(rolTexto(s.autorRol))})${s._pend ? ' \xB7 <span class="pill p-cola">Pendiente de env\xEDo</span>' : ""}</div><p>${esc(s.texto)}</p></li>`).join("") : '<li><p class="muted">Sin movimientos todav\xEDa.</p></li>';
+  }, (e) => {
+    tl.innerHTML = `<li>${errorCarga(e)}</li>`;
+  });
+  function acciones() {
+    const o = ot, yo = perfil2.uid, admin = perfil2.rol === "administrador", partes = [];
+    if (puede(perfil2.rol, "atenderOrden")) {
+      if (o.estado === "pendiente") partes.push(`<div class="card"><p>Al iniciar la atenci\xF3n, la orden queda a su nombre y el chofer ve el cambio.</p><button type="button" class="btn block" data-a="iniciar">${ic("wrench")}Iniciar atenci\xF3n</button></div>`);
+      else if (o.estado === "atencion" && (o.mecanicoUid === yo || admin)) partes.push(`<form class="card fRes" novalidate><div class="card-h"><h3>Cerrar la orden</h3></div>
+        <label class="f">Trabajos realizados<textarea name="trabajosRealizados" maxlength="600" placeholder="Ej.: cambio de sellos de la bomba y prueba de presi\xF3n"></textarea></label>
+        <div class="frow"><label class="f">Horas de reparaci\xF3n<input name="horasReparacion" type="number" inputmode="decimal" min="0.1" max="720" step="0.1"></label>
+        <label class="f">Horas fuera de servicio <span class="hint">Si lo deja vac\xEDo, se usan las de reparaci\xF3n.</span><input name="horasParada" type="number" inputmode="decimal" min="0" max="720" step="0.1"></label></div>
+        <button class="btn ok block" type="submit">${ic("check")}Marcar como resuelta</button></form>`);
+      else if (o.estado === "atencion") partes.push(`<div class="note">La atiende ${esc(o.mecanicoCodigo)}. Solo esa persona o el administrador puede cerrarla.</div>`);
+    }
+    if (puede(perfil2.rol, "observarSeguimiento")) partes.push(`<form class="card fObs" novalidate><label class="f">Agregar observaci\xF3n al seguimiento<textarea name="texto" maxlength="400" style="min-height:80px" placeholder="Ej.: repuesto solicitado al almac\xE9n"></textarea></label><button class="btn sec block" type="submit">Agregar observaci\xF3n</button></form>`);
+    if (perfil2.rol === "chofer") partes.push('<div class="note">Aqu\xED ve el avance de la orden. El mec\xE1nico registra la atenci\xF3n y el cierre.</div>');
+    dAcc.innerHTML = partes.join("");
+    const bI = $("[data-a=iniciar]", dAcc);
+    if (bI) bI.onclick = async () => {
+      ocupado(bI, true, "Iniciando\u2026");
+      try {
+        await iniciarAtencion(perfil2, otId);
+        toast(`${o.codigo} en atenci\xF3n.`, "ok");
+      } catch (e) {
+        toast(mensajeError(e), "crit", 8e3);
+        ocupado(bI, false);
+      }
+    };
+    const fR = $(".fRes", dAcc);
+    if (fR) fR.onsubmit = async (e) => {
       e.preventDefault();
       const c = { trabajosRealizados: fR.trabajosRealizados.value, horasReparacion: fR.horasReparacion.value, horasParada: fR.horasParada.value };
-      const v = S.validarCierre(c); if (Object.keys(v.errores).length) { marcarErrores(fR, v.errores); return; }
-      marcarErrores(fR, {}); const b = $('button[type=submit]', fR); ocupado(b, true, 'Guardando…');
-      try { await S.resolverOrden(perfil, otId, c); toast(`${o.codigo} resuelta · indicadores actualizados.`, 'ok'); }
-      catch (err) { if (err.campos) marcarErrores(fR, err.campos); toast(mensajeError(err), 'crit', 8000); ocupado(b, false); }
+      const v = validarCierre(c);
+      if (Object.keys(v.errores).length) {
+        marcarErrores(fR, v.errores);
+        return;
+      }
+      marcarErrores(fR, {});
+      const b = $("button[type=submit]", fR);
+      ocupado(b, true, "Guardando\u2026");
+      try {
+        await resolverOrden(perfil2, otId, c);
+        toast(`${o.codigo} resuelta \xB7 indicadores actualizados.`, "ok");
+      } catch (err2) {
+        if (err2.campos) marcarErrores(fR, err2.campos);
+        toast(mensajeError(err2), "crit", 8e3);
+        ocupado(b, false);
+      }
     };
-    const fO = $('.fObs', dAcc);
-    if (fO) fO.onsubmit = async e => {
-      e.preventDefault(); const b = $('button[type=submit]', fO);
-      const t = fO.texto.value.trim(); if (t.length < 3) { marcarErrores(fO, { texto: 'Escriba al menos 3 caracteres.' }); return; }
-      marcarErrores(fO, {}); ocupado(b, true, 'Guardando…');
-      try { const r = await S.agregarObservacion(perfil, otId, t); fO.reset(); toast(r.enCola ? 'Observación guardada en el equipo; se enviará al reconectar.' : 'Observación agregada.', r.enCola ? 'warn' : 'ok'); }
-      catch (err) { toast(mensajeError(err), 'crit', 8000); }
-      finally { ocupado(b, false); }
+    const fO = $(".fObs", dAcc);
+    if (fO) fO.onsubmit = async (e) => {
+      e.preventDefault();
+      const b = $("button[type=submit]", fO);
+      const t = fO.texto.value.trim();
+      if (t.length < 3) {
+        marcarErrores(fO, { texto: "Escriba al menos 3 caracteres." });
+        return;
+      }
+      marcarErrores(fO, {});
+      ocupado(b, true, "Guardando\u2026");
+      try {
+        const r = await agregarObservacion(perfil2, otId, t);
+        fO.reset();
+        toast(r.enCola ? "Observaci\xF3n guardada en el equipo; se enviar\xE1 al reconectar." : "Observaci\xF3n agregada.", r.enCola ? "warn" : "ok");
+      } catch (err2) {
+        toast(mensajeError(err2), "crit", 8e3);
+      } finally {
+        ocupado(b, false);
+      }
     };
   }
-  return () => { u1(); u2(); };
+  return () => {
+    u1();
+    u2();
+  };
 }
-
-const rolTexto = r => ({ chofer: 'chofer', mecanico: 'mecánico', supervisor: 'supervisor', administrador: 'administrador' }[r] || r);
-
+var rolTexto = (r) => ({ chofer: "chofer", mecanico: "mec\xE1nico", supervisor: "supervisor", administrador: "administrador" })[r] || r;
 function datosOrden(o) {
   const m = o.detalleModelo;
   return `<div class="card">
@@ -1295,287 +1499,407 @@ function datosOrden(o) {
     <dl class="dl">
       <dt>Unidad</dt><dd class="num">${esc(o.unidadId)}</dd>
       <dt>Sistema</dt><dd>${esc(o.sistema)}</dd>
-      <dt>Descripción</dt><dd>${esc(o.resumen)}</dd>
-      <dt>Acción recomendada</dt><dd>${esc(o.accion)} ${badgeMotor(o)}</dd>
-      <dt>Registró</dt><dd>${esc(o.reportadoPorCodigo)} · ${esc(fFecha(o.creadoEn))}</dd>
-      <dt>Atiende</dt><dd>${o.mecanicoCodigo ? `${esc(o.mecanicoCodigo)} · desde ${esc(fFecha(o.inicioEn))}` : 'Sin asignar'}</dd>
-      ${o.estado === 'resuelta' ? `<dt>Resuelta</dt><dd>${esc(fFecha(o.resueltaEn))}</dd><dt>Trabajos</dt><dd>${esc(o.trabajosRealizados)}</dd><dt>Horas</dt><dd>${esc(fHoras(o.horasReparacion))} de reparación · ${esc(fHoras(o.horasParada))} fuera de servicio</dd>` : ''}
+      <dt>Descripci\xF3n</dt><dd>${esc(o.resumen)}</dd>
+      <dt>Acci\xF3n recomendada</dt><dd>${esc(o.accion)} ${badgeMotor(o)}</dd>
+      <dt>Registr\xF3</dt><dd>${esc(o.reportadoPorCodigo)} \xB7 ${esc(fFecha(o.creadoEn))}</dd>
+      <dt>Atiende</dt><dd>${o.mecanicoCodigo ? `${esc(o.mecanicoCodigo)} \xB7 desde ${esc(fFecha(o.inicioEn))}` : "Sin asignar"}</dd>
+      ${o.estado === "resuelta" ? `<dt>Resuelta</dt><dd>${esc(fFecha(o.resueltaEn))}</dd><dt>Trabajos</dt><dd>${esc(o.trabajosRealizados)}</dd><dt>Horas</dt><dd>${esc(fHoras(o.horasReparacion))} de reparaci\xF3n \xB7 ${esc(fHoras(o.horasParada))} fuera de servicio</dd>` : ""}
     </dl>
-    ${m ? `<p class="foot"><span class="badge b-ia">IA</span> Clasificación del modelo sobre el ciclo de laboratorio n.° ${esc(m.cicloEnsayo)} (probabilidad ${Math.round(m.probabilidad * 100)} %) <span class="badge b-sim">Simulación</span>. La orden la registró una persona; confirmar en la unidad.</p>` : ''}
+    ${m ? `<p class="foot"><span class="badge b-ia">IA</span> Clasificaci\xF3n del modelo sobre el ciclo de laboratorio n.\xB0 ${esc(m.cicloEnsayo)} (probabilidad ${Math.round(m.probabilidad * 100)} %) <span class="badge b-sim">Simulaci\xF3n</span>. La orden la registr\xF3 una persona; confirmar en la unidad.</p>` : ""}
   </div>`;
 }
-
-// ---------- alertas calculadas con las operaciones registradas ----------
-const horasDesde = iso => (Date.now() - new Date(iso)) / 36e5;
-function alertasChofer(perfil, misOrdenes, ordenesUnidad, inspUnidad) {
-  const out = [], u = perfil.unidadAsignada;
+var horasDesde = (iso) => (Date.now() - new Date(iso)) / 36e5;
+function alertasChofer(perfil2, misOrdenes, ordenesUnidad, inspUnidad) {
+  const out = [], u = perfil2.unidadAsignada;
   if (u) {
-    const e = S.estadoUnidad(u, ordenesUnidad);
-    if (e.nivel === 2) out.push({ nivel: 'crit', titulo: `${u}: no debe salir a ruta`, texto: `${e.detalle}. Espere la indicación del mecánico.`, en: null, fija: true });
-    else if (e.nivel === 1) out.push({ nivel: 'warn', titulo: `${u}: en ruta con advertencia`, texto: `${e.detalle}.`, en: null, fija: true });
+    const e = estadoUnidad(u, ordenesUnidad);
+    if (e.nivel === 2) out.push({ nivel: "crit", titulo: `${u}: no debe salir a ruta`, texto: `${e.detalle}. Espere la indicaci\xF3n del mec\xE1nico.`, en: null, fija: true });
+    else if (e.nivel === 1) out.push({ nivel: "warn", titulo: `${u}: en ruta con advertencia`, texto: `${e.detalle}.`, en: null, fija: true });
     const ins = inspUnidad[0];
-    if (ins && ins.resultado !== 'apta') out.push({ nivel: ins.resultado === 'no_apta' ? 'crit' : 'warn', titulo: `Inspección de ${u}: ${S.RESULTADOS[ins.resultado]}`, texto: `${ins.sistema}: ${ins.observaciones} (${ins.responsableCodigo}).`, en: ins.creadoEn });
+    if (ins && ins.resultado !== "apta") out.push({ nivel: ins.resultado === "no_apta" ? "crit" : "warn", titulo: `Inspecci\xF3n de ${u}: ${RESULTADOS[ins.resultado]}`, texto: `${ins.sistema}: ${ins.observaciones} (${ins.responsableCodigo}).`, en: ins.creadoEn });
   }
-  const vistas = new Map(); [...misOrdenes, ...ordenesUnidad].forEach(o => vistas.set(o.id, o));
-  [...vistas.values()].sort(recientes).slice(0, 30).forEach(o => {
-    const propio = o.reportadoPorUid === perfil.uid ? 'Su reporte' : 'Orden de su unidad';
-    if (o.estado === 'pendiente') out.push({ nivel: 'info', titulo: `${propio} ${o.codigo}: pendiente`, texto: o.resumen, en: o.creadoEn, otId: o.id });
-    else if (o.estado === 'atencion') out.push({ nivel: 'auto', titulo: `${o.codigo}: en atención por ${o.mecanicoCodigo}`, texto: o.resumen, en: o.inicioEn, otId: o.id });
-    else out.push({ nivel: 'good', titulo: `${o.codigo}: resuelta`, texto: o.trabajosRealizados, en: o.resueltaEn, otId: o.id });
+  const vistas = /* @__PURE__ */ new Map();
+  [...misOrdenes, ...ordenesUnidad].forEach((o) => vistas.set(o.id, o));
+  [...vistas.values()].sort(recientes).slice(0, 30).forEach((o) => {
+    const propio = o.reportadoPorUid === perfil2.uid ? "Su reporte" : "Orden de su unidad";
+    if (o.estado === "pendiente") out.push({ nivel: "info", titulo: `${propio} ${o.codigo}: pendiente`, texto: o.resumen, en: o.creadoEn, otId: o.id });
+    else if (o.estado === "atencion") out.push({ nivel: "auto", titulo: `${o.codigo}: en atenci\xF3n por ${o.mecanicoCodigo}`, texto: o.resumen, en: o.inicioEn, otId: o.id });
+    else out.push({ nivel: "good", titulo: `${o.codigo}: resuelta`, texto: o.trabajosRealizados, en: o.resueltaEn, otId: o.id });
   });
   return out;
 }
 function alertasTaller(ordenes) {
-  const out = [], ab = ordenes.filter(o => o.estado !== 'resuelta');
-  S.UNIDADES_CATALOGO.filter(u => u.ruta).forEach(u => { const e = S.estadoUnidad(u.codigo, ordenes); if (e.nivel === 2) out.push({ nivel: 'crit', titulo: `${u.codigo} fuera de ruta (${u.ruta})`, texto: e.detalle, en: null, fija: true }); });
-  ab.filter(o => o.estado === 'pendiente').sort(porPrioridad).forEach(o => {
-    const h = horasDesde(o.creadoEn);
-    if (o.prioridad === 'alta') out.push({ nivel: 'crit', titulo: `Prioridad alta sin atender: ${o.codigo} · ${o.unidadId}`, texto: o.resumen, en: o.creadoEn, otId: o.id });
-    else if (h >= 2) out.push({ nivel: 'warn', titulo: `Sin atender hace ${Math.floor(h)} h: ${o.codigo} · ${o.unidadId}`, texto: o.resumen, en: o.creadoEn, otId: o.id });
-    else out.push({ nivel: 'info', titulo: `Nueva orden ${o.codigo} · ${o.unidadId}`, texto: o.resumen, en: o.creadoEn, otId: o.id });
+  const out = [], ab = ordenes.filter((o) => o.estado !== "resuelta");
+  UNIDADES_CATALOGO.filter((u) => u.ruta).forEach((u) => {
+    const e = estadoUnidad(u.codigo, ordenes);
+    if (e.nivel === 2) out.push({ nivel: "crit", titulo: `${u.codigo} fuera de ruta (${u.ruta})`, texto: e.detalle, en: null, fija: true });
   });
-  ab.filter(o => o.estado === 'atencion' && horasDesde(o.inicioEn) >= 24).forEach(o => out.push({ nivel: 'warn', titulo: `En atención hace más de 24 h: ${o.codigo}`, texto: `${o.unidadId} · atiende ${o.mecanicoCodigo}`, en: o.inicioEn, otId: o.id }));
+  ab.filter((o) => o.estado === "pendiente").sort(porPrioridad).forEach((o) => {
+    const h = horasDesde(o.creadoEn);
+    if (o.prioridad === "alta") out.push({ nivel: "crit", titulo: `Prioridad alta sin atender: ${o.codigo} \xB7 ${o.unidadId}`, texto: o.resumen, en: o.creadoEn, otId: o.id });
+    else if (h >= 2) out.push({ nivel: "warn", titulo: `Sin atender hace ${Math.floor(h)} h: ${o.codigo} \xB7 ${o.unidadId}`, texto: o.resumen, en: o.creadoEn, otId: o.id });
+    else out.push({ nivel: "info", titulo: `Nueva orden ${o.codigo} \xB7 ${o.unidadId}`, texto: o.resumen, en: o.creadoEn, otId: o.id });
+  });
+  ab.filter((o) => o.estado === "atencion" && horasDesde(o.inicioEn) >= 24).forEach((o) => out.push({ nivel: "warn", titulo: `En atenci\xF3n hace m\xE1s de 24 h: ${o.codigo}`, texto: `${o.unidadId} \xB7 atiende ${o.mecanicoCodigo}`, en: o.inicioEn, otId: o.id }));
   return out;
 }
-const TONO = { crit: 'p-crit', warn: 'p-adv', good: 'p-ok', auto: 'p-aten', info: 'p-pend' };
-const NIVEL = { crit: 'Crítica', warn: 'Advertencia', good: 'Resuelta', auto: 'En atención', info: 'Aviso' };
+var TONO = { crit: "p-crit", warn: "p-adv", good: "p-ok", auto: "p-aten", info: "p-pend" };
+var NIVEL = { crit: "Cr\xEDtica", warn: "Advertencia", good: "Resuelta", auto: "En atenci\xF3n", info: "Aviso" };
 function listaAlertas(alertas, visto) {
-  if (!alertas.length) return vacio('Sin alertas. Las alertas se calculan con las órdenes e inspecciones registradas.', 'bell');
-  return `<div class="list">${alertas.map(a => `<${a.otId ? `button type="button" data-ot="${esc(a.otId)}"` : 'div'} class="row" style="grid-template-columns:1fr auto${a.nivel === 'crit' ? ';border-color:#E2B4AC;background:var(--crit-soft)' : ''}">
-    <span class="t">${a.en && visto && a.en > visto ? '<span class="pill p-cola">Nuevo</span> ' : ''}${esc(a.titulo)}</span><span class="r"><span class="pill ${TONO[a.nivel]}">${NIVEL[a.nivel]}</span></span>
-    <span class="s" style="grid-column:1/3">${esc(a.texto || '')}${a.en ? ` · ${esc(fRel(a.en))}` : ''}</span></${a.otId ? 'button' : 'div'}>`).join('')}</div>`;
+  if (!alertas.length) return vacio("Sin alertas. Las alertas se calculan con las \xF3rdenes e inspecciones registradas.", "bell");
+  return `<div class="list">${alertas.map((a) => `<${a.otId ? `button type="button" data-ot="${esc(a.otId)}"` : "div"} class="row" style="grid-template-columns:1fr auto${a.nivel === "crit" ? ";border-color:#E2B4AC;background:var(--crit-soft)" : ""}">
+    <span class="t">${a.en && visto && a.en > visto ? '<span class="pill p-cola">Nuevo</span> ' : ""}${esc(a.titulo)}</span><span class="r"><span class="pill ${TONO[a.nivel]}">${NIVEL[a.nivel]}</span></span>
+    <span class="s" style="grid-column:1/3">${esc(a.texto || "")}${a.en ? ` \xB7 ${esc(fRel(a.en))}` : ""}</span></${a.otId ? "button" : "div"}>`).join("")}</div>`;
 }
-const contarNuevas = (alertas, visto) => alertas.filter(a => a.fija ? a.nivel === 'crit' : (a.en && (!visto || a.en > visto))).length;
-return { porPrioridad, recientes, filaOrden, vacio, errorCarga, formularioReporte, detalleOrden, datosOrden, alertasChofer, alertasTaller, listaAlertas, contarNuevas, pillResultado };
-})();
+var contarNuevas = (alertas, visto) => alertas.filter((a) => a.fija ? a.nivel === "crit" : a.en && (!visto || a.en > visto)).length;
 
-// ===== app.js =====
-__M['app'] = (() => {
-// FlotaIA Mobile · chofer y mecánico (el administrador también puede entrar).
-const { cerrarSesion } = __M['auth'];
-const { arrancarInterfaz } = __M['arranque'];
-const S = __M['firestore-service'];
-const { ROL_NOMBRE } = __M['permissions'];
-const { LOGO, ic, esc, $, $$, indicadorConexion, toast, hoja, fFecha, fHoras, pillResultado } = __M['ui'];
-const { formularioReporte, detalleOrden, filaOrden, vacio, errorCarga, alertasChofer, alertasTaller, listaAlertas, contarNuevas, porPrioridad, recientes } = __M['componentes'];
-
-const root = $('#app');
-let A, perfil = null, subs = [], conexion = () => {}, vista = null, detalle = null, frmReporte = null;
-const D = { ordenes: [], ordenesUnidad: [], insp: [], unidades: [], cargado: false, error: null };
-const prevEstado = new Map();
-
-const TABS = {
-  chofer: [['inicio', 'Inicio', 'home'], ['unidad', 'Mi unidad', 'truck'], ['reportar', 'Reportar', 'plus'], ['reportes', 'Reportes', 'list'], ['alertas', 'Alertas', 'bell']],
-  taller: [['ordenes', 'Órdenes', 'wrench'], ['reportar', 'Reportar', 'plus'], ['historial', 'Historial', 'list'], ['alertas', 'Alertas', 'bell']],
+// mobile/app.js
+var root = $("#app");
+var A3;
+var perfil = null;
+var subs = [];
+var conexion = () => {
 };
-const tabs = () => perfil.rol === 'chofer' ? TABS.chofer : TABS.taller;
-const claveVisto = () => `flotaia-alertas-visto-${perfil.uid}`;
-const leerVisto = () => { try { return localStorage.getItem(claveVisto()) || ''; } catch (e) { return ''; } };
-const guardarVisto = () => { try { localStorage.setItem(claveVisto(), new Date().toISOString()); } catch (e) {} };
-
-function limpiar() { subs.forEach(f => { try { f(); } catch (e) {} }); subs = []; if (detalle) { const d = detalle; detalle = null; d.cerrar(); } Object.assign(D, { ordenes: [], ordenesUnidad: [], insp: [], unidades: [], cargado: false, error: null }); prevEstado.clear(); vista = null; }
-function enlazarSalir() { $$('[data-salir]', root).forEach(b => b.onclick = () => cerrarSesion()); }
-
-async function arrancar() {
-  A = await arrancarInterfaz({ interfaz: 'mobile', root, onPerfil: (p, a) => { A = a; perfil = p; montarApp(); }, onSalir: () => { limpiar(); perfil = null; } });
-  if (!A) return;
-  window.addEventListener('hashchange', () => { if (perfil) mostrar(location.hash.slice(1)); });
-  window.addEventListener('popstate', () => { if (detalle) { const d = detalle; detalle = null; d.cerrar(); } });
+var vista = null;
+var detalle = null;
+var frmReporte = null;
+var D = { ordenes: [], ordenesUnidad: [], insp: [], unidades: [], cargado: false, error: null };
+var prevEstado = /* @__PURE__ */ new Map();
+var TABS = {
+  chofer: [["inicio", "Inicio", "home"], ["unidad", "Mi unidad", "truck"], ["reportar", "Reportar", "plus"], ["reportes", "Reportes", "list"], ["alertas", "Alertas", "bell"]],
+  taller: [["ordenes", "\xD3rdenes", "wrench"], ["reportar", "Reportar", "plus"], ["historial", "Historial", "list"], ["alertas", "Alertas", "bell"]]
+};
+var tabs = () => perfil.rol === "chofer" ? TABS.chofer : TABS.taller;
+var claveVisto = () => `flotaia-alertas-visto-${perfil.uid}`;
+var leerVisto = () => {
+  try {
+    return localStorage.getItem(claveVisto()) || "";
+  } catch (e) {
+    return "";
+  }
+};
+var guardarVisto = () => {
+  try {
+    localStorage.setItem(claveVisto(), (/* @__PURE__ */ new Date()).toISOString());
+  } catch (e) {
+  }
+};
+function limpiar() {
+  subs.forEach((f) => {
+    try {
+      f();
+    } catch (e) {
+    }
+  });
+  subs = [];
+  if (detalle) {
+    const d = detalle;
+    detalle = null;
+    d.cerrar();
+  }
+  Object.assign(D, { ordenes: [], ordenesUnidad: [], insp: [], unidades: [], cargado: false, error: null });
+  prevEstado.clear();
+  vista = null;
 }
-
-// ---------- estructura y suscripciones ----------
+function enlazarSalir() {
+  $$("[data-salir]", root).forEach((b) => b.onclick = () => cerrarSesion());
+}
+async function arrancar() {
+  A3 = await arrancarInterfaz({ interfaz: "mobile", root, onPerfil: (p, a) => {
+    A3 = a;
+    perfil = p;
+    montarApp();
+  }, onSalir: () => {
+    limpiar();
+    perfil = null;
+  } });
+  if (!A3) return;
+  window.addEventListener("hashchange", () => {
+    if (perfil) mostrar(location.hash.slice(1));
+  });
+  window.addEventListener("popstate", () => {
+    if (detalle) {
+      const d = detalle;
+      detalle = null;
+      d.cerrar();
+    }
+  });
+}
 function montarApp() {
   limpiar();
   root.innerHTML = `<div class="m-app">
     <header class="topbar"><div class="brand">${LOGO}<div class="bname">Flota<span>IA</span><small>Mobile</small></div></div>
-      <div class="top-r"><span class="chip-rol">${esc(perfil.codigo)} · ${esc(ROL_NOMBRE[perfil.rol])}</span><button type="button" class="iconbtn" data-salir aria-label="Cerrar sesión" title="Cerrar sesión">${ic('logout')}</button></div></header>
-    <div class="proto-band"><b>Prototipo académico | Caso simulado</b><span>El Tambo — Huancayo</span><span class="conn" style="margin-left:auto;color:var(--ink-2)"></span></div>
+      <div class="top-r"><span class="chip-rol">${esc(perfil.codigo)} \xB7 ${esc(ROL_NOMBRE[perfil.rol])}</span><button type="button" class="iconbtn" data-salir aria-label="Cerrar sesi\xF3n" title="Cerrar sesi\xF3n">${ic("logout")}</button></div></header>
+    <div class="proto-band"><b>Prototipo acad\xE9mico | Caso simulado</b><span>El Tambo \u2014 Huancayo</span><span class="conn" style="margin-left:auto;color:var(--ink-2)"></span></div>
     <main class="m-main" id="vista" tabindex="-1"></main>
-    <nav class="bnav" aria-label="Secciones">${tabs().map(([id, t, i]) => `<button type="button" data-tab="${id}">${ic(i)}<span>${t}</span></button>`).join('')}</nav>
+    <nav class="bnav" aria-label="Secciones">${tabs().map(([id, t, i]) => `<button type="button" data-tab="${id}">${ic(i)}<span>${t}</span></button>`).join("")}</nav>
   </div>`;
   enlazarSalir();
-  conexion = indicadorConexion($('.conn', root), A);
-  $('.bnav', root).addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) ir(b.dataset.tab); });
-  $('#vista', root).addEventListener('click', e => {
-    const a = e.target.closest('[data-ir]'); if (a) { ir(a.dataset.ir); return; }
-    const o = e.target.closest('[data-ot]'); if (o) abrirDetalle(o.dataset.ot);
+  conexion = indicadorConexion($(".conn", root), A3);
+  $(".bnav", root).addEventListener("click", (e) => {
+    const b = e.target.closest("[data-tab]");
+    if (b) ir(b.dataset.tab);
   });
-  const fallo = e => { D.error = e; refrescar(); };
-  const meta = m => conexion(m);
-  subs.push(S.vigilarOrdenes(perfil, (rows, m) => { avisarCambios(rows); D.ordenes = rows; D.cargado = true; D.error = null; meta(m); refrescar(); }, fallo));
-  subs.push(S.vigilarUnidades(rows => { D.unidades = rows; refrescar(); }, fallo));
-  if (perfil.rol === 'chofer' && perfil.unidadAsignada) {
-    subs.push(S.vigilarOrdenesUnidad(perfil.unidadAsignada, (rows, m) => { D.ordenesUnidad = rows; meta(m); refrescar(); }, fallo));
-    subs.push(S.vigilarInspeccionesUnidad(perfil.unidadAsignada, rows => { D.insp = rows; refrescar(); }, fallo));
+  $("#vista", root).addEventListener("click", (e) => {
+    const a = e.target.closest("[data-ir]");
+    if (a) {
+      ir(a.dataset.ir);
+      return;
+    }
+    const o = e.target.closest("[data-ot]");
+    if (o) abrirDetalle(o.dataset.ot);
+  });
+  const fallo = (e) => {
+    D.error = e;
+    refrescar();
+  };
+  const meta = (m) => conexion(m);
+  subs.push(vigilarOrdenes(perfil, (rows, m) => {
+    avisarCambios(rows);
+    D.ordenes = rows;
+    D.cargado = true;
+    D.error = null;
+    meta(m);
+    refrescar();
+  }, fallo));
+  subs.push(vigilarUnidades((rows) => {
+    D.unidades = rows;
+    refrescar();
+  }, fallo));
+  if (perfil.rol === "chofer" && perfil.unidadAsignada) {
+    subs.push(vigilarOrdenesUnidad(perfil.unidadAsignada, (rows, m) => {
+      D.ordenesUnidad = rows;
+      meta(m);
+      refrescar();
+    }, fallo));
+    subs.push(vigilarInspeccionesUnidad(perfil.unidadAsignada, (rows) => {
+      D.insp = rows;
+      refrescar();
+    }, fallo));
   }
   const ini = location.hash.slice(1);
-  mostrar(tabs().some(t => t[0] === ini) ? ini : tabs()[0][0]);
+  mostrar(tabs().some((t) => t[0] === ini) ? ini : tabs()[0][0]);
 }
-
-// Aviso en pantalla cuando cambia el estado de una orden que este usuario sigue (no en la primera carga).
 function avisarCambios(rows) {
   const primera = !D.cargado;
-  rows.forEach(o => {
+  rows.forEach((o) => {
     const antes = prevEstado.get(o.id);
     if (!primera && antes !== o.estado) {
-      if (perfil.rol === 'chofer' && antes && o.estado === 'atencion') toast(`${o.codigo}: en atención por ${o.mecanicoCodigo}.`, 'ok', 6000);
-      else if (perfil.rol === 'chofer' && antes && o.estado === 'resuelta') toast(`${o.codigo}: resuelta.`, 'ok', 6000);
-      else if (perfil.rol !== 'chofer' && !antes && o.reportadoPorUid !== perfil.uid && o.estado === 'pendiente') toast(`Nueva orden ${o.codigo} · ${o.unidadId} · prioridad ${o.prioridad}.`, o.prioridad === 'alta' ? 'crit' : '', 7000);
+      if (perfil.rol === "chofer" && antes && o.estado === "atencion") toast(`${o.codigo}: en atenci\xF3n por ${o.mecanicoCodigo}.`, "ok", 6e3);
+      else if (perfil.rol === "chofer" && antes && o.estado === "resuelta") toast(`${o.codigo}: resuelta.`, "ok", 6e3);
+      else if (perfil.rol !== "chofer" && !antes && o.reportadoPorUid !== perfil.uid && o.estado === "pendiente") toast(`Nueva orden ${o.codigo} \xB7 ${o.unidadId} \xB7 prioridad ${o.prioridad}.`, o.prioridad === "alta" ? "crit" : "", 7e3);
     }
     prevEstado.set(o.id, o.estado);
   });
 }
-
-function ir(n) { if (location.hash.slice(1) === n) mostrar(n); else location.hash = n; }
+function ir(n) {
+  if (location.hash.slice(1) === n) mostrar(n);
+  else location.hash = n;
+}
 function mostrar(n) {
-  if (!tabs().some(t => t[0] === n)) n = tabs()[0][0];
-  vista = n; frmReporte = null;
-  $$('.bnav [data-tab]', root).forEach(b => { const on = b.dataset.tab === n; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
-  const el = $('#vista', root); el.innerHTML = '';
-  V[n].montar(el); refrescar();
-  if (n === 'alertas') guardarVisto();
-  window.scrollTo(0, 0); el.focus({ preventScroll: true });
+  if (!tabs().some((t) => t[0] === n)) n = tabs()[0][0];
+  vista = n;
+  frmReporte = null;
+  $$(".bnav [data-tab]", root).forEach((b) => {
+    const on = b.dataset.tab === n;
+    b.classList.toggle("on", on);
+    if (on) b.setAttribute("aria-current", "page");
+    else b.removeAttribute("aria-current");
+  });
+  const el = $("#vista", root);
+  el.innerHTML = "";
+  V[n].montar(el);
+  refrescar();
+  if (n === "alertas") guardarVisto();
+  window.scrollTo(0, 0);
+  el.focus({ preventScroll: true });
 }
 function refrescar() {
   if (!perfil || !vista) return;
-  const el = $('#vista', root); if (!el) return;
-  if (D.error) { const box = $('[data-error]', el); if (box) box.innerHTML = errorCarga(D.error); }
+  const el = $("#vista", root);
+  if (!el) return;
+  if (D.error) {
+    const box = $("[data-error]", el);
+    if (box) box.innerHTML = errorCarga(D.error);
+  }
   V[vista].actualizar(el);
-  const al = perfil.rol === 'chofer' ? alertasChofer(perfil, D.ordenes, D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
-  const n = vista === 'alertas' ? al.filter(a => a.fija && a.nivel === 'crit').length : contarNuevas(al, leerVisto());
-  const b = $('.bnav [data-tab=alertas]', root);
-  if (b) { let c = $('.cnt', b); if (n) { if (!c) { c = document.createElement('span'); c.className = 'cnt'; b.append(c); } c.textContent = n; b.setAttribute('aria-label', `Alertas (${n})`); } else { if (c) c.remove(); b.removeAttribute('aria-label'); } }
+  const al = perfil.rol === "chofer" ? alertasChofer(perfil, D.ordenes, D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
+  const n = vista === "alertas" ? al.filter((a) => a.fija && a.nivel === "crit").length : contarNuevas(al, leerVisto());
+  const b = $(".bnav [data-tab=alertas]", root);
+  if (b) {
+    let c = $(".cnt", b);
+    if (n) {
+      if (!c) {
+        c = document.createElement("span");
+        c.className = "cnt";
+        b.append(c);
+      }
+      c.textContent = n;
+      b.setAttribute("aria-label", `Alertas (${n})`);
+    } else {
+      if (c) c.remove();
+      b.removeAttribute("aria-label");
+    }
+  }
 }
-
 function abrirDetalle(id) {
-  if (detalle) { const d = detalle; detalle = null; d.cerrar(); }
+  if (detalle) {
+    const d = detalle;
+    detalle = null;
+    d.cerrar();
+  }
   let dejar = null;
-  const h = hoja('Orden de trabajo', '', { onClose: () => { if (dejar) dejar(); if (detalle === h) detalle = null; if (history.state && history.state.flotaiaHoja) history.back(); } });
+  const h = hoja("Orden de trabajo", "", { onClose: () => {
+    if (dejar) dejar();
+    if (detalle === h) detalle = null;
+    if (history.state && history.state.flotaiaHoja) history.back();
+  } });
   dejar = detalleOrden(h.el, perfil, id);
-  history.pushState({ flotaiaHoja: 1 }, '');
+  history.pushState({ flotaiaHoja: 1 }, "");
   detalle = h;
 }
-
-// ---------- vistas ----------
-const unidadDe = c => D.unidades.find(u => u.codigo === c);
-const semaforo = (u, e) => { const r = unidadDe(u); return `<div class="semaforo n${e.nivel}" role="status"><span class="luz" aria-hidden="true"></span><div><span class="small muted">Unidad <b class="num" style="display:inline;font-size:1rem">${esc(u)}</b>${r && r.ruta ? ` · ruta ${esc(r.ruta)}` : ''}</span><b>${e.nivel === 2 ? 'No sale a ruta' : esc(e.texto)}</b><span class="small">${esc(e.detalle)}</span></div></div>`; };
-const sinUnidad = '<div class="note warn">Aún no tiene una unidad asignada. Pida al administrador que se la asigne para poder reportar.</div>';
-const cargando = () => D.cargado ? '' : '<p class="muted">Cargando…</p>';
-const seg = (nombre, opciones, actual) => `<div class="seg" role="group" aria-label="${esc(nombre)}">${opciones.map(([v, t]) => `<button type="button" data-f="${v}" class="${v === actual ? 'on' : ''}" aria-pressed="${v === actual}">${t}</button>`).join('')}</div>`;
-function enlazarSeg(el, alCambiar) { $$('.seg [data-f]', el).forEach(b => b.onclick = () => { $$('.seg [data-f]', el).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); }); alCambiar(b.dataset.f); }); }
-const filtros = { reportes: 'todos', ordenes: 'disponibles', unidad: '' };
-
-const V = {
+var unidadDe = (c) => D.unidades.find((u) => u.codigo === c);
+var semaforo = (u, e) => {
+  const r = unidadDe(u);
+  return `<div class="semaforo n${e.nivel}" role="status"><span class="luz" aria-hidden="true"></span><div><span class="small muted">Unidad <b class="num" style="display:inline;font-size:1rem">${esc(u)}</b>${r && r.ruta ? ` \xB7 ruta ${esc(r.ruta)}` : ""}</span><b>${e.nivel === 2 ? "No sale a ruta" : esc(e.texto)}</b><span class="small">${esc(e.detalle)}</span></div></div>`;
+};
+var sinUnidad = '<div class="note warn">A\xFAn no tiene una unidad asignada. Pida al administrador que se la asigne para poder reportar.</div>';
+var cargando = () => D.cargado ? "" : '<p class="muted">Cargando\u2026</p>';
+var seg = (nombre, opciones, actual) => `<div class="seg" role="group" aria-label="${esc(nombre)}">${opciones.map(([v, t]) => `<button type="button" data-f="${v}" class="${v === actual ? "on" : ""}" aria-pressed="${v === actual}">${t}</button>`).join("")}</div>`;
+function enlazarSeg(el, alCambiar) {
+  $$(".seg [data-f]", el).forEach((b) => b.onclick = () => {
+    $$(".seg [data-f]", el).forEach((x) => {
+      x.classList.toggle("on", x === b);
+      x.setAttribute("aria-pressed", x === b);
+    });
+    alCambiar(b.dataset.f);
+  });
+}
+var filtros = { reportes: "todos", ordenes: "disponibles", unidad: "" };
+var V = {
   inicio: {
     montar(el) {
-      el.innerHTML = `<div class="vhead saludo"><div class="eyebrow">Chofer · ${esc(perfil.codigo)}</div><h1>Hola, ${esc(perfil.nombre)}</h1></div>
+      el.innerHTML = `<div class="vhead saludo"><div class="eyebrow">Chofer \xB7 ${esc(perfil.codigo)}</div><h1>Hola, ${esc(perfil.nombre)}</h1></div>
         <div data-error></div><div data-sem></div>
-        <button type="button" class="btn accion-grande" data-ir="reportar">${ic('plus')}Reportar una falla</button>
+        <button type="button" class="btn accion-grande" data-ir="reportar">${ic("plus")}Reportar una falla</button>
         <section class="card"><div class="card-h"><div><h2>Mis reportes</h2><p>Operaciones registradas</p></div><button type="button" class="btn sec sm" data-ir="reportes">Ver todos</button></div>
           <div class="mini3" data-cnt></div><div class="list" data-ult></div></section>`;
     },
     actualizar(el) {
       const u = perfil.unidadAsignada;
-      $('[data-sem]', el).innerHTML = u ? semaforo(u, S.estadoUnidad(u, D.ordenesUnidad)) : sinUnidad;
-      const c = e => D.ordenes.filter(o => o.estado === e).length;
-      $('[data-cnt]', el).innerHTML = `<div class="kpi warn"><span class="l">Pendientes</span><span class="v">${c('pendiente')}</span></div><div class="kpi auto"><span class="l">En atención</span><span class="v">${c('atencion')}</span></div><div class="kpi good"><span class="l">Resueltas</span><span class="v">${c('resuelta')}</span></div>`;
+      $("[data-sem]", el).innerHTML = u ? semaforo(u, estadoUnidad(u, D.ordenesUnidad)) : sinUnidad;
+      const c = (e) => D.ordenes.filter((o) => o.estado === e).length;
+      $("[data-cnt]", el).innerHTML = `<div class="kpi warn"><span class="l">Pendientes</span><span class="v">${c("pendiente")}</span></div><div class="kpi auto"><span class="l">En atenci\xF3n</span><span class="v">${c("atencion")}</span></div><div class="kpi good"><span class="l">Resueltas</span><span class="v">${c("resuelta")}</span></div>`;
       const ult = [...D.ordenes].sort(recientes).slice(0, 3);
-      $('[data-ult]', el).innerHTML = cargando() || (ult.length ? ult.map(o => filaOrden(o, { mostrarUnidad: false })).join('') : vacio('Todavía no ha enviado reportes.'));
-    },
+      $("[data-ult]", el).innerHTML = cargando() || (ult.length ? ult.map((o) => filaOrden(o, { mostrarUnidad: false })).join("") : vacio("Todav\xEDa no ha enviado reportes."));
+    }
   },
   unidad: {
     montar(el) {
       const u = perfil.unidadAsignada;
-      el.innerHTML = `<div class="vhead"><div class="eyebrow">Mi unidad</div><h1 class="num">${esc(u || 'Sin unidad asignada')}</h1><p class="lead">El estado se calcula con las órdenes abiertas y las inspecciones registradas de la unidad.</p></div>
+      el.innerHTML = `<div class="vhead"><div class="eyebrow">Mi unidad</div><h1 class="num">${esc(u || "Sin unidad asignada")}</h1><p class="lead">El estado se calcula con las \xF3rdenes abiertas y las inspecciones registradas de la unidad.</p></div>
         <div data-error></div><div data-sem></div>
-        <section class="card"><div class="card-h"><h2>Órdenes abiertas de la unidad</h2></div><div class="list" data-ab></div></section>
-        <section class="card"><div class="card-h"><div><h2>Últimas inspecciones</h2><p>Registradas por el taller o la supervisión</p></div></div><div class="list" data-ins></div></section>
+        <section class="card"><div class="card-h"><h2>\xD3rdenes abiertas de la unidad</h2></div><div class="list" data-ab></div></section>
+        <section class="card"><div class="card-h"><div><h2>\xDAltimas inspecciones</h2><p>Registradas por el taller o la supervisi\xF3n</p></div></div><div class="list" data-ins></div></section>
         <section class="card"><dl class="dl" data-ficha></dl><p class="foot">Unidad y ruta del caso simulado de El Tambo.</p></section>`;
     },
     actualizar(el) {
       const u = perfil.unidadAsignada;
-      if (!u) { $('[data-sem]', el).innerHTML = sinUnidad; $('[data-ab]', el).innerHTML = vacio('Sin unidad asignada.'); $('[data-ins]', el).innerHTML = ''; $('[data-ficha]', el).innerHTML = ''; return; }
-      $('[data-sem]', el).innerHTML = semaforo(u, S.estadoUnidad(u, D.ordenesUnidad));
-      const ab = D.ordenesUnidad.filter(o => o.estado !== 'resuelta').sort(porPrioridad);
-      $('[data-ab]', el).innerHTML = ab.length ? ab.map(o => filaOrden(o, { mostrarUnidad: false })).join('') : vacio('Sin órdenes abiertas.', 'check');
-      $('[data-ins]', el).innerHTML = D.insp.length ? D.insp.slice(0, 5).map(i => `<div class="row" style="cursor:default;grid-template-columns:1fr auto"><span class="t">${esc(i.sistema)} · ${esc(S.CONDICIONES[i.condicion])}</span><span class="r">${pillResultado(i.resultado)}</span><span class="s" style="grid-column:1/3">${esc(fFecha(i.creadoEn))} · ${esc(i.responsableCodigo)}${i.observaciones ? ' · ' + esc(i.observaciones) : ''}</span></div>`).join('') : vacio('Sin inspecciones registradas.');
+      if (!u) {
+        $("[data-sem]", el).innerHTML = sinUnidad;
+        $("[data-ab]", el).innerHTML = vacio("Sin unidad asignada.");
+        $("[data-ins]", el).innerHTML = "";
+        $("[data-ficha]", el).innerHTML = "";
+        return;
+      }
+      $("[data-sem]", el).innerHTML = semaforo(u, estadoUnidad(u, D.ordenesUnidad));
+      const ab = D.ordenesUnidad.filter((o) => o.estado !== "resuelta").sort(porPrioridad);
+      $("[data-ab]", el).innerHTML = ab.length ? ab.map((o) => filaOrden(o, { mostrarUnidad: false })).join("") : vacio("Sin \xF3rdenes abiertas.", "check");
+      $("[data-ins]", el).innerHTML = D.insp.length ? D.insp.slice(0, 5).map((i) => `<div class="row" style="cursor:default;grid-template-columns:1fr auto"><span class="t">${esc(i.sistema)} \xB7 ${esc(CONDICIONES[i.condicion])}</span><span class="r">${pillResultado(i.resultado)}</span><span class="s" style="grid-column:1/3">${esc(fFecha(i.creadoEn))} \xB7 ${esc(i.responsableCodigo)}${i.observaciones ? " \xB7 " + esc(i.observaciones) : ""}</span></div>`).join("") : vacio("Sin inspecciones registradas.");
       const r = unidadDe(u);
-      $('[data-ficha]', el).innerHTML = r ? `<dt>Código</dt><dd class="num">${esc(r.codigo)}</dd><dt>Tipo</dt><dd>${esc(r.tipo === 'compactadora' ? 'Compactadora' : 'Camión baranda')}</dd><dt>Ruta</dt><dd>${esc(r.ruta || 'Sin ruta fija')}</dd>` : '<dt>Unidad</dt><dd>Catálogo de unidades no inicializado.</dd>';
-    },
+      $("[data-ficha]", el).innerHTML = r ? `<dt>C\xF3digo</dt><dd class="num">${esc(r.codigo)}</dd><dt>Tipo</dt><dd>${esc(r.tipo === "compactadora" ? "Compactadora" : "Cami\xF3n baranda")}</dd><dt>Ruta</dt><dd>${esc(r.ruta || "Sin ruta fija")}</dd>` : "<dt>Unidad</dt><dd>Cat\xE1logo de unidades no inicializado.</dd>";
+    }
   },
   reportar: {
     montar(el) {
       el.innerHTML = '<div data-error></div><div data-frm style="display:grid;gap:14px"></div>';
-      frmReporte = formularioReporte($('[data-frm]', el), perfil, { origen: 'mobile', unidades: D.unidades, onVer: id => abrirDetalle(id) });
+      frmReporte = formularioReporte($("[data-frm]", el), perfil, { origen: "mobile", unidades: D.unidades, onVer: (id) => abrirDetalle(id) });
     },
-    actualizar() { if (frmReporte && perfil.rol !== 'chofer' && document.activeElement?.name !== 'unidadId') frmReporte.unidades(D.unidades); },
+    actualizar() {
+      if (frmReporte && perfil.rol !== "chofer" && document.activeElement?.name !== "unidadId") frmReporte.unidades(D.unidades);
+    }
   },
   reportes: {
     montar(el) {
       el.innerHTML = `<div class="vhead"><div class="eyebrow">Seguimiento</div><h1>Mis reportes</h1><p class="lead">Toque un reporte para ver su avance en tiempo real.</p></div><div data-error></div>
-        ${seg('Filtrar reportes', [['todos', 'Todos'], ['abiertos', 'Abiertos'], ['resueltos', 'Resueltos']], filtros.reportes)}<div class="list" data-l></div>`;
-      enlazarSeg(el, v => { filtros.reportes = v; refrescar(); });
+        ${seg("Filtrar reportes", [["todos", "Todos"], ["abiertos", "Abiertos"], ["resueltos", "Resueltos"]], filtros.reportes)}<div class="list" data-l></div>`;
+      enlazarSeg(el, (v) => {
+        filtros.reportes = v;
+        refrescar();
+      });
     },
     actualizar(el) {
-      const f = filtros.reportes, L = D.ordenes.filter(o => f === 'todos' || (f === 'abiertos' ? o.estado !== 'resuelta' : o.estado === 'resuelta')).sort(recientes);
-      $('[data-l]', el).innerHTML = cargando() || (L.length ? L.map(o => filaOrden(o)).join('') : vacio(f === 'todos' ? 'Todavía no ha enviado reportes.' : 'No hay reportes en este grupo.'));
-    },
+      const f = filtros.reportes, L = D.ordenes.filter((o) => f === "todos" || (f === "abiertos" ? o.estado !== "resuelta" : o.estado === "resuelta")).sort(recientes);
+      $("[data-l]", el).innerHTML = cargando() || (L.length ? L.map((o) => filaOrden(o)).join("") : vacio(f === "todos" ? "Todav\xEDa no ha enviado reportes." : "No hay reportes en este grupo."));
+    }
   },
   ordenes: {
     montar(el) {
-      el.innerHTML = `<div class="vhead"><div class="eyebrow">${esc(ROL_NOMBRE[perfil.rol])} · ${esc(perfil.codigo)}</div><h1>Órdenes de trabajo</h1><p class="lead">Ordenadas por prioridad. Toque una orden para atenderla.</p></div><div data-error></div>
+      el.innerHTML = `<div class="vhead"><div class="eyebrow">${esc(ROL_NOMBRE[perfil.rol])} \xB7 ${esc(perfil.codigo)}</div><h1>\xD3rdenes de trabajo</h1><p class="lead">Ordenadas por prioridad. Toque una orden para atenderla.</p></div><div data-error></div>
         <div class="filtros"><div data-seg></div><label class="f">Unidad<select data-u></select></label></div><div class="list" data-l></div>`;
-      $('[data-u]', el).onchange = e => { filtros.unidad = e.target.value; refrescar(); };
+      $("[data-u]", el).onchange = (e) => {
+        filtros.unidad = e.target.value;
+        refrescar();
+      };
     },
     actualizar(el) {
-      const yo = perfil.uid, ab = D.ordenes.filter(o => o.estado !== 'resuelta');
-      const grupos = { disponibles: ab.filter(o => o.estado === 'pendiente'), mias: ab.filter(o => o.estado === 'atencion' && o.mecanicoUid === yo), abiertas: ab };
-      $('[data-seg]', el).innerHTML = seg('Grupo de órdenes', [['disponibles', `Pendientes (${grupos.disponibles.length})`], ['mias', `Mías (${grupos.mias.length})`], ['abiertas', `Abiertas (${ab.length})`]], filtros.ordenes);
-      enlazarSeg(el, v => { filtros.ordenes = v; refrescar(); });
-      pintarSelectUnidad($('[data-u]', el));
-      const L = grupos[filtros.ordenes].filter(o => !filtros.unidad || o.unidadId === filtros.unidad).sort(porPrioridad);
-      $('[data-l]', el).innerHTML = cargando() || (L.length ? L.map(o => filaOrden(o)).join('') : vacio({ disponibles: 'No hay órdenes pendientes.', mias: 'No tiene órdenes en atención.', abiertas: 'No hay órdenes abiertas.' }[filtros.ordenes], 'check'));
-    },
+      const yo = perfil.uid, ab = D.ordenes.filter((o) => o.estado !== "resuelta");
+      const grupos = { disponibles: ab.filter((o) => o.estado === "pendiente"), mias: ab.filter((o) => o.estado === "atencion" && o.mecanicoUid === yo), abiertas: ab };
+      $("[data-seg]", el).innerHTML = seg("Grupo de \xF3rdenes", [["disponibles", `Pendientes (${grupos.disponibles.length})`], ["mias", `M\xEDas (${grupos.mias.length})`], ["abiertas", `Abiertas (${ab.length})`]], filtros.ordenes);
+      enlazarSeg(el, (v) => {
+        filtros.ordenes = v;
+        refrescar();
+      });
+      pintarSelectUnidad($("[data-u]", el));
+      const L = grupos[filtros.ordenes].filter((o) => !filtros.unidad || o.unidadId === filtros.unidad).sort(porPrioridad);
+      $("[data-l]", el).innerHTML = cargando() || (L.length ? L.map((o) => filaOrden(o)).join("") : vacio({ disponibles: "No hay \xF3rdenes pendientes.", mias: "No tiene \xF3rdenes en atenci\xF3n.", abiertas: "No hay \xF3rdenes abiertas." }[filtros.ordenes], "check"));
+    }
   },
   historial: {
     montar(el) {
-      el.innerHTML = `<div class="vhead"><div class="eyebrow">Taller</div><h1>Historial</h1><p class="lead">Órdenes resueltas, de la más reciente a la más antigua.</p></div><div data-error></div>
+      el.innerHTML = `<div class="vhead"><div class="eyebrow">Taller</div><h1>Historial</h1><p class="lead">\xD3rdenes resueltas, de la m\xE1s reciente a la m\xE1s antigua.</p></div><div data-error></div>
         <label class="f">Unidad<select data-u></select></label><div class="mini3" data-k></div><div class="list" data-l></div>`;
-      $('[data-u]', el).onchange = e => { filtros.unidad = e.target.value; refrescar(); };
+      $("[data-u]", el).onchange = (e) => {
+        filtros.unidad = e.target.value;
+        refrescar();
+      };
     },
     actualizar(el) {
-      pintarSelectUnidad($('[data-u]', el));
-      const R = D.ordenes.filter(o => o.estado === 'resuelta' && (!filtros.unidad || o.unidadId === filtros.unidad)).sort((a, b) => String(b.resueltaEn).localeCompare(String(a.resueltaEn)));
-      const mias = R.filter(o => o.mecanicoUid === perfil.uid).length, mttr = R.length ? R.reduce((s, o) => s + (Number(o.horasReparacion) || 0), 0) / R.length : null;
-      $('[data-k]', el).innerHTML = `<div class="kpi good"><span class="l">Resueltas</span><span class="v">${R.length}</span></div><div class="kpi auto"><span class="l">Por usted</span><span class="v">${mias}</span></div><div class="kpi"><span class="l">Reparación media</span><span class="v" style="font-size:1.3rem">${esc(fHoras(mttr))}</span></div>`;
-      $('[data-l]', el).innerHTML = cargando() || (R.length ? R.map(o => filaOrden(o)).join('') : vacio('Todavía no hay órdenes resueltas.'));
-    },
+      pintarSelectUnidad($("[data-u]", el));
+      const R = D.ordenes.filter((o) => o.estado === "resuelta" && (!filtros.unidad || o.unidadId === filtros.unidad)).sort((a, b) => String(b.resueltaEn).localeCompare(String(a.resueltaEn)));
+      const mias = R.filter((o) => o.mecanicoUid === perfil.uid).length, mttr = R.length ? R.reduce((s, o) => s + (Number(o.horasReparacion) || 0), 0) / R.length : null;
+      $("[data-k]", el).innerHTML = `<div class="kpi good"><span class="l">Resueltas</span><span class="v">${R.length}</span></div><div class="kpi auto"><span class="l">Por usted</span><span class="v">${mias}</span></div><div class="kpi"><span class="l">Reparaci\xF3n media</span><span class="v" style="font-size:1.3rem">${esc(fHoras(mttr))}</span></div>`;
+      $("[data-l]", el).innerHTML = cargando() || (R.length ? R.map((o) => filaOrden(o)).join("") : vacio("Todav\xEDa no hay \xF3rdenes resueltas."));
+    }
   },
   alertas: {
     montar(el) {
-      el.innerHTML = `<div class="vhead"><div class="eyebrow">Avisos</div><h1>Alertas</h1><p class="lead">${perfil.rol === 'chofer' ? 'Estado de su unidad y avance de sus reportes.' : 'Órdenes que requieren atención y unidades fuera de ruta.'} Se calculan con las operaciones registradas.</p></div><div data-error></div><div data-l></div>`;
+      el.innerHTML = `<div class="vhead"><div class="eyebrow">Avisos</div><h1>Alertas</h1><p class="lead">${perfil.rol === "chofer" ? "Estado de su unidad y avance de sus reportes." : "\xD3rdenes que requieren atenci\xF3n y unidades fuera de ruta."} Se calculan con las operaciones registradas.</p></div><div data-error></div><div data-l></div>`;
       el.dataset.visto = leerVisto();
     },
     actualizar(el) {
-      const al = perfil.rol === 'chofer' ? alertasChofer(perfil, D.ordenes, D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
-      $('[data-l]', el).innerHTML = cargando() || listaAlertas(al, el.dataset.visto);
-    },
-  },
+      const al = perfil.rol === "chofer" ? alertasChofer(perfil, D.ordenes, D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
+      $("[data-l]", el).innerHTML = cargando() || listaAlertas(al, el.dataset.visto);
+    }
+  }
 };
 function pintarSelectUnidad(sel) {
   if (document.activeElement === sel) return;
-  const ops = D.unidades.map(u => u.codigo);
-  sel.innerHTML = '<option value="">Todas</option>' + ops.map(c => `<option${c === filtros.unidad ? ' selected' : ''}>${esc(c)}</option>`).join('');
+  const ops = D.unidades.map((u) => u.codigo);
+  sel.innerHTML = '<option value="">Todas</option>' + ops.map((c) => `<option${c === filtros.unidad ? " selected" : ""}>${esc(c)}</option>`).join("");
 }
-
 arrancar();
-return {  };
-})();
 
-// Manifiesto opcional: solo se enlaza si está publicado junto a esta página.
-fetch('manifest.webmanifest', { method: 'HEAD', cache: 'no-store' }).then(r => { if (r.ok) { const l = document.createElement('link'); l.rel = 'manifest'; l.href = 'manifest.webmanifest'; document.head.append(l); } }).catch(() => {});
-// En el modo local de prueba se exponen los módulos para las pruebas automáticas (no se hace con Firebase).
-if (new URLSearchParams(location.search).get('modo') === 'local') window.__FLOTAIA_MODULOS__ = __M;
 </script>
 </body>
 </html>
