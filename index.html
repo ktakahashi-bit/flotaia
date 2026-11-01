@@ -1016,7 +1016,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
           <div><div class="eyebrow">Operación</div><h1 id="h-mant">Mantenimiento y órdenes de trabajo</h1><p class="lead">Registro de fallas, generación de órdenes y seguimiento: Pendiente → En atención → Resuelta. Incluye el acta de entrega-recepción de la unidad antes de salir a ruta. Cada cambio recalcula los indicadores.</p></div>
           <span class="badge b-auto">Automatización</span>
         </div>
-        <section id="flotaia-compartida" class="card" style="margin:0 0 24px;padding:24px">
+        <style>#flotaia-compartida [hidden]{display:none!important}#flotaia-compartida label{display:grid;gap:6px;margin:10px 0}#flotaia-compartida input,#flotaia-compartida textarea,#flotaia-compartida select{font:inherit;padding:10px;max-width:100%;border:1px solid #bcc9ce;border-radius:6px}#flotaia-compartida textarea{width:100%;min-height:90px}#flotaia-compartida table th,#flotaia-compartida table td{padding:10px;text-align:left;vertical-align:top}</style><section id="flotaia-compartida" class="card" style="margin:0 0 24px;padding:24px">
 <h2>Operaciones compartidas · Móvil y tablet</h2>
 <p>Órdenes registradas en Firebase. La demostración y sus indicadores conservan sus datos de simulación.</p>
 <p><a href="./mobile/">Abrir móvil</a> · <a href="./tablet/">Abrir tablet</a></p>
@@ -2581,7 +2581,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// shared/local-adapter.js
+// flotaia/shared/local-adapter.js
 var local_adapter_exports = {};
 __export(local_adapter_exports, {
   CUENTAS_DEMO: () => CUENTAS_DEMO,
@@ -2757,7 +2757,7 @@ async function crearAdaptadorLocal() {
 }
 var CLAVE, SESION, TS, PASS_DEMO, CUENTAS_DEMO, UNIDADES;
 var init_local_adapter = __esm({
-  "shared/local-adapter.js"() {
+  "flotaia/shared/local-adapter.js"() {
     CLAVE = "flotaia-multiplataforma-local-v1";
     SESION = "flotaia-multiplataforma-local-sesion";
     TS = "__SERVER_TS__";
@@ -2773,10 +2773,10 @@ var init_local_adapter = __esm({
   }
 });
 
-// shared/firebase-config.js
+// flotaia/shared/firebase-config.js
 var firebaseConfig, FIREBASE_SDK, configCompleta;
 var init_firebase_config = __esm({
-  "shared/firebase-config.js"() {
+  "flotaia/shared/firebase-config.js"() {
     firebaseConfig = {
       apiKey: "AIzaSyCjJtpxrXrJD539z1gQvhNt4pZsQxSHwF8",
       authDomain: "flotaia-3de2c.firebaseapp.com",
@@ -2790,7 +2790,7 @@ var init_firebase_config = __esm({
   }
 });
 
-// shared/firestore-adapter.js
+// flotaia/shared/firestore-adapter.js
 var firestore_adapter_exports = {};
 __export(firestore_adapter_exports, {
   crearAdaptadorFirestore: () => crearAdaptadorFirestore
@@ -2917,13 +2917,13 @@ async function crearAdaptadorFirestore() {
 }
 var CDN;
 var init_firestore_adapter = __esm({
-  "shared/firestore-adapter.js"() {
+  "flotaia/shared/firestore-adapter.js"() {
     init_firebase_config();
     CDN = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK}`;
   }
 });
 
-// shared/reglas.js
+// flotaia/shared/reglas.js
 function reglas(t) {
   const x = t.toLowerCase();
   const sistema = /bomba|prensa|hidr|aceite|cilindro|compuerta|fuga|acumulador|enfriador|pala|manguera/.test(x) ? "Hidr\xE1ulico" : /motor|humo|escape|arranca|temperatura|recalienta|turbo/.test(x) ? "Motor" : /luz|luces|bater|eléctr|electr|tablero|alternador|fusible/.test(x) ? "El\xE9ctrico" : /llanta|neum|freno|suspens|dirección|direccion/.test(x) ? "Chasis" : "Por confirmar";
@@ -2932,7 +2932,7 @@ function reglas(t) {
   return { sistema, prioridad, accion: acc };
 }
 
-// shared/permissions.js
+// flotaia/shared/permissions.js
 var ROLES = ["chofer", "mecanico", "supervisor", "administrador"];
 var T = true;
 var F = false;
@@ -2954,7 +2954,7 @@ function puede(rol, accion) {
   return fila[rol];
 }
 
-// shared/firestore-service.js
+// flotaia/shared/firestore-service.js
 var A = null;
 var usarAdaptador = (a) => {
   A = a;
@@ -2994,7 +2994,7 @@ async function crearReporte(perfil, d, ids, origen) {
   const ops = [
     { op: "set", path: ["incidencias", ids.inc], data: { unidadId: d.unidadId, sistema, descripcion, observaciones: String(d.observaciones || "").trim(), prioridad: c.prioridad, prioridadOrigen: "reglas", origen, autorUid: f.uid, autorCodigo: f.codigo, autorRol: f.rol, otId: ids.ot, creadoEn: ts, prototipo: true } },
     { op: "set", path: ["ordenes_trabajo", ids.ot], data: nuevaOT({ codigo, unidadId: d.unidadId, sistema, prioridad: c.prioridad, accion: ACCION_POR_SISTEMA[sistema], resumen: descripcion, origen: "incidencia", incidenciaId: ids.inc, inspeccionId: null, motor: "reglas", detalleModelo: null }, f, ts) },
-    { op: "set", path: ["ordenes_trabajo", ids.ot, "seguimiento", ids.seg], data: entradaSeguimiento("creacion", `Reporte registrado desde ${origen === "mobile" ? "el celular" : "la tablet"}. Clasificaci\xF3n por reglas: ${sistema}, prioridad ${c.prioridad}.`, null, "pendiente", f, ts) }
+    { op: "set", path: ["ordenes_trabajo", ids.ot, "seguimiento", ids.seg], data: entradaSeguimiento("creacion", `Reporte registrado desde ${origen === "mobile" ? "el celular" : origen === "escritorio" ? "el escritorio" : "la tablet"}. Clasificaci\xF3n por reglas: ${sistema}, prioridad ${c.prioridad}.`, null, "pendiente", f, ts) }
   ];
   return enviar(
     ops,
@@ -3078,7 +3078,7 @@ async function inicializarCatalogo(perfil) {
   return { creadas: faltan.length };
 }
 
-// shared/auth.js
+// flotaia/shared/auth.js
 var MODO_LOCAL = new URLSearchParams(location.search).get("modo") === "local";
 var A2 = null;
 async function iniciarDatos() {
@@ -3160,7 +3160,7 @@ function mensajeError(e) {
   return MENSAJES[e.code] || e.message || "Error desconocido.";
 }
 
-// desktop/conexion.js
+// flotaia/desktop/conexion.js
 var root = document.querySelector("#flotaia-compartida");
 var el = (tag, value) => {
   const n = document.createElement(tag);
