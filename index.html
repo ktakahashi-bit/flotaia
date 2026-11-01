@@ -2593,7 +2593,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   }
   function actualizarFuente(){
     const b=$('fuenteGlobal');if(!b)return;
-    b.querySelector('strong').textContent=modoCompartido?(datosConfirmados?'Operación compartida · Firebase':'Operación compartida · esperando datos'):'Demostración local · datos de ensayo';
+    b.querySelector('strong').textContent=modoCompartido?(datosConfirmados?'Operación compartida · Firebase':perfilCompartido?'Operación compartida · datos en caché':'Operación compartida · esperando datos'):'Demostración local · datos de ensayo';
     b.querySelector('p').textContent=modoCompartido?'Flota, rutas, alertas, órdenes y disponibilidad actual usan las mismas órdenes de móvil y tablet. Alta abierta: fuera de ruta. Media: advertencia. El catálogo es del prototipo. Análisis hidráulico, documentos, actas, combustible y proyecciones ambientales son escenarios de ensayo; no son mediciones reales.':'Los cambios de este escenario se guardan en esta PC y no crean ni modifican órdenes compartidas.';
     $('modoFuente').textContent=modoCompartido?'Abrir demostración local':'Volver a operación compartida';
     $('fQuien').disabled=modoCompartido;
@@ -2603,7 +2603,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
       $('kMtbf').textContent='Sin base de horas';
       $('kpDisp').querySelector('.m').textContent='Actual: unidades disponibles / 7; no es disponibilidad mensual.';
       if(!perfilCompartido){$('fCards').innerHTML='<div class="card">Inicie sesión en Cuenta y reportes compartidos para cargar la flota.</div>';}
-      if(!datosConfirmados){['kOper','kAdv','kCrit','kRutas','kDisp','kMttr'].forEach(i=>$(i).textContent='—');}
+      if(!perfilCompartido){['kOper','kAdv','kCrit','kRutas','kDisp','kMttr'].forEach(i=>$(i).textContent='—');}
     }
   }
   const fuente=document.createElement('aside');fuente.id='fuenteGlobal';fuente.style.cssText='position:relative;padding:16px;margin:12px;background:#e8f5f3;color:#123d38;border:1px solid #8ac9bc;border-radius:12px;z-index:2';
@@ -2618,7 +2618,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   document.addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b||!modoCompartido)return;
     if(['btnDemo','btnPaso','twinDemo','dcGotoDemo','btnReset','dkReset'].includes(b.id)){cambiarModo(false);return;}
-    if(['btnCiclo'].includes(b.id)||b.hasAttribute('data-leer')||b.hasAttribute('data-renov')){e.preventDefault();e.stopImmediatePropagation();toast('Cambie a demostración local para ejecutar sensores de ensayo.','crit');}
+    if(['btnCiclo'].includes(b.id)||b.hasAttribute('data-leer')||b.hasAttribute('data-renov')||b.hasAttribute('data-docej')){e.preventDefault();e.stopImmediatePropagation();toast('Cambie a demostración local para ejecutar sensores de ensayo.','crit');}
   },true);
 
   // ---------- inicio ----------
