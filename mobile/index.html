@@ -1953,7 +1953,11 @@ function elegirModoDemo() {
   root.innerHTML = `<main class="login"><section class="card" style="max-width:480px;margin:32px auto;padding:24px"><h1>Chofer / Mec\xE1nico</h1><p>Cuenta de demostraci\xF3n acad\xE9mica</p><p>Elige c\xF3mo probar FlotaIA. Puedes cambiar de vista sin volver a iniciar sesi\xF3n.</p><div style="display:grid;gap:12px"><button class="btn block" data-modo-demo="chofer">Entrar como chofer</button><button class="btn block" data-modo-demo="mecanico">Entrar como mec\xE1nico</button><button class="btn sec block" data-salir>Cerrar sesi\xF3n</button></div><p class="small muted">Las operaciones quedan a nombre de la cuenta compartida ME-99.</p></section></main>`;
   enlazarSalir();
   $$("[data-modo-demo]", root).forEach((b) => b.onclick = () => {
-    modoDemo = b.dataset.modoDemo;
+    if (b.dataset.modoDemo === "mecanico") {
+      location.assign("../tablet/" + location.search);
+      return;
+    }
+    modoDemo = "chofer";
     history.replaceState(null, "", location.pathname + location.search);
     montarApp();
   });
