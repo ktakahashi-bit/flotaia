@@ -955,7 +955,7 @@ function prepararRegistro(tipo, p, d) {
 }
 async function guardarRegistro(tipo, perfil2, d, id) {
   const A4 = adaptador(), data = prepararRegistro(tipo, perfil2, d), ts = A4.ts();
-  id ||= A4.newId([tipo]);
+  id || (id = A4.newId([tipo]));
   if (A4.nombre === "firestore" && !navigator.onLine) throw new Error("Con\xE9ctese para confirmar este registro.");
   const ops = [];
   let codigo = null;
@@ -1053,7 +1053,7 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
         data.items = Object.fromEntries(PUNTOS.map(([k]) => [k, f.get("item_" + k) === "si"]));
         if (PUNTOS.some(([k]) => !f.get("item_" + k))) throw new Error("Complete los trece puntos.");
       }
-      ids[tipo] ||= adaptador().newId([tipo]);
+      ids[tipo] || (ids[tipo] = adaptador().newId([tipo]));
       const r = await guardarRegistro(tipo, perfil2, data, ids[tipo]);
       delete ids[tipo];
       form.reset();
@@ -1608,8 +1608,9 @@ function filaOrden(o, { sel = false, mostrarUnidad = true } = {}) {
 }
 var vacio = (texto2, icono = "inbox") => `<div class="empty">${ic(icono)}<span>${esc(texto2)}</span></div>`;
 var errorCarga = (e) => `<div class="note crit">${esc(mensajeError(e))}</div>`;
-function formularioReporte(cont, perfil2, { origen, unidades = [], onVer } = {}) {
-  const fijo = perfil2.rol === "chofer";
+function formularioReporte(cont, perfil2, { origen, unidades = [], onVer, unidadDemo = null } = {}) {
+  const fijo = perfil2.rol === "chofer" || !!unidadDemo;
+  const unidadFija = unidadDemo || perfil2.unidadAsignada;
   cont.innerHTML = `<form class="card" novalidate>
     <div class="card-h"><div><h2>Reportar una falla</h2><p>Las reglas asignan sistema, prioridad y acci\xF3n</p></div><span class="badge b-auto">Automatizaci\xF3n</span></div>
     <label class="f">Unidad<select name="unidadId" ${fijo ? "disabled" : ""}></select>${fijo ? '<span class="hint">Su unidad asignada. Para cambiarla, consulte al administrador.</span>' : ""}</label>
@@ -1630,10 +1631,10 @@ function formularioReporte(cont, perfil2, { origen, unidades = [], onVer } = {})
   let ids = null, enviando = false;
   const pintarUnidades = (lista) => {
     const actual = sel.value;
-    const opciones = fijo ? perfil2.unidadAsignada ? [perfil2.unidadAsignada] : [] : lista.map((u) => u.codigo);
+    const opciones = fijo ? unidadFija ? [unidadFija] : [] : lista.map((u) => u.codigo);
     sel.innerHTML = opciones.length ? (fijo ? "" : '<option value="">Elija la unidad\u2026</option>') + opciones.map((c) => `<option>${esc(c)}</option>`).join("") : '<option value="">Sin unidad asignada</option>';
     if (opciones.includes(actual)) sel.value = actual;
-    btn.disabled = fijo && !perfil2.unidadAsignada;
+    btn.disabled = fijo && !unidadFija;
   };
   const vista2 = () => {
     const t = txt.value.trim();
@@ -1658,7 +1659,7 @@ function formularioReporte(cont, perfil2, { origen, unidades = [], onVer } = {})
   form.onsubmit = async (e) => {
     e.preventDefault();
     if (enviando) return;
-    const d = { unidadId: fijo ? perfil2.unidadAsignada : sel.value, descripcion: txt.value, observaciones: form.observaciones.value };
+    const d = { unidadId: fijo ? unidadFija : sel.value, descripcion: txt.value, observaciones: form.observaciones.value };
     const errs = validarReporte(perfil2, d);
     if (Object.keys(errs).length) {
       marcarErrores(form, errs);
@@ -1686,7 +1687,7 @@ function formularioReporte(cont, perfil2, { origen, unidades = [], onVer } = {})
     const tono = r.enCola ? "warn" : "good";
     const texto2 = r.duplicadoEvitado ? `El reporte ya estaba registrado como ${esc(r.codigo)}; no se duplic\xF3.` : r.enCola ? `Sin confirmaci\xF3n del servidor: el reporte qued\xF3 guardado en este equipo y se enviar\xE1 al recuperar la se\xF1al. C\xF3digo asignado: <b class="num">${esc(r.codigo)}</b>.` : `Reporte enviado. Se cre\xF3 la orden <b class="num">${esc(r.codigo)}</b> en estado Pendiente.`;
     res.innerHTML = `<div class="card"><div class="note ${tono}">${texto2}</div>
-      <dl class="dl"><dt>Unidad</dt><dd>${esc(form.unidadId.value || perfil2.unidadAsignada)}</dd><dt>Sistema</dt><dd>${esc(r.sistema)}</dd><dt>Prioridad</dt><dd>${pillPrioridad(r.prioridad)}</dd><dt>Acci\xF3n</dt><dd>${esc(r.accion)}</dd></dl>
+      <dl class="dl"><dt>Unidad</dt><dd>${esc(form.unidadId.value || unidadFija)}</dd><dt>Sistema</dt><dd>${esc(r.sistema)}</dd><dt>Prioridad</dt><dd>${pillPrioridad(r.prioridad)}</dd><dt>Acci\xF3n</dt><dd>${esc(r.accion)}</dd></dl>
       <div style="display:grid;gap:8px">${onVer ? '<button type="button" class="btn dark block" data-a="ver">Ver seguimiento</button>' : ""}<button type="button" class="btn sec block" data-a="otro">Registrar otro reporte</button></div></div>`;
     res.querySelector("[data-a=otro]").onclick = () => {
       form.reset();
@@ -1703,7 +1704,7 @@ function formularioReporte(cont, perfil2, { origen, unidades = [], onVer } = {})
   vista2();
   return { unidades: (lista) => pintarUnidades(lista) };
 }
-function detalleOrden(cont, perfil2, otId) {
+function detalleOrden(cont, perfil2, otId, { soloLectura = false } = {}) {
   cont.innerHTML = `<div class="dOt"><div class="card"><p class="muted">Cargando la orden\u2026</p></div></div><div class="dAcc" style="display:grid;gap:12px"></div>
     <section class="card"><div class="card-h"><div><h3>Seguimiento</h3><p>Cada cambio queda con autor y hora del servidor</p></div></div><ol class="tl"><li><p class="muted">Cargando\u2026</p></li></ol></section>`;
   const dOt = $(".dOt", cont), dAcc = $(".dAcc", cont), tl = $(".tl", cont);
@@ -1731,7 +1732,7 @@ function detalleOrden(cont, perfil2, otId) {
   });
   function acciones() {
     const o = ot, yo = perfil2.uid, admin = perfil2.rol === "administrador", partes = [];
-    if (puede(perfil2.rol, "atenderOrden")) {
+    if (!soloLectura && puede(perfil2.rol, "atenderOrden")) {
       if (o.estado === "pendiente") partes.push(`<div class="card"><p>Al iniciar la atenci\xF3n, la orden queda a su nombre y el chofer ve el cambio.</p><button type="button" class="btn block" data-a="iniciar">${ic("wrench")}Iniciar atenci\xF3n</button></div>`);
       else if (o.estado === "atencion" && (o.mecanicoUid === yo || admin)) partes.push(`<form class="card fRes" novalidate><div class="card-h"><h3>Cerrar la orden</h3></div>
         <label class="f">Trabajos realizados<textarea name="trabajosRealizados" maxlength="600" placeholder="Ej.: cambio de sellos de la bomba y prueba de presi\xF3n"></textarea></label>
@@ -1740,8 +1741,8 @@ function detalleOrden(cont, perfil2, otId) {
         <button class="btn ok block" type="submit">${ic("check")}Marcar como resuelta</button></form>`);
       else if (o.estado === "atencion") partes.push(`<div class="note">La atiende ${esc(o.mecanicoCodigo)}. Solo esa persona o el administrador puede cerrarla.</div>`);
     }
-    if (puede(perfil2.rol, "observarSeguimiento")) partes.push(`<form class="card fObs" novalidate><label class="f">Agregar observaci\xF3n al seguimiento<textarea name="texto" maxlength="400" style="min-height:80px" placeholder="Ej.: repuesto solicitado al almac\xE9n"></textarea></label><button class="btn sec block" type="submit">Agregar observaci\xF3n</button></form>`);
-    if (perfil2.rol === "chofer") partes.push('<div class="note">Aqu\xED ve el avance de la orden. El mec\xE1nico registra la atenci\xF3n y el cierre.</div>');
+    if (!soloLectura && puede(perfil2.rol, "observarSeguimiento")) partes.push(`<form class="card fObs" novalidate><label class="f">Agregar observaci\xF3n al seguimiento<textarea name="texto" maxlength="400" style="min-height:80px" placeholder="Ej.: repuesto solicitado al almac\xE9n"></textarea></label><button class="btn sec block" type="submit">Agregar observaci\xF3n</button></form>`);
+    if (soloLectura || perfil2.rol === "chofer") partes.push('<div class="note">Aqu\xED ve el avance de la orden. El mec\xE1nico registra la atenci\xF3n y el cierre.</div>');
     dAcc.innerHTML = partes.join("");
     const bI = $("[data-a=iniciar]", dAcc);
     if (bI) bI.onclick = async () => {
@@ -1880,7 +1881,13 @@ var TABS = {
   chofer: [["inicio", "Inicio", "home"], ["unidad", "Mi unidad", "truck"], ["reportar", "Reportar", "plus"], ["reportes", "Reportes", "list"], ["alertas", "Alertas", "bell"]],
   taller: [["ordenes", "\xD3rdenes", "wrench"], ["reportar", "Reportar", "plus"], ["historial", "Historial", "list"], ["alertas", "Alertas", "bell"]]
 };
-var tabs = () => perfil.rol === "chofer" ? TABS.chofer : TABS.taller;
+var modoDemo = null;
+var cuentaDemo = () => perfil?.email === "demo@flotaia.example" && perfil?.rol === "mecanico";
+var esVistaChofer = () => perfil?.rol === "chofer" || cuentaDemo() && modoDemo === "chofer";
+var unidadVista = () => cuentaDemo() && modoDemo === "chofer" ? "C-03" : perfil.unidadAsignada;
+var perfilVista = () => esVistaChofer() && cuentaDemo() ? { ...perfil, unidadAsignada: "C-03" } : perfil;
+var misReportes = () => cuentaDemo() && esVistaChofer() ? D.ordenes.filter((o) => o.reportadoPorUid === perfil.uid && o.unidadId === "C-03") : D.ordenes;
+var tabs = () => esVistaChofer() ? TABS.chofer : TABS.taller;
 var claveVisto = () => `flotaia-alertas-visto-${perfil.uid}`;
 var leerVisto = () => {
   try {
@@ -1928,10 +1935,11 @@ async function arrancar() {
   }, onSalir: () => {
     limpiar();
     perfil = null;
+    modoDemo = null;
   } });
   if (!A3) return;
   window.addEventListener("hashchange", () => {
-    if (perfil) mostrar(location.hash.slice(1));
+    if (perfil && (!cuentaDemo() || modoDemo)) mostrar(location.hash.slice(1));
   });
   window.addEventListener("popstate", () => {
     if (detalle) {
@@ -1941,16 +1949,37 @@ async function arrancar() {
     }
   });
 }
+function elegirModoDemo() {
+  root.innerHTML = `<main class="login"><section class="card" style="max-width:480px;margin:32px auto;padding:24px"><h1>Chofer / Mec\xE1nico</h1><p>Cuenta de demostraci\xF3n acad\xE9mica</p><p>Elige c\xF3mo probar FlotaIA. Puedes cambiar de vista sin volver a iniciar sesi\xF3n.</p><div style="display:grid;gap:12px"><button class="btn block" data-modo-demo="chofer">Entrar como chofer</button><button class="btn block" data-modo-demo="mecanico">Entrar como mec\xE1nico</button><button class="btn sec block" data-salir>Cerrar sesi\xF3n</button></div><p class="small muted">Las operaciones quedan a nombre de la cuenta compartida ME-99.</p></section></main>`;
+  enlazarSalir();
+  $$("[data-modo-demo]", root).forEach((b) => b.onclick = () => {
+    modoDemo = b.dataset.modoDemo;
+    history.replaceState(null, "", location.pathname + location.search);
+    montarApp();
+  });
+}
 function montarApp() {
   limpiar();
+  if (cuentaDemo() && !modoDemo) {
+    elegirModoDemo();
+    return;
+  }
   root.innerHTML = `<div class="m-app">
     <header class="topbar"><div class="brand">${LOGO}<div class="bname">Flota<span>IA</span><small>Mobile</small></div></div>
-      <div class="top-r"><span class="chip-rol">${esc(perfil.codigo)} \xB7 ${esc(ROL_NOMBRE[perfil.rol])}</span><button type="button" class="iconbtn" data-salir aria-label="Cerrar sesi\xF3n" title="Cerrar sesi\xF3n">${ic("logout")}</button></div></header>
+      <div class="top-r"><span class="chip-rol">${esc(perfil.codigo)} \xB7 ${esc(esVistaChofer() ? "Chofer" : ROL_NOMBRE[perfil.rol])}${cuentaDemo() ? " \xB7 Demo" : ""}</span><button type="button" class="iconbtn" data-salir aria-label="Cerrar sesi\xF3n" title="Cerrar sesi\xF3n">${ic("logout")}</button></div></header>
     <div class="proto-band"><b>Prototipo acad\xE9mico | Caso simulado</b><span>El Tambo \u2014 Huancayo</span><span class="conn" style="margin-left:auto;color:var(--ink-2)"></span></div>
+    ${cuentaDemo() ? `<div style="padding:10px 16px;background:var(--senal-soft);display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Vista ${esVistaChofer() ? "Chofer \xB7 C-03" : "Mec\xE1nico"}</b><button type="button" class="btn sec sm" data-cambiar-demo>Cambiar Chofer / Mec\xE1nico</button><span class="small">Cuenta compartida ME-99</span></div>` : ""}
     <main class="m-main" id="vista" tabindex="-1"></main>
     <nav class="bnav" aria-label="Secciones">${tabs().map(([id, t, i]) => `<button type="button" data-tab="${id}">${ic(i)}<span>${t}</span></button>`).join("")}</nav>
   </div>`;
   enlazarSalir();
+  const cambiar = $("[data-cambiar-demo]", root);
+  if (cambiar) cambiar.onclick = () => {
+    if (frmReporte && !confirm("Al cambiar de vista se descarta el formulario abierto. \xBFContinuar?")) return;
+    limpiar();
+    modoDemo = null;
+    elegirModoDemo();
+  };
   conexion = indicadorConexion($(".conn", root), A3);
   $(".bnav", root).addEventListener("click", (e) => {
     const b = e.target.closest("[data-tab]");
@@ -1982,13 +2011,13 @@ function montarApp() {
     D.unidades = rows;
     refrescar();
   }, fallo));
-  if (perfil.rol === "chofer" && perfil.unidadAsignada) {
-    subs.push(vigilarOrdenesUnidad(perfil.unidadAsignada, (rows, m) => {
+  if (esVistaChofer() && unidadVista()) {
+    subs.push(vigilarOrdenesUnidad(unidadVista(), (rows, m) => {
       D.ordenesUnidad = rows;
       meta(m);
       refrescar();
     }, fallo));
-    subs.push(vigilarInspeccionesUnidad(perfil.unidadAsignada, (rows) => {
+    subs.push(vigilarInspeccionesUnidad(unidadVista(), (rows) => {
       D.insp = rows;
       refrescar();
     }, fallo));
@@ -2002,9 +2031,9 @@ function avisarCambios(rows) {
   rows.forEach((o) => {
     const antes = prevEstado.get(o.id);
     if (!primera && antes !== o.estado) {
-      if (perfil.rol === "chofer" && antes && o.estado === "atencion") toast(`${o.codigo}: en atenci\xF3n por ${o.mecanicoCodigo}.`, "ok", 6e3);
-      else if (perfil.rol === "chofer" && antes && o.estado === "resuelta") toast(`${o.codigo}: resuelta.`, "ok", 6e3);
-      else if (perfil.rol !== "chofer" && !antes && o.reportadoPorUid !== perfil.uid && o.estado === "pendiente") toast(`Nueva orden ${o.codigo} \xB7 ${o.unidadId} \xB7 prioridad ${o.prioridad}.`, o.prioridad === "alta" ? "crit" : "", 7e3);
+      if (esVistaChofer() && antes && o.estado === "atencion") toast(`${o.codigo}: en atenci\xF3n por ${o.mecanicoCodigo}.`, "ok", 6e3);
+      else if (esVistaChofer() && antes && o.estado === "resuelta") toast(`${o.codigo}: resuelta.`, "ok", 6e3);
+      else if (!esVistaChofer() && !antes && o.reportadoPorUid !== perfil.uid && o.estado === "pendiente") toast(`Nueva orden ${o.codigo} \xB7 ${o.unidadId} \xB7 prioridad ${o.prioridad}.`, o.prioridad === "alta" ? "crit" : "", 7e3);
     }
     prevEstado.set(o.id, o.estado);
   });
@@ -2040,7 +2069,7 @@ function refrescar() {
     if (box) box.innerHTML = errorCarga(D.error);
   }
   V[vista].actualizar(el);
-  const al = perfil.rol === "chofer" ? alertasChofer(perfil, D.ordenes, D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
+  const al = esVistaChofer() ? alertasChofer(perfilVista(), misReportes(), D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
   const n = vista === "alertas" ? al.filter((a) => a.fija && a.nivel === "crit").length : contarNuevas(al, leerVisto());
   const b = $(".bnav [data-tab=alertas]", root);
   if (b) {
@@ -2071,7 +2100,7 @@ function abrirDetalle(id) {
     if (detalle === h2) detalle = null;
     if (history.state && history.state.flotaiaHoja) history.back();
   } });
-  dejar = detalleOrden(h2.el, perfil, id);
+  dejar = detalleOrden(h2.el, perfil, id, { soloLectura: cuentaDemo() && esVistaChofer() });
   history.pushState({ flotaiaHoja: 1 }, "");
   detalle = h2;
 }
@@ -2103,17 +2132,17 @@ var V = {
           <div class="mini3" data-cnt></div><div class="list" data-ult></div></section>`;
     },
     actualizar(el) {
-      const u = perfil.unidadAsignada;
+      const u = unidadVista();
       $("[data-sem]", el).innerHTML = u ? semaforo(u, estadoUnidad(u, D.ordenesUnidad)) : sinUnidad;
-      const c = (e) => D.ordenes.filter((o) => o.estado === e).length;
+      const c = (e) => misReportes().filter((o) => o.estado === e).length;
       $("[data-cnt]", el).innerHTML = `<div class="kpi warn"><span class="l">Pendientes</span><span class="v">${c("pendiente")}</span></div><div class="kpi auto"><span class="l">En atenci\xF3n</span><span class="v">${c("atencion")}</span></div><div class="kpi good"><span class="l">Resueltas</span><span class="v">${c("resuelta")}</span></div>`;
-      const ult = [...D.ordenes].sort(recientes).slice(0, 3);
+      const ult = [...misReportes()].sort(recientes).slice(0, 3);
       $("[data-ult]", el).innerHTML = cargando() || (ult.length ? ult.map((o) => filaOrden(o, { mostrarUnidad: false })).join("") : vacio("Todav\xEDa no ha enviado reportes."));
     }
   },
   unidad: {
     montar(el) {
-      const u = perfil.unidadAsignada;
+      const u = unidadVista();
       el.innerHTML = `<div class="vhead"><div class="eyebrow">Mi unidad</div><h1 class="num">${esc(u || "Sin unidad asignada")}</h1><p class="lead">El estado se calcula con las \xF3rdenes abiertas y las inspecciones registradas de la unidad.</p></div>
         <div data-error></div><div data-sem></div>
         <section class="card"><div class="card-h"><h2>\xD3rdenes abiertas de la unidad</h2></div><div class="list" data-ab></div></section>
@@ -2121,7 +2150,7 @@ var V = {
         <section class="card"><dl class="dl" data-ficha></dl><p class="foot">Unidad y ruta del caso simulado de El Tambo.</p></section>`;
     },
     actualizar(el) {
-      const u = perfil.unidadAsignada;
+      const u = unidadVista();
       if (!u) {
         $("[data-sem]", el).innerHTML = sinUnidad;
         $("[data-ab]", el).innerHTML = vacio("Sin unidad asignada.");
@@ -2140,10 +2169,10 @@ var V = {
   reportar: {
     montar(el) {
       el.innerHTML = '<div data-error></div><div data-frm style="display:grid;gap:14px"></div>';
-      frmReporte = formularioReporte($("[data-frm]", el), perfil, { origen: "mobile", unidades: D.unidades, onVer: (id) => abrirDetalle(id) });
+      frmReporte = formularioReporte($("[data-frm]", el), perfil, { origen: "mobile", unidadDemo: cuentaDemo() && esVistaChofer() ? "C-03" : null, unidades: D.unidades, onVer: (id) => abrirDetalle(id) });
     },
     actualizar() {
-      if (frmReporte && perfil.rol !== "chofer" && document.activeElement?.name !== "unidadId") frmReporte.unidades(D.unidades);
+      if (frmReporte && !esVistaChofer() && document.activeElement?.name !== "unidadId") frmReporte.unidades(D.unidades);
     }
   },
   reportes: {
@@ -2156,7 +2185,7 @@ var V = {
       });
     },
     actualizar(el) {
-      const f = filtros.reportes, L = D.ordenes.filter((o) => f === "todos" || (f === "abiertos" ? o.estado !== "resuelta" : o.estado === "resuelta")).sort(recientes);
+      const f = filtros.reportes, L = misReportes().filter((o) => f === "todos" || (f === "abiertos" ? o.estado !== "resuelta" : o.estado === "resuelta")).sort(recientes);
       $("[data-l]", el).innerHTML = cargando() || (L.length ? L.map((o) => filaOrden(o)).join("") : vacio(f === "todos" ? "Todav\xEDa no ha enviado reportes." : "No hay reportes en este grupo."));
     }
   },
@@ -2201,11 +2230,11 @@ var V = {
   },
   alertas: {
     montar(el) {
-      el.innerHTML = `<div class="vhead"><div class="eyebrow">Avisos</div><h1>Alertas</h1><p class="lead">${perfil.rol === "chofer" ? "Estado de su unidad y avance de sus reportes." : "\xD3rdenes que requieren atenci\xF3n y unidades fuera de ruta."} Se calculan con las operaciones registradas.</p></div><div data-error></div><div data-l></div>`;
+      el.innerHTML = `<div class="vhead"><div class="eyebrow">Avisos</div><h1>Alertas</h1><p class="lead">${esVistaChofer() ? "Estado de su unidad y avance de sus reportes." : "\xD3rdenes que requieren atenci\xF3n y unidades fuera de ruta."} Se calculan con las operaciones registradas.</p></div><div data-error></div><div data-l></div>`;
       el.dataset.visto = leerVisto();
     },
     actualizar(el) {
-      const al = perfil.rol === "chofer" ? alertasChofer(perfil, D.ordenes, D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
+      const al = esVistaChofer() ? alertasChofer(perfilVista(), misReportes(), D.ordenesUnidad, D.insp) : alertasTaller(D.ordenes);
       $("[data-l]", el).innerHTML = cargando() || listaAlertas(al, el.dataset.visto);
     }
   }
