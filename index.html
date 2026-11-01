@@ -910,7 +910,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
 <div class="web-hero-copy"><p class="hero-kicker">Caso simulado de El Tambo, Huancayo</p><h2 id="heroTitle">De la falla reportada a la ruta recuperada</h2><p>FlotaIA registra cada falla de las siete compactadoras, estima la condición de la bomba hidráulica, ordena qué unidad atender primero y muestra qué rutas se quedan sin servicio.</p><div class="web-hero-actions"><a href="#demo">Ver la demostración C-03</a><a class="alt" href="#studio">Abrir el observatorio</a></div></div>
 <div class="route-board"><div class="rb-h"><b>Rutas de hoy</b><span id="rbCount">7 de 7 atendidas</span></div><ol class="rb-list" id="rbList" aria-live="polite"></ol><p class="rb-note">R-01 a R-07 son rutas académicas: una por compactadora. Los estados salen del mismo cálculo que el resto del sistema.</p></div>
 </div>
-<div class="web-sectionhead"><h2>Centro de control de flota</h2><span>Lecturas demostrativas del caso El Tambo · no son datos en vivo</span></div>
+<div class="web-sectionhead"><h2>Centro de control de flota</h2><span>Prototipo académico: órdenes sincronizadas en operación compartida; lecturas de ensayo en demostración local.</span></div>
 <div class="banner crit" id="rBanner" role="alert" hidden></div>
         <div class="g-exec">
           <div class="card" id="cFleet">
@@ -937,9 +937,9 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
         </div>
         <div class="g-2">
           <div class="card" id="cDispChart">
-            <div class="card-h"><div><h2>Disponibilidad por compactadora</h2><p>Mes en curso · 240 h programadas por unidad (30 días × 8 h)</p></div><span class="badge b-auto">Automatización</span></div>
+            <div class="card-h"><div><h2>Disponibilidad por compactadora</h2><p>Operación: disponibilidad actual según órdenes abiertas · ensayo local: 240 h mensuales por unidad</p></div><span class="badge b-auto">Automatización</span></div>
             <div id="rDispChart"></div>
-            <p class="foot">Escala de 80 % a 100 %. La línea discontinua marca la meta de 90 %.</p>
+            <p class="foot">Escala ajustada a las unidades mostradas. La línea discontinua marca la referencia de 90 %.</p>
           </div>
           <div class="card" id="cInc">
             <div class="card-h"><div><h2>Incidencias que requieren atención</h2><p>Alertas del modelo y órdenes pendientes, por prioridad</p></div></div>
@@ -1018,7 +1018,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
         </div>
         <style>#flotaia-compartida [hidden]{display:none!important}#flotaia-compartida label{display:grid;gap:6px;margin:10px 0}#flotaia-compartida input,#flotaia-compartida textarea,#flotaia-compartida select{font:inherit;padding:10px;max-width:100%;border:1px solid #bcc9ce;border-radius:6px}#flotaia-compartida textarea{width:100%;min-height:90px}#flotaia-compartida table th,#flotaia-compartida table td{padding:10px;text-align:left;vertical-align:top}</style><section id="flotaia-compartida" class="card" style="margin:0 0 24px;padding:24px">
 <h2>Operaciones compartidas · Móvil y tablet</h2>
-<p>Órdenes registradas en Firebase. La demostración y sus indicadores conservan sus datos de simulación.</p>
+<p>Órdenes registradas en Firebase. En modo Operación compartida, alimentan las vistas y los indicadores operativos del escritorio.</p>
 <p><a href="./mobile/">Abrir móvil</a> · <a href="./tablet/">Abrir tablet</a></p>
 <p data-estado role="status">Iniciando conexión…</p>
 <button type="button" data-google hidden>Iniciar sesión con Google</button>
@@ -1078,10 +1078,10 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
               <thead><tr><th>N.° orden</th><th>Unidad</th><th>Sistema</th><th>Descripción</th><th>Prioridad</th><th>Registro</th><th>Estado</th><th>Acción recomendada</th><th>Seguimiento</th></tr></thead>
               <tbody id="otBody"></tbody>
             </table></div>
-            <p class="foot">Una orden de prioridad alta sin resolver retira la unidad de ruta y cuenta 8 h fuera de servicio. Al resolverla se registran las horas reales de reparación y fuera de servicio.</p>
+            <p class="foot">Operación compartida: una orden alta abierta retira la unidad de ruta; una media muestra advertencia. Al cerrar, se registran las horas declaradas. La disponibilidad actual cuenta unidades disponibles, sin inventar horas de parada. La demostración local utiliza supuestos mensuales.</p>
           </div>
           <div class="card" id="cActa">
-            <div class="card-h"><div><h2>Entrega-recepción de la unidad</h2><p>Acta y lista de verificación antes de salir a ruta: al inicio del turno, cuando el chofer cambia de unidad o cuando la unidad vuelve del taller</p></div><span class="badge b-auto">Automatización</span></div>
+            <div class="card-h"><div><h2>Entrega-recepción de la unidad · ensayo local</h2><p>Acta y lista de verificación antes de salir a ruta: al inicio del turno, cuando el chofer cambia de unidad o cuando la unidad vuelve del taller</p></div><span class="badge b-auto">Automatización</span></div>
             <form id="aerForm" novalidate class="fgrid">
               <div class="fcol">
               <div class="frow">
@@ -1582,6 +1582,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     });
     ab.filter(o => o.prioridad === 'alta' && !( !modoCompartido && o.motor === 'modelo' && S.unidades[o.unidad] && nivel(o.unidad) === 2))
       .forEach(o => alertas.push({ sev: 2, unidad: o.unidad, t: `${o.codigo} · ${o.sistema}: prioridad alta`, d: 'Unidad fuera de ruta hasta resolver la orden', tipo: 'o', id: o.id }));
+    if(modoCompartido) ab.filter(o=>o.prioridad==='media').forEach(o=>alertas.push({sev:1,unidad:o.unidad,t:`${o.codigo} · ${o.sistema}: advertencia`,d:'Programar revisión; no retira la unidad de ruta.',tipo:'o',id:o.id}));
     if (!modoCompartido) VEH.forEach(u => DOCS.forEach(([t, nom]) => { const e = docEstado(u, t), n = diasA(S.docs[u][t]);
       if (e === 2) alertas.push({ sev: 2, unidad: u, t: `${nom} vencid${DOCG[t]}`, d: `La unidad no puede salir a ruta hasta renovarl${DOCG[t]}`, tipo: 'd' });
       else if (e === 1) alertas.push({ sev: 1, unidad: u, t: `${nom} vence en ${n} ${n === 1 ? 'día' : 'días'}`, d: 'Tramitar la renovación antes del vencimiento', tipo: 'd' }); }));
@@ -2596,6 +2597,8 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     b.querySelector('p').textContent=modoCompartido?'Flota, rutas, alertas, órdenes y disponibilidad actual usan las mismas órdenes de móvil y tablet. Alta abierta: fuera de ruta. Media: advertencia. El catálogo es del prototipo. Análisis hidráulico, documentos, actas, combustible y proyecciones ambientales son escenarios de ensayo; no son mediciones reales.':'Los cambios de este escenario se guardan en esta PC y no crean ni modifican órdenes compartidas.';
     $('modoFuente').textContent=modoCompartido?'Abrir demostración local':'Volver a operación compartida';
     $('fQuien').disabled=modoCompartido;
+    if(modoCompartido && perfilCompartido){const a=document.createElement('option');a.value='sesion';a.textContent=perfilCompartido.codigo+' · '+perfilCompartido.rol;$('fQuien').replaceChildren(a);}
+    else if(!modoCompartido && $('fQuien').options.length===1){$('fQuien').innerHTML='<option>Chofer</option><option>Mecánico</option><option>Supervisor</option>';}
     if(modoCompartido){
       $('kMtbf').textContent='Sin base de horas';
       $('kpDisp').querySelector('.m').textContent='Actual: unidades disponibles / 7; no es disponibilidad mensual.';
