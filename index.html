@@ -927,7 +927,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
             </div>
           </div>
           <div class="kgrid" id="cKpis">
-            <div class="kpi" id="kpDisp"><span class="l"><svg class="i"><use href="#i-gauge"/></svg>Disponibilidad de flota (mes)</span><span class="v tone" id="kDisp">–</span><div class="meter"><i id="kDispBar"></i></div><span class="m">Meta ≥ 90 %</span></div>
+            <div class="kpi" id="kpDisp"><span class="l"><svg class="i"><use href="#i-gauge"/></svg>Disponibilidad de flota (actual / ensayo mensual)</span><span class="v tone" id="kDisp">–</span><div class="meter"><i id="kDispBar"></i></div><span class="m">Meta ≥ 90 %</span></div>
             <div class="kpi"><span class="l">MTBF · horas entre fallas</span><span class="v" id="kMtbf">–</span><span class="m">Meta +25 % vs. línea base</span></div>
             <div class="kpi"><span class="l">MTTR · horas de reparación</span><span class="v" id="kMttr">–</span><span class="m">Meta −20 % vs. línea base</span></div>
             <div class="kpi" id="kpOt"><span class="l"><svg class="i"><use href="#i-wrench"/></svg>Órdenes de trabajo pendientes</span><span class="v tone" id="kOt">–</span><span class="m" id="kOtM">&nbsp;</span></div>
@@ -1384,7 +1384,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
           </div>
         </div>
 
-        <div class="studio-split"><div class="studio-panel"><div class="studio-heading"><div><h2>Disponibilidad por unidad</h2><p class="studio-muted">Escala de 0–100 %</p></div></div><div class="studio-hbars" id="svBars"></div><p class="studio-note">La disponibilidad incorpora el tiempo de parada registrado en las órdenes simuladas.</p></div><div class="studio-panel"><div class="studio-heading"><div><h2>Órdenes por prioridad</h2><p class="studio-muted">Pendientes y en atención</p></div></div><div class="studio-hbars" id="svPriority"></div><div class="studio-insight">Los gráficos y tablas se actualizan cuando cambia el estado del prototipo, por ejemplo durante la demostración C-03.</div></div></div>
+        <div class="studio-split"><div class="studio-panel"><div class="studio-heading"><div><h2>Disponibilidad por unidad</h2><p class="studio-muted">Escala de 0–100 %</p></div></div><div class="studio-hbars" id="svBars"></div><p class="studio-note">Operación compartida: disponibilidad actual según órdenes altas abiertas. Demostración local: disponibilidad mensual según horas de parada simuladas.</p></div><div class="studio-panel"><div class="studio-heading"><div><h2>Órdenes por prioridad</h2><p class="studio-muted">Pendientes y en atención</p></div></div><div class="studio-hbars" id="svPriority"></div><div class="studio-insight">Los gráficos y tablas se actualizan cuando cambia el estado del prototipo, por ejemplo durante la demostración C-03.</div></div></div>
 
         <div class="studio-split"><div class="studio-panel dark"><div class="studio-heading"><div><h2>Mapa de prioridad por componente</h2><p class="studio-muted">Matriz rápida para explicar dónde se concentra el riesgo operativo.</p></div></div><div class="studio-heat" id="svHeat"></div><p class="studio-note">Mayor intensidad de color = mayor concentración de órdenes registradas en ese componente y prioridad.</p></div><div class="studio-panel"><div class="studio-heading"><div><h2>Lectura gerencial</h2><p class="studio-muted">Narrativa de apoyo para sustentar el tablero.</p></div></div><div class="studio-insight" id="svNarrative">—</div><div class="studio-kpi-stack" style="margin-top:12px"><div class="studio-kpi-card" style="--tone:#2B5D6E"><small>Confianza promedio del modelo</small><strong id="svConfMean">—</strong><span>Promedio simple de las siete unidades</span></div><div class="studio-kpi-card" style="--tone:#5B4BB7"><small>Unidades con advertencia o crítica</small><strong id="svWatch">—</strong><span>Requieren seguimiento o intervención</span></div></div></div></div>
       </section>
@@ -1553,33 +1553,36 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   if (!Array.isArray(S.actas)) { S.actas = []; S.na = 0; }
   if (!S.docs || typeof S.docs !== 'object') { S.docs = docsIniciales(); S.docLog = []; }
   if (!Array.isArray(S.docLog)) S.docLog = [];
-  function guardar() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-  const nivel = u => S.unidades[u].pred.clase; // 0 verde, 1 ámbar, 2 rojo
+  let modoCompartido = true, datosConfirmados = false, perfilCompartido = null, ordenesCompartidas = [];
+  let estadoDemo = structuredClone(S);
+  S = estadoInicial(); S.ots = []; S.hist = []; S.actas = []; S.hc.reg = [];
+  function guardar() { if (modoCompartido) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  const nivel = u => modoCompartido ? (abiertas().some(o=>o.unidad===u && o.prioridad==='alta') ? 2 : abiertas().some(o=>o.unidad===u && o.prioridad==='media') ? 1 : 0) : S.unidades[u].pred.clase; // 0 verde, 1 ámbar, 2 rojo
 
   // ---------- cálculos (mismas fórmulas del documento, sección X) ----------
   const abiertas = () => S.ots.filter(o => o.estado !== 'resuelta');
-  function fuera() { const ab = abiertas(); return UNITS.filter(u => nivel(u) === 2 || ab.some(o => o.unidad === u && o.prioridad === 'alta') || docVencido(u)); }
-  function horasParada(o) { return o.estado === 'resuelta' ? (Number(o.horasParada) || 0) : (o.prioridad === 'alta' ? 8 : 0); }
+  function fuera() { const ab = abiertas(); return UNITS.filter(u => nivel(u) === 2 || ab.some(o => o.unidad === u && o.prioridad === 'alta') || (!modoCompartido && docVencido(u))); }
+  function horasParada(o) { return o.estado === 'resuelta' ? (Number(o.horasParada) || 0) : (!modoCompartido && o.prioridad === 'alta' ? 8 : 0); }
   function alertaU(u, F, ab) { return F.includes(u) ? 2 : (nivel(u) === 1 || ab.some(o => o.unidad === u && o.prioridad === 'media')) ? 1 : 0; }
   function calc() {
     const comp = S.ots.filter(o => o.unidad !== 'B-01');
     const parada = comp.reduce((s, o) => s + horasParada(o), 0);
-    const disp = (H_PROG - parada) / H_PROG * 100;
+    const disp = modoCompartido ? (UNITS.length-fuera().length)/UNITS.length*100 : (H_PROG-parada)/H_PROG*100;
     const fallas = comp.filter(o => o.prioridad !== 'baja').length;
     const cerr = S.ots.filter(o => o.estado === 'resuelta' && Number(o.horasReparacion) > 0);
     const mttr = cerr.length ? cerr.reduce((s, o) => s + Number(o.horasReparacion), 0) / cerr.length : null;
-    const mtbf = fallas ? (H_PROG - parada) / fallas : null;
+    const mtbf = !modoCompartido && fallas ? (H_PROG - parada) / fallas : null;
     const F = fuera(), ab = abiertas();
     const lv = {}; UNITS.forEach(u => { lv[u] = alertaU(u, F, ab); });
     const cuenta = n => UNITS.filter(u => lv[u] === n).length;
     const alertas = [];
     UNITS.forEach(u => {
-      if (nivel(u) === 2) alertas.push({ sev: 2, unidad: u, t: 'Fuga interna severa detectada por el modelo', d: 'Unidad fuera de ruta · inspeccionar bomba y sellos', tipo: 'u' });
-      else if (nivel(u) === 1) alertas.push({ sev: 1, unidad: u, t: 'Fuga interna débil detectada por el modelo', d: 'Programar revisión de la bomba', tipo: 'u' });
+      if (!modoCompartido && nivel(u) === 2) alertas.push({ sev: 2, unidad: u, t: 'Fuga interna severa detectada por el modelo', d: 'Unidad fuera de ruta · inspeccionar bomba y sellos', tipo: 'u' });
+      else if (!modoCompartido && nivel(u) === 1) alertas.push({ sev: 1, unidad: u, t: 'Fuga interna débil detectada por el modelo', d: 'Programar revisión de la bomba', tipo: 'u' });
     });
-    ab.filter(o => o.prioridad === 'alta' && !(o.motor === 'modelo' && S.unidades[o.unidad] && nivel(o.unidad) === 2))
+    ab.filter(o => o.prioridad === 'alta' && !( !modoCompartido && o.motor === 'modelo' && S.unidades[o.unidad] && nivel(o.unidad) === 2))
       .forEach(o => alertas.push({ sev: 2, unidad: o.unidad, t: `${o.codigo} · ${o.sistema}: prioridad alta`, d: 'Unidad fuera de ruta hasta resolver la orden', tipo: 'o', id: o.id }));
-    VEH.forEach(u => DOCS.forEach(([t, nom]) => { const e = docEstado(u, t), n = diasA(S.docs[u][t]);
+    if (!modoCompartido) VEH.forEach(u => DOCS.forEach(([t, nom]) => { const e = docEstado(u, t), n = diasA(S.docs[u][t]);
       if (e === 2) alertas.push({ sev: 2, unidad: u, t: `${nom} vencid${DOCG[t]}`, d: `La unidad no puede salir a ruta hasta renovarl${DOCG[t]}`, tipo: 'd' });
       else if (e === 1) alertas.push({ sev: 1, unidad: u, t: `${nom} vence en ${n} ${n === 1 ? 'día' : 'días'}`, d: 'Tramitar la renovación antes del vencimiento', tipo: 'd' }); }));
     return { parada, disp, fallas, mttr, mtbf, F, ab, lv, oper: cuenta(0), adv: cuenta(1), crit: cuenta(2), cub: UNITS.length - F.length, alertas };
@@ -1594,7 +1597,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   }
   const otsU = u => S.ots.filter(o => o.unidad === u);
   const paradaU = u => otsU(u).reduce((s, o) => s + horasParada(o), 0);
-  const dispU = u => (H_U - paradaU(u)) / H_U * 100;
+  const dispU = u => modoCompartido ? (fuera().includes(u)?0:100) : (H_U-paradaU(u))/H_U*100;
   function eventosU(u) {
     const ev = [];
     S.hist.filter(h => h.unidad === u).forEach(h => ev.push({ t: h.t, c: h.clase, x: `${h.origen}: ${CLSm[h.clase]} (${fmt(h.conf * 100, 0)} %)` }));
@@ -1689,13 +1692,13 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
             <span class="uc-state">${NIV[l][0]}</span>
           </div>
           <div class="uc-mainmetric">
-            <div><div class="metric-caption">Disponibilidad mensual</div><div class="metric-value">${fmt(availability,1)}<span style="font-size:1rem;letter-spacing:0">%</span></div><div class="metric-hint">Meta de referencia ≥ 90 %</div></div>
+            <div><div class="metric-caption">${modoCompartido?'Disponibilidad actual':'Disponibilidad mensual simulada'}</div><div class="metric-value">${fmt(availability,1)}<span style="font-size:1rem;letter-spacing:0">%</span></div><div class="metric-hint">Meta de referencia ≥ 90 %</div></div>
             <div class="uc-ring" style="--pct:${availability}" aria-label="Disponibilidad ${fmt(availability,1)} por ciento"><div class="uc-ring-inner">${availability>=90?'En meta':'Revisar'}</div></div>
           </div>
         </div>
         <div class="uc-quickstats">
           <div class="uc-quickstat"><small>Situación operativa</small><strong class="${unitOut?'status-critical':''}">${unitOut?'Fuera de ruta':'En ruta'}</strong></div>
-          <div class="uc-quickstat"><small>Condición hidráulica</small><strong>${CLS[c]} · ${fmt(st.pred.confianza*100,0)} %</strong></div>
+          <div class="uc-quickstat"><small>${modoCompartido?'Condición según órdenes':'Condición hidráulica simulada'}</small><strong>${modoCompartido?NIV[l][0]:CLS[c]+' · '+fmt(st.pred.confianza*100,0)+' %'}</strong></div>
           <div class="uc-quickstat"><small>Tiempo detenido</small><strong>${fmt(paradaU(u),1)} h</strong></div>
           <div class="uc-quickstat"><small>Órdenes abiertas</small><strong>${oa} OT</strong></div>
         </div>
@@ -1721,7 +1724,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     $('detBody').innerHTML = `
       <div class="det-k">
         <div class="am"><span class="l">Estado operativo</span><span class="v" style="font-size:1rem">${K.F.includes(u) ? '<span class="c2">Fuera de ruta</span>' : 'En ruta'}</span></div>
-        <div class="am"><span class="l">Disponibilidad (mes)</span><span class="v">${fmt(dispU(u), 1)} %</span></div>
+        <div class="am"><span class="l">${modoCompartido?'Disponibilidad actual':'Disponibilidad mensual simulada'}</span><span class="v">${fmt(dispU(u), 1)} %</span></div>
         <div class="am"><span class="l">Horas fuera de servicio</span><span class="v">${fmt(paradaU(u), 1)} h</span></div>
         <div class="am"><span class="l">Fallas registradas</span><span class="v">${ou.filter(o => o.prioridad !== 'baja').length}</span></div>
       </div>
@@ -1733,7 +1736,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
           <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" data-leer="${u}">Leer un ciclo de sensores</button><button type="button" class="btn sec sm" data-reportar="${u}">Registrar una falla</button></div>
         </div>
         <div class="card" style="box-shadow:none">
-          <div class="card-h"><h3>Eventos de la simulación</h3></div>
+          <div class="card-h"><h3>${modoCompartido?'Historial compartido de órdenes':'Eventos de la simulación'}</h3></div>
           <div class="tl">${ev.length ? ev.map(e => `<div class="tl-i"><span class="dot d${e.c}"></span><div><div class="w">${esc(fechaHora(e.t))}</div>${esc(e.x)}</div></div>`).join('') : '<div class="empty">Sin eventos</div>'}</div>
         </div>
       </div>
@@ -1769,8 +1772,9 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
       const orig = o.motor === 'modelo' ? '<span class="badge b-ia">IA</span>' : '<span class="badge b-auto">Reglas</span>';
       let seg;
       if (o.estado === 'resuelta') seg = `<span class="tsm">${fmt(Number(o.horasReparacion), 1)} h de reparación<br>${fmt(Number(o.horasParada), 1)} h fuera de servicio</span>`;
-      else if (resolviendo === o.id) seg = `<div class="resolver"><div class="two"><label>Horas de reparación<input type="number" min="0" step="0.5" inputmode="decimal" id="rep-${esc(o.id)}" aria-label="Horas de reparación de ${esc(o.codigo)}"></label><label>Horas fuera de servicio<input type="number" min="0" step="0.5" inputmode="decimal" id="par-${esc(o.id)}" placeholder="= reparación" aria-label="Horas fuera de servicio de ${esc(o.codigo)}"></label></div><div class="fu"><button type="button" class="btn ok sm" data-act="confirmar" data-id="${esc(o.id)}">Confirmar cierre</button><button type="button" class="btn sec sm" data-act="cancelar" data-id="${esc(o.id)}">Cancelar</button></div><span class="msg" id="msg-${esc(o.id)}"></span></div>`;
-      else seg = `<div class="fu">${o.estado === 'pendiente' ? `<button type="button" class="btn sec sm" data-act="atender" data-id="${esc(o.id)}">Iniciar atención</button>` : ''}<button type="button" class="btn sm" data-act="resolver" data-id="${esc(o.id)}">Resolver</button></div>`;
+      else if (resolviendo === o.id) seg = `<div class="resolver"><div class="two"><label>Horas de reparación<input type="number" min="0" step="0.5" inputmode="decimal" id="rep-${esc(o.id)}" aria-label="Horas de reparación de ${esc(o.codigo)}"></label><label>Horas fuera de servicio<input type="number" min="0" step="0.5" inputmode="decimal" id="par-${esc(o.id)}" placeholder="= reparación" aria-label="Horas fuera de servicio de ${esc(o.codigo)}"></label></div><label>Trabajos realizados<textarea maxlength="600" id="trab-${esc(o.id)}" aria-label="Trabajos realizados de ${esc(o.codigo)}"></textarea></label><div class="fu"><button type="button" class="btn ok sm" data-act="confirmar" data-id="${esc(o.id)}">Confirmar cierre</button><button type="button" class="btn sec sm" data-act="cancelar" data-id="${esc(o.id)}">Cancelar</button></div><span class="msg" id="msg-${esc(o.id)}"></span></div>`;
+      else seg = `<div class="fu">${o.estado === 'pendiente' ? `<button type="button" class="btn sec sm" data-act="atender" data-id="${esc(o.id)}">Iniciar atención</button>` : ''}${!modoCompartido || o.estado==='atencion'?`<button type="button" class="btn sm" data-act="resolver" data-id="${esc(o.id)}">Resolver</button>`:''}</div>`;
+      if(modoCompartido && !['administrador','mecanico'].includes(perfilCompartido?.rol) && o.estado!=='resuelta') seg='<span>Seguimiento desde móvil o tablet por el mecánico autorizado.</span>';
       return `<tr data-ot="${esc(o.id)}" class="${ultimoOt === o.id ? 'hl' : ''}">
         <td data-l="Orden"><span class="code">${esc(o.codigo)}</span><div class="fu" style="margin-top:4px">${orig}${o.ejemplo ? '<span class="pill p-ej">ejemplo</span>' : ''}</div></td>
         <td data-l="Unidad"><span class="code">${esc(o.unidad)}</span><div class="tsm">${esc(o.origen)}</div></td>
@@ -1975,7 +1979,8 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   function renderAll() {
     const K = calc(), A = amb(K.F);
     renderResumen(K, A); renderFlota(K); renderMant(); renderAer(); renderDocs(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K); renderImpactLab(); renderIPIM(); renderStudio(K); renderTwin(K); renderHeroRoutes(K);
-    $('clock').textContent = 'Simulación · ' + fechaHora(new Date().toISOString());
+    $('clock').textContent = (modoCompartido?'Órdenes compartidas · ':'Simulación local · ') + fechaHora(new Date().toISOString());
+    if (typeof actualizarFuente === 'function') actualizarFuente();
     return { K, A };
   }
 
@@ -2049,7 +2054,13 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     const c = reglas(t); $('pvSis').textContent = c.sistema; $('pvPri').innerHTML = `<span class="pill p-${c.prioridad}">${c.prioridad}</span>${c.prioridad === 'alta' ? ' · la unidad sale de ruta' : ''}`; $('pvAcc').textContent = c.accion;
   }
   $('fTexto').addEventListener('input', () => { preview(); if ($('fTexto').value.trim().length >= 8) { $('otMsg').textContent = ''; $('otMsg').className = 'msg'; } });
-  function enviarReporte() {
+  async function enviarReporte() {
+    if (modoCompartido) {
+      const b = $('otForm').querySelector('button[type="submit"]'); if (b) b.disabled=true;
+      try { const r=await window.FlotaIACompartida.reportar($('fUnidad').value,$('fTexto').value); $('otMsg').textContent=r.enCola?'Pendiente de confirmación del servidor.':'Reporte compartido registrado: '+r.codigo; $('otMsg').className='msg okm'; $('fTexto').value=''; preview(); }
+      catch(e){ $('otMsg').textContent=e.message; $('otMsg').className='msg err'; }
+      finally {if(b)b.disabled=false;} return;
+    }
     const t = $('fTexto').value.trim();
     if (t.length < 8) { $('otMsg').textContent = 'Escriba una descripción de al menos 8 caracteres.'; $('otMsg').className = 'msg err'; $('fTexto').focus(); return null; }
     const o = crearReporte($('fUnidad').value, $('fQuien').value, t);
@@ -2244,9 +2255,17 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     if (o.motor === 'modelo' && S.unidades[o.unidad]) { const k = cicloDe(0, S.n + 3), pred = predecir(k.x); S.unidades[o.unidad] = { ciclo: k.id, pred }; S.hist.push({ t: new Date().toISOString(), unidad: o.unidad, ciclo: k.id, clase: pred.clase, conf: pred.confianza, real: k.bomba, origen: 'Lectura tras la reparación' }); }
     guardar(); return o;
   }
-  $('otBody').addEventListener('click', ev => {
+  $('otBody').addEventListener('click', async ev => {
     const b = ev.target.closest('[data-act]'); if (!b) return;
     const id = b.dataset.id, act = b.dataset.act;
+    if (modoCompartido && ['atender','confirmar'].includes(act)) {
+      b.disabled=true;
+      try {
+        if(act==='atender') await window.FlotaIACompartida.atender(id);
+        else { await window.FlotaIACompartida.resolver(id,{horasReparacion:$('rep-'+id).value,horasParada:$('par-'+id).value,trabajosRealizados:$('trab-'+id).value}); resolviendo=null; }
+        ultimoOt=id; renderAll(); toast('Cambio confirmado y compartido','ok');
+      } catch(e) {toast(e.message,'crit'); b.disabled=false;} return;
+    }
     if (act === 'atender') { const o = atender(id); ultimoOt = id; renderAll(); if (o) toast(`${o.codigo} en atención`); }
     else if (act === 'resolver') { resolviendo = id; renderMant(); const r = $('rep-' + id); if (r) r.focus(); }
     else if (act === 'cancelar') { resolviendo = null; renderMant(); }
@@ -2409,8 +2428,8 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
     $('twinRoutes').innerHTML=UNITS.map((u,i)=>{const missing=routeOut.has(u);const rec=missing&&u===recoverTarget;return `<span class="${rec?'recovered':missing?'missing':''}" title="${rec?'Cobertura alternativa supuesta':missing?'Sin cobertura':'Atendida'}">R-0${i+1}<small style="display:block;font-weight:400">${rec?'Hipótesis':missing?'Afectada':'Cubierta'}</small></span>`}).join('');
     const narrative=twinPlan==='base'?'Estado base: '+base+' de 7 rutas atendidas. No se ha aplicado ninguna contingencia.':twinPlan==='retirar'?'Si '+unit+' se retira, la cobertura estimada sería '+removal+' de 7 rutas. La orden o condición actual puede haberla retirado ya.':'Con una capacidad alternativa hipotética de una ruta, la cobertura sería '+recovered+' de 7. Requiere verificación de vehículos, turnos y recursos.';
     $('twinNarrative').textContent=narrative;
-    const c3=S.unidades['C-03'].pred.clase, c3open=S.ots.filter(o=>o.unidad==='C-03'&&o.estado!=='resuelta').length;
-    $('twinC3Status').textContent=`C-03: ${['sin fuga','fuga débil','fuga severa'][c3]} · ${c3open} órdenes pendientes · ${K.F.includes('C-03')?'fuera de ruta':'en ruta'} · cobertura base ${base}/7. Este panel y el IPIM leen el mismo estado interno de la demostración.`;
+    const c3=nivel('C-03'), c3open=S.ots.filter(o=>o.unidad==='C-03'&&o.estado!=='resuelta').length;
+    $('twinC3Status').textContent=`C-03: ${(modoCompartido?['sin alertas de órdenes','advertencia por orden','crítica por orden']:['sin fuga','fuga débil','fuga severa'])[c3]} · ${c3open} órdenes pendientes · ${K.F.includes('C-03')?'fuera de ruta':'en ruta'} · cobertura base ${base}/7. ${modoCompartido?'Este panel y el IPIM usan las órdenes compartidas; las contingencias son hipótesis.':'Este panel y el IPIM leen el estado de la demostración.'}`;
   }
   $('rbList').addEventListener('click', e => { const b = e.target.closest('[data-rb]'); if (b) abrirDetalle(b.dataset.rb); });
   $('twinFleet').addEventListener('click',e=>{const b=e.target.closest('[data-twin-unit]');if(b){twinUnit=b.dataset.twinUnit;renderTwin(calc());}});
@@ -2497,14 +2516,14 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
 
   // ---------- Observatorio: tablas y visualizaciones derivadas del estado existente ----------
   const svFilter={sort:'unidad',asc:true};
-  function svDisp(unit){const os=S.ots.filter(o=>o.unidad===unit);const par=os.reduce((n,o)=>n+horasParada(o),0);return Math.max(0,Math.min(100,(H_U-par)/H_U*100));}
-  function svRows(){return UNITS.map(u=>{const n=nivel(u);return {unidad:u,estado:n,confianza:S.unidades[u].pred.confianza*100,ot:S.ots.filter(o=>o.unidad===u&&o.estado!=='resuelta').length,disp:svDisp(u)};});}
+  function svDisp(unit){if(modoCompartido)return dispU(unit);const os=S.ots.filter(o=>o.unidad===unit);const par=os.reduce((n,o)=>n+horasParada(o),0);return Math.max(0,Math.min(100,(H_U-par)/H_U*100));}
+  function svRows(){return UNITS.map(u=>{const n=nivel(u);return {unidad:u,estado:n,confianza:modoCompartido?0:S.unidades[u].pred.confianza*100,ot:S.ots.filter(o=>o.unidad===u&&o.estado!=='resuelta').length,disp:svDisp(u)};});}
   function renderStudio(K){
     const st=$('svStatus').value,unit=$('svUnit').value,txt=$('svSearch').value.trim().toLowerCase();
     const names=['Normal','Advertencia','Crítica'];
     let rows=svRows().filter(r=>(st==='all'||String(r.estado)===st)&&(unit==='all'||r.unidad===unit)&&(!txt||(r.unidad+' '+names[r.estado]).toLowerCase().includes(txt)));
     rows.sort((a,b)=>{const k=svFilter.sort,av=a[k],bv=b[k];if(typeof av==='string')return svFilter.asc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));return svFilter.asc?av-bv:bv-av;});
-    $('svBody').innerHTML=rows.length?rows.map(r=>`<tr><td class="code">${r.unidad}</td><td><span class="studio-chip ${['ok','mid','high'][r.estado]}">${names[r.estado]}</span></td><td>${fmt(r.confianza,1)} %</td><td>${r.ot}</td><td>${fmt(r.disp,1)} %</td><td><button class="btn sec sm" data-sv-unit="${r.unidad}" type="button">Ver unidad</button></td></tr>`).join(''):'<tr><td colspan="6" class="studio-empty">No hay unidades con estos filtros.</td></tr>';
+    $('svBody').innerHTML=rows.length?rows.map(r=>`<tr><td class="code">${r.unidad}</td><td><span class="studio-chip ${['ok','mid','high'][r.estado]}">${names[r.estado]}</span></td><td>${modoCompartido?'No aplica':fmt(r.confianza,1)+' %'}</td><td>${r.ot}</td><td>${fmt(r.disp,1)} %</td><td><button class="btn sec sm" data-sv-unit="${r.unidad}" type="button">Ver unidad</button></td></tr>`).join(''):'<tr><td colspan="6" class="studio-empty">No hay unidades con estos filtros.</td></tr>';
     $('svCount').textContent=`${rows.length} unidad(es) visibles de ${UNITS.length}. Datos demostrativos del prototipo.`;
     if(!$('svUnit').dataset.ready){$('svUnit').innerHTML='<option value="all">Todas las unidades</option>'+UNITS.map(u=>`<option value="${u}">${u}</option>`).join('');$('svUnit').dataset.ready='1';}
     const all=svRows(), crit=all.filter(r=>r.estado===2).length, adv=all.filter(r=>r.estado===1).length, oper=all.filter(r=>r.estado===0).length;
@@ -2558,15 +2577,56 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   $('svBody').addEventListener('click',e=>{const btn=e.target.closest('[data-sv-unit]');if(!btn)return;const u=btn.dataset.svUnit;ir('flota');const el=$('flU');if(el){el.value=u;el.dispatchEvent(new Event('change'));}});
   $('svExport').addEventListener('click',()=>{const names=['Normal','Advertencia','Crítica'];const data=['Unidad;Condición;Confianza_porcentaje;OT_abiertas;Disponibilidad_porcentaje',...svRows().map(r=>[r.unidad,names[r.estado],r.confianza.toFixed(2),r.ot,r.disp.toFixed(2)].join(';')),'AVISO: datos simulados del prototipo, no información operativa municipal'];descargar('FlotaIA_observatorio_simulado.csv','text/csv;charset=utf-8','\uFEFF'+data.join('\n'));});
 
+  // Una fuente operativa; el escenario de ensayo conserva su propio estado local.
+  function aplicarOrdenes() {
+    S.ots=ordenesCompartidas.map(o=>({...o,unidad:o.unidadId,sintoma:o.resumen,creada:o.creadoEn,inicio:o.inicioEn,resuelta:o.resueltaEn,ejemplo:false}));
+    S.hist=[]; S.actas=[];
+  }
+  function cambiarModo(compartido){
+    if(compartido===modoCompartido)return;
+    if(!modoCompartido)estadoDemo=structuredClone(S);
+    modoCompartido=compartido;
+    S=compartido?estadoInicial():structuredClone(estadoDemo);
+    if(compartido){S.hc.reg=[];aplicarOrdenes();demoSalir();}
+    resolviendo=null;syncSup();renderAll();actualizarFuente();
+  }
+  function actualizarFuente(){
+    const b=$('fuenteGlobal');if(!b)return;
+    b.querySelector('strong').textContent=modoCompartido?(datosConfirmados?'Operación compartida · Firebase':'Operación compartida · esperando datos'):'Demostración local · datos de ensayo';
+    b.querySelector('p').textContent=modoCompartido?'Flota, rutas, alertas, órdenes y disponibilidad actual usan las mismas órdenes de móvil y tablet. Alta abierta: fuera de ruta. Media: advertencia. El catálogo es del prototipo. Análisis hidráulico, documentos, actas, combustible y proyecciones ambientales son escenarios de ensayo; no son mediciones reales.':'Los cambios de este escenario se guardan en esta PC y no crean ni modifican órdenes compartidas.';
+    $('modoFuente').textContent=modoCompartido?'Abrir demostración local':'Volver a operación compartida';
+    $('fQuien').disabled=modoCompartido;
+    if(modoCompartido){
+      $('kMtbf').textContent='Sin base de horas';
+      $('kpDisp').querySelector('.m').textContent='Actual: unidades disponibles / 7; no es disponibilidad mensual.';
+      if(!perfilCompartido){$('fCards').innerHTML='<div class="card">Inicie sesión en Cuenta y reportes compartidos para cargar la flota.</div>';}
+      if(!datosConfirmados){['kOper','kAdv','kCrit','kRutas','kDisp','kMttr'].forEach(i=>$(i).textContent='—');}
+    }
+  }
+  const fuente=document.createElement('aside');fuente.id='fuenteGlobal';fuente.style.cssText='position:relative;padding:16px;margin:12px;background:#e8f5f3;color:#123d38;border:1px solid #8ac9bc;border-radius:12px;z-index:2';
+  fuente.innerHTML='<strong></strong><p style="margin:6px 0;max-width:1100px"></p><button type="button" class="btn sec sm" id="modoFuente"></button> <a href="#mantenimiento">Cuenta y reportes compartidos</a> · <a href="./tablet/">Inspecciones compartidas en tablet</a>';
+  document.querySelector('main').prepend(fuente);
+  $('modoFuente').onclick=()=>cambiarModo(!modoCompartido);
+  window.FlotaIAIntegracion={
+    recibir(ordenes,perfil,meta){ordenesCompartidas=ordenes;perfilCompartido=perfil;datosConfirmados=!meta?.fromCache;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();},
+    desconectar(){ordenesCompartidas=[];perfilCompartido=null;datosConfirmados=false;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();}
+  };
+  document.addEventListener('submit',e=>{if(modoCompartido && ['docForm','aerForm','hcForm'].includes(e.target.id)){e.preventDefault();e.stopImmediatePropagation();toast('Use la demostración local para este formulario de ensayo. Las inspecciones compartidas se registran en tablet.','crit');}},true);
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b||!modoCompartido)return;
+    if(['btnDemo','btnPaso','twinDemo','dcGotoDemo','btnReset','dkReset'].includes(b.id)){cambiarModo(false);return;}
+    if(['btnCiclo'].includes(b.id)||b.hasAttribute('data-leer')||b.hasAttribute('data-renov')){e.preventDefault();e.stopImmediatePropagation();toast('Cambie a demostración local para ejecutar sensores de ensayo.','crit');}
+  },true);
+
   // ---------- inicio ----------
   renderSelects(); syncSup(); renderCM(); renderAll(); pintarDemo();
+  actualizarFuente();
   ir((location.hash || '#resumen').slice(1), true);
-  setInterval(() => { $('clock').textContent = 'Simulación · ' + fechaHora(new Date().toISOString()); }, 30000);
+  setInterval(() => { $('clock').textContent = (modoCompartido?'Órdenes compartidas · ':'Simulación local · ') + fechaHora(new Date().toISOString()); }, 30000);
   window.FlotaIA = { predecir, ciclos: CICLOS, estado: () => S, calc, amb: () => amb(calc().F), FE, hc: () => hcCalc() };
 })();
 </script>
-<script type="module">
-var __defProp = Object.defineProperty;
+<script type="module">var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __esm = (fn, res, err2) => function __init() {
   if (err2) throw err2[0];
@@ -2972,6 +3032,9 @@ var err = (code, msg) => {
   return e;
 };
 var firma = (perfil) => ({ uid: perfil.uid, codigo: perfil.codigo, rol: perfil.rol });
+var exigirConexion = () => {
+  if (A.nombre === "firestore" && !navigator.onLine) throw err("flotaia/sin-conexion", "Iniciar o cerrar una orden requiere conexi\xF3n, para que dos mec\xE1nicos no tomen la misma orden. Int\xE9ntelo cuando tenga se\xF1al.");
+};
 function validarReporte(perfil, d) {
   const e = {};
   if (!d.unidadId) e.unidadId = "Elija la compactadora.";
@@ -3062,10 +3125,50 @@ async function enviar(ops, resultado, yaExiste) {
     throw e;
   }
 }
+async function iniciarAtencion(perfil, otId) {
+  if (!puede(perfil.rol, "atenderOrden")) throw err("flotaia/permiso", "Su perfil no puede atender \xF3rdenes.");
+  exigirConexion();
+  const f = firma(perfil), ts = A.ts(), segId = A.newId(["ordenes_trabajo", otId, "seguimiento"]);
+  return A.tx(async (t) => {
+    const o = await t.get(["ordenes_trabajo", otId]);
+    if (!o) throw err("flotaia/no-existe", "La orden ya no existe.");
+    if (o.estado !== "pendiente") throw err("flotaia/estado", `La orden ya est\xE1 ${ESTADOS[o.estado].toLowerCase()}.`);
+    t.update(["ordenes_trabajo", otId], { estado: "atencion", mecanicoUid: f.uid, mecanicoCodigo: f.codigo, inicioEn: ts, actualizadoEn: ts });
+    t.set(["ordenes_trabajo", otId, "seguimiento", segId], entradaSeguimiento("inicio", `Atenci\xF3n iniciada por ${f.codigo}.`, "pendiente", "atencion", f, ts));
+    return true;
+  });
+}
+function validarCierre(c) {
+  const e = {}, trabajos = String(c.trabajosRealizados || "").trim();
+  const rep = c.horasReparacion === "" || c.horasReparacion == null ? NaN : Number(c.horasReparacion);
+  const par = c.horasParada === "" || c.horasParada == null ? rep : Number(c.horasParada);
+  if (trabajos.length < 5) e.trabajosRealizados = "Describa los trabajos realizados (m\xEDnimo 5 caracteres).";
+  else if (trabajos.length > 600) e.trabajosRealizados = "M\xE1ximo 600 caracteres.";
+  if (!(rep > 0) || rep > 720) e.horasReparacion = "Ingrese las horas de reparaci\xF3n (mayor que 0 y hasta 720).";
+  if (!(par >= 0) || par > 720) e.horasParada = "Las horas fuera de servicio deben estar entre 0 y 720.";
+  return { errores: e, valores: { trabajosRealizados: trabajos, horasReparacion: rep, horasParada: par } };
+}
+async function resolverOrden(perfil, otId, cierre) {
+  if (!puede(perfil.rol, "atenderOrden")) throw err("flotaia/permiso", "Su perfil no puede cerrar \xF3rdenes.");
+  const { errores, valores } = validarCierre(cierre);
+  if (Object.keys(errores).length) throw Object.assign(err("flotaia/validacion", "Revise los campos marcados."), { campos: errores });
+  exigirConexion();
+  const f = firma(perfil), ts = A.ts(), segId = A.newId(["ordenes_trabajo", otId, "seguimiento"]);
+  return A.tx(async (t) => {
+    const o = await t.get(["ordenes_trabajo", otId]);
+    if (!o) throw err("flotaia/no-existe", "La orden ya no existe.");
+    if (o.estado !== "atencion") throw err("flotaia/estado", "Solo se puede cerrar una orden en atenci\xF3n.");
+    if (o.mecanicoUid !== f.uid && perfil.rol !== "administrador") throw err("flotaia/permiso", `La atiende ${o.mecanicoCodigo}; solo esa persona o el administrador puede cerrarla.`);
+    t.update(["ordenes_trabajo", otId], { estado: "resuelta", trabajosRealizados: valores.trabajosRealizados, horasReparacion: valores.horasReparacion, horasParada: valores.horasParada, resueltaEn: ts, actualizadoEn: ts });
+    t.set(["ordenes_trabajo", otId, "seguimiento", segId], entradaSeguimiento("resolucion", `Orden resuelta: ${valores.trabajosRealizados} (${valores.horasReparacion} h de reparaci\xF3n, ${valores.horasParada} h fuera de servicio).`, "atencion", "resuelta", f, ts));
+    return true;
+  });
+}
 function vigilarOrdenes(perfil, cb, onError) {
   const spec = perfil.rol === "chofer" ? { path: ["ordenes_trabajo"], where: [["reportadoPorUid", "==", perfil.uid]], orderBy: ["creadoEn", "desc"], limit: 100 } : { path: ["ordenes_trabajo"], orderBy: ["creadoEn", "desc"], limit: 300 };
   return A.watch(spec, cb, onError);
 }
+var vigilarInspecciones = (cb, onError) => A.watch({ path: ["inspecciones"], orderBy: ["creadoEn", "desc"], limit: 200 }, cb, onError);
 var vigilarUnidades = (cb, onError) => A.watch({ path: ["unidades"], orderBy: ["codigo", "asc"] }, cb, onError);
 async function inicializarCatalogo(perfil) {
   if (!puede(perfil.rol, "administrarUsuarios")) throw err("flotaia/permiso", "Solo el administrador inicializa el cat\xE1logo.");
@@ -3172,6 +3275,25 @@ var detener = () => {
 var detenerUnidades = () => {
 };
 var perfilActual = null;
+var detenerInspecciones = () => {
+};
+window.FlotaIACompartida = {
+  async reportar(unidadId, descripcion) {
+    if (!perfilActual) throw new Error("Inicie sesi\xF3n en Cuenta y reportes compartidos.");
+    envioIds ||= nuevosIdsReporte();
+    const r = await crearReporte(perfilActual, { unidadId, descripcion, observaciones: "" }, envioIds, "escritorio");
+    envioIds = null;
+    return r;
+  },
+  async atender(id) {
+    if (!perfilActual) throw new Error("Inicie sesi\xF3n.");
+    return iniciarAtencion(perfilActual, id);
+  },
+  async resolver(id, cierre) {
+    if (!perfilActual) throw new Error("Inicie sesi\xF3n.");
+    return resolverOrden(perfilActual, id, cierre);
+  }
+};
 var status = root.querySelector("[data-estado]");
 var listado = root.querySelector("[data-ordenes]");
 var form = root.querySelector("form");
@@ -3230,6 +3352,8 @@ try {
   observarSesion((s) => {
     detener();
     detenerUnidades();
+    detenerInspecciones();
+    window.FlotaIAIntegracion.desconectar();
     detener = () => {
     };
     detenerUnidades = () => {
@@ -3237,6 +3361,7 @@ try {
     perfilActual = null;
     reporte.hidden = true;
     listado.replaceChildren();
+    root.querySelector("[data-inspecciones]")?.replaceChildren();
     form.hidden = s.estado !== "sin_sesion";
     google.hidden = s.estado !== "sin_sesion";
     salir.hidden = !s.usuario;
@@ -3261,6 +3386,7 @@ try {
     }, error);
     if (s.perfil.rol === "administrador") inicializarCatalogo(s.perfil).catch(error);
     detener = vigilarOrdenes(s.perfil, (ordenes, meta) => {
+      window.FlotaIAIntegracion.recibir(ordenes, s.perfil, meta);
       listado.replaceChildren();
       status.textContent = meta?.fromCache ? "Datos en cach\xE9: esperando confirmaci\xF3n del servidor." : "Datos recibidos de Firebase. Los cambios se muestran autom\xE1ticamente.";
       if (!ordenes.length) {
@@ -3283,13 +3409,22 @@ try {
       table.append(body);
       listado.append(table);
     }, error);
+    let inspecciones = root.querySelector("[data-inspecciones]");
+    if (!inspecciones) {
+      inspecciones = document.createElement("div");
+      inspecciones.dataset.inspecciones = "";
+      root.append(inspecciones);
+    }
+    detenerInspecciones = vigilarInspecciones((items) => {
+      inspecciones.replaceChildren(el("h3", "Inspecciones compartidas \xB7 \xFAltimas " + items.length));
+      items.slice(0, 20).forEach((i) => inspecciones.append(el("p", `${i.unidadId} \xB7 ${i.sistema} \xB7 ${i.condicion} \xB7 ${i.observaciones || "Sin observaciones"}`)));
+    }, error);
   });
 } catch (e) {
   form.hidden = true;
   google.hidden = true;
   error(e);
 }
-
 </script>
 </body>
 </html>
