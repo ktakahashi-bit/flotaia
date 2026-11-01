@@ -1016,7 +1016,25 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
           <div><div class="eyebrow">Operación</div><h1 id="h-mant">Mantenimiento y órdenes de trabajo</h1><p class="lead">Registro de fallas, generación de órdenes y seguimiento: Pendiente → En atención → Resuelta. Incluye el acta de entrega-recepción de la unidad antes de salir a ruta. Cada cambio recalcula los indicadores.</p></div>
           <span class="badge b-auto">Automatización</span>
         </div>
-        <div class="g-mant">
+        <section id="flotaia-compartida" class="card" style="margin:0 0 24px;padding:24px">
+<h2>Operaciones compartidas · Móvil y tablet</h2>
+<p>Órdenes registradas en Firebase. La demostración y sus indicadores conservan sus datos de simulación.</p>
+<p><a href="./mobile/">Abrir móvil</a> · <a href="./tablet/">Abrir tablet</a></p>
+<p data-estado role="status">Iniciando conexión…</p>
+<button type="button" data-google hidden>Iniciar sesión con Google</button>
+<form hidden style="display:flex;gap:12px;flex-wrap:wrap">
+<label>Correo <input name="email" type="email" autocomplete="username" required></label>
+<label>Contraseña <input name="password" type="password" autocomplete="current-password" required></label>
+<button type="submit">Conectar</button></form>
+<button type="button" data-salir hidden>Cerrar sesión</button>
+<form data-reporte hidden style="margin:20px 0">
+<h3>Registrar una falla compartida</h3>
+<label>Unidad <select name="unidad" required></select></label>
+<label>Descripción <textarea name="descripcion" minlength="8" maxlength="400" required></textarea></label>
+<button type="submit">Enviar reporte a móvil y tablet</button><p data-envio role="status"></p>
+</form>
+<div data-ordenes style="overflow:auto"></div></section>
+<div class="g-mant">
           <div class="card" id="cForm">
             <div class="card-h"><div><h2>Registrar una falla</h2><p>Las reglas asignan sistema, prioridad y acción</p></div></div>
             <form id="otForm" novalidate class="fgrid">
@@ -2546,6 +2564,732 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   setInterval(() => { $('clock').textContent = 'Simulación · ' + fechaHora(new Date().toISOString()); }, 30000);
   window.FlotaIA = { predecir, ciclos: CICLOS, estado: () => S, calc, amb: () => amb(calc().F), FE, hc: () => hcCalc() };
 })();
+</script>
+<script type="module">
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res, err2) => function __init() {
+  if (err2) throw err2[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err2 = [e], e;
+  }
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// shared/local-adapter.js
+var local_adapter_exports = {};
+__export(local_adapter_exports, {
+  CUENTAS_DEMO: () => CUENTAS_DEMO,
+  crearAdaptadorLocal: () => crearAdaptadorLocal
+});
+function semilla() {
+  const now = (/* @__PURE__ */ new Date()).toISOString(), docs = {};
+  CUENTAS_DEMO.forEach((c) => {
+    docs[`usuarios/${c.uid}`] = { ...c.perfil, activo: true, prototipo: true, creadoEn: now, actualizadoEn: now };
+  });
+  UNIDADES.forEach((u) => {
+    docs[`unidades/${u.codigo}`] = { ...u, simulado: true, prototipo: true };
+  });
+  return { docs, cuentas: CUENTAS_DEMO.map((c) => ({ email: c.email, pass: PASS_DEMO, uid: c.uid })) };
+}
+async function crearAdaptadorLocal() {
+  let db;
+  const leer = () => {
+    try {
+      const g = JSON.parse(localStorage.getItem(CLAVE) || "null");
+      if (g && g.docs && g.cuentas) return g;
+    } catch (e) {
+    }
+    return semilla();
+  };
+  const guardar = () => {
+    try {
+      localStorage.setItem(CLAVE, JSON.stringify(db));
+    } catch (e) {
+    }
+  };
+  db = leer();
+  guardar();
+  const oyentes = /* @__PURE__ */ new Set();
+  const canal = "BroadcastChannel" in window ? new BroadcastChannel("flotaia-local") : null;
+  const notificar = (remoto) => {
+    if (remoto) db = leer();
+    oyentes.forEach((f) => f());
+  };
+  if (canal) canal.onmessage = () => notificar(true);
+  window.addEventListener("storage", (e) => {
+    if (e.key === CLAVE) notificar(true);
+  });
+  const cambio = () => {
+    guardar();
+    if (canal) canal.postMessage("cambio");
+    notificar(false);
+  };
+  const authCbs = /* @__PURE__ */ new Set();
+  let usuario = null;
+  try {
+    const s = JSON.parse(sessionStorage.getItem(SESION) || "null");
+    if (s && db.cuentas.some((c) => c.uid === s.uid)) usuario = s;
+  } catch (e) {
+  }
+  const emitirAuth = () => authCbs.forEach((cb) => cb(usuario));
+  const key = (path) => path.join("/");
+  const conId = (k, d) => ({ id: k.split("/").pop(), ...d });
+  const prep = (data) => {
+    const o = {}, now = (/* @__PURE__ */ new Date()).toISOString();
+    for (const k in data) o[k] = data[k] === TS ? now : data[k];
+    return o;
+  };
+  const id = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-6);
+  const ejecutar = (spec) => {
+    const pref = key(spec.path) + "/", prof = spec.path.length + 1;
+    let filas = Object.entries(db.docs).filter(([k]) => k.startsWith(pref) && k.split("/").length === prof).map(([k, d]) => conId(k, d));
+    (spec.where || []).forEach(([f, op, v]) => {
+      filas = filas.filter((r) => op === "==" ? r[f] === v : op === "in" ? v.includes(r[f]) : true);
+    });
+    if (spec.orderBy) {
+      const [f, dir] = spec.orderBy;
+      filas.sort((a, b) => String(a[f]).localeCompare(String(b[f])) * (dir === "desc" ? -1 : 1));
+    }
+    if (spec.limit) filas = filas.slice(0, spec.limit);
+    return filas;
+  };
+  const err2 = (code, msg) => {
+    const e = new Error(msg);
+    e.code = code;
+    return e;
+  };
+  return {
+    nombre: "local",
+    ts: () => TS,
+    onAuth(cb) {
+      authCbs.add(cb);
+      setTimeout(() => cb(usuario), 0);
+      return () => authCbs.delete(cb);
+    },
+    async signIn(email, pass) {
+      const c = db.cuentas.find((x) => x.email.toLowerCase() === String(email).trim().toLowerCase() && x.pass === pass);
+      if (!c) throw err2("auth/invalid-credential", "Credenciales no v\xE1lidas");
+      usuario = { uid: c.uid, email: c.email };
+      sessionStorage.setItem(SESION, JSON.stringify(usuario));
+      emitirAuth();
+      return usuario;
+    },
+    async signOut() {
+      usuario = null;
+      sessionStorage.removeItem(SESION);
+      emitirAuth();
+    },
+    async getDoc(path) {
+      const d = db.docs[key(path)];
+      return d ? conId(key(path), d) : null;
+    },
+    watch(spec, onData) {
+      const f = () => onData(ejecutar(spec), { fromCache: false, pendientes: false });
+      oyentes.add(f);
+      setTimeout(f, 0);
+      return () => oyentes.delete(f);
+    },
+    watchDoc(path, onData) {
+      const f = () => {
+        const d = db.docs[key(path)];
+        onData(d ? conId(key(path), d) : null, { fromCache: false, pendientes: false });
+      };
+      oyentes.add(f);
+      setTimeout(f, 0);
+      return () => oyentes.delete(f);
+    },
+    newId: () => id(),
+    async commit(ops) {
+      db = leer();
+      for (const o of ops) {
+        const k = key(o.path);
+        if (o.op === "update" && !db.docs[k]) throw err2("not-found", "Documento inexistente");
+      }
+      ops.forEach((o) => {
+        const k = key(o.path);
+        db.docs[k] = o.op === "set" ? prep(o.data) : { ...db.docs[k], ...prep(o.data) };
+      });
+      cambio();
+    },
+    async tx(fn) {
+      db = leer();
+      const pend = [];
+      const r = await fn({ get: async (p) => {
+        const d = db.docs[key(p)];
+        return d ? conId(key(p), d) : null;
+      }, set: (p, d) => pend.push({ op: "set", path: p, data: d }), update: (p, d) => pend.push({ op: "update", path: p, data: d }) });
+      pend.forEach((o) => {
+        const k = key(o.path);
+        db.docs[k] = o.op === "set" ? prep(o.data) : { ...db.docs[k], ...prep(o.data) };
+      });
+      cambio();
+      return r;
+    },
+    async crearCuenta(email, pass) {
+      db = leer();
+      if (db.cuentas.some((c) => c.email.toLowerCase() === email.toLowerCase())) throw err2("auth/email-already-in-use", "Correo ya registrado");
+      const uid = "u-" + id();
+      db.cuentas.push({ email, pass, uid });
+      cambio();
+      return uid;
+    },
+    onConexion(cb) {
+      const f = () => cb({ online: navigator.onLine });
+      window.addEventListener("online", f);
+      window.addEventListener("offline", f);
+      f();
+      return () => {
+        window.removeEventListener("online", f);
+        window.removeEventListener("offline", f);
+      };
+    },
+    reiniciarDemo() {
+      db = semilla();
+      cambio();
+    }
+  };
+}
+var CLAVE, SESION, TS, PASS_DEMO, CUENTAS_DEMO, UNIDADES;
+var init_local_adapter = __esm({
+  "shared/local-adapter.js"() {
+    CLAVE = "flotaia-multiplataforma-local-v1";
+    SESION = "flotaia-multiplataforma-local-sesion";
+    TS = "__SERVER_TS__";
+    PASS_DEMO = "demo1234";
+    CUENTAS_DEMO = [
+      { email: "chofer@demo.local", uid: "u-chofer-03", perfil: { rol: "chofer", nombre: "Chofer de prueba", codigo: "CH-03", unidadAsignada: "C-03" } },
+      { email: "chofer5@demo.local", uid: "u-chofer-05", perfil: { rol: "chofer", nombre: "Chofer de prueba 2", codigo: "CH-05", unidadAsignada: "C-05" } },
+      { email: "mecanico@demo.local", uid: "u-mecanico-01", perfil: { rol: "mecanico", nombre: "Mec\xE1nico de prueba", codigo: "ME-01", unidadAsignada: null } },
+      { email: "supervisor@demo.local", uid: "u-supervisor-01", perfil: { rol: "supervisor", nombre: "Supervisor de prueba", codigo: "SU-01", unidadAsignada: null } },
+      { email: "admin@demo.local", uid: "u-admin-01", perfil: { rol: "administrador", nombre: "Administrador de prueba", codigo: "AD-01", unidadAsignada: null } }
+    ];
+    UNIDADES = [...Array.from({ length: 7 }, (_, i) => ({ codigo: `C-0${i + 1}`, tipo: "compactadora", ruta: `R-0${i + 1}` })), { codigo: "B-01", tipo: "baranda", ruta: null }];
+  }
+});
+
+// shared/firebase-config.js
+var firebaseConfig, FIREBASE_SDK, configCompleta;
+var init_firebase_config = __esm({
+  "shared/firebase-config.js"() {
+    firebaseConfig = {
+      apiKey: "AIzaSyCjJtpxrXrJD539z1gQvhNt4pZsQxSHwF8",
+      authDomain: "flotaia-3de2c.firebaseapp.com",
+      projectId: "flotaia-3de2c",
+      storageBucket: "flotaia-3de2c.firebasestorage.app",
+      messagingSenderId: "951580054033",
+      appId: "1:951580054033:web:77f45bd8f108f366be17b0"
+    };
+    FIREBASE_SDK = "10.12.2";
+    configCompleta = () => Object.values(firebaseConfig).every((v) => typeof v === "string" && v && !v.includes("PEGAR_AQUI"));
+  }
+});
+
+// shared/firestore-adapter.js
+var firestore_adapter_exports = {};
+__export(firestore_adapter_exports, {
+  crearAdaptadorFirestore: () => crearAdaptadorFirestore
+});
+async function crearAdaptadorFirestore() {
+  if (!configCompleta()) {
+    const e = new Error("Falta completar shared/firebase-config.js");
+    e.code = "flotaia/config";
+    throw e;
+  }
+  let appMod, A3, F2;
+  try {
+    [appMod, A3, F2] = await Promise.all([import(`${CDN}/firebase-app.js`), import(`${CDN}/firebase-auth.js`), import(`${CDN}/firebase-firestore.js`)]);
+  } catch (err2) {
+    const e = new Error("No se pudo cargar el SDK de Firebase");
+    e.code = "flotaia/sdk";
+    e.cause = err2;
+    throw e;
+  }
+  const app = appMod.initializeApp(firebaseConfig);
+  const auth = A3.getAuth(app);
+  await A3.setPersistence(auth, A3.browserLocalPersistence);
+  let db;
+  try {
+    db = F2.initializeFirestore(app, { localCache: F2.persistentLocalCache({ tabManager: F2.persistentMultipleTabManager() }) });
+  } catch (e) {
+    db = F2.getFirestore(app);
+  }
+  const ref = (path) => F2.doc(db, ...path);
+  const col = (path) => F2.collection(db, ...path);
+  const conv = (v) => v && typeof v.toDate === "function" ? v.toDate().toISOString() : v;
+  const fromSnap = (s) => {
+    const d = s.data({ serverTimestamps: "estimate" }) || {};
+    const o = { id: s.id, _pend: s.metadata.hasPendingWrites };
+    for (const k in d) o[k] = conv(d[k]);
+    return o;
+  };
+  const TS2 = /* @__PURE__ */ Symbol("serverTimestamp");
+  const prep = (data) => {
+    const o = {};
+    for (const k in data) o[k] = data[k] === TS2 ? F2.serverTimestamp() : data[k];
+    return o;
+  };
+  const conexionCbs = /* @__PURE__ */ new Set();
+  const avisar = () => conexionCbs.forEach((cb) => cb({ online: navigator.onLine }));
+  window.addEventListener("online", avisar);
+  window.addEventListener("offline", avisar);
+  return {
+    nombre: "firestore",
+    ts: () => TS2,
+    onAuth: (cb) => A3.onAuthStateChanged(auth, (u) => cb(u ? { uid: u.uid, email: u.email } : null)),
+    signIn: (email, pass) => A3.signInWithEmailAndPassword(auth, email, pass).then((c) => ({ uid: c.user.uid, email: c.user.email })),
+    signInGoogle: async () => {
+      const provider = new A3.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      const c = await A3.signInWithPopup(auth, provider);
+      return { uid: c.user.uid, email: c.user.email };
+    },
+    signOut: () => A3.signOut(auth),
+    async getDoc(path) {
+      const s = await F2.getDoc(ref(path));
+      return s.exists() ? fromSnap(s) : null;
+    },
+    watch(spec, onData, onError) {
+      const cons = [];
+      (spec.where || []).forEach(([f, op, v]) => cons.push(F2.where(f, op, v)));
+      if (spec.orderBy) cons.push(F2.orderBy(spec.orderBy[0], spec.orderBy[1] || "asc"));
+      if (spec.limit) cons.push(F2.limit(spec.limit));
+      const q = F2.query(col(spec.path), ...cons);
+      return F2.onSnapshot(
+        q,
+        { includeMetadataChanges: true },
+        (snap) => onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites }),
+        (err2) => onError && onError(err2)
+      );
+    },
+    watchDoc(path, onData, onError) {
+      return F2.onSnapshot(
+        ref(path),
+        { includeMetadataChanges: true },
+        (s) => onData(s.exists() ? fromSnap(s) : null, { fromCache: s.metadata.fromCache, pendientes: s.metadata.hasPendingWrites }),
+        (err2) => onError && onError(err2)
+      );
+    },
+    newId: (path) => F2.doc(col(path)).id,
+    commit(ops) {
+      const b = F2.writeBatch(db);
+      ops.forEach((o) => {
+        if (o.op === "set") b.set(ref(o.path), prep(o.data));
+        else b.update(ref(o.path), prep(o.data));
+      });
+      return b.commit();
+    },
+    tx(fn) {
+      return F2.runTransaction(db, async (t) => fn({
+        get: async (p) => {
+          const s = await t.get(ref(p));
+          return s.exists() ? fromSnap(s) : null;
+        },
+        set: (p, d) => t.set(ref(p), prep(d)),
+        update: (p, d) => t.update(ref(p), prep(d))
+      }));
+    },
+    // Alta de una cuenta por el administrador sin cerrar su propia sesión: se usa una instancia secundaria de Firebase.
+    async crearCuenta(email, pass) {
+      const sec = appMod.initializeApp(firebaseConfig, "flotaia-alta-" + Date.now());
+      try {
+        const sAuth = A3.getAuth(sec);
+        await A3.setPersistence(sAuth, A3.inMemoryPersistence);
+        const cred = await A3.createUserWithEmailAndPassword(sAuth, email, pass);
+        const uid = cred.user.uid;
+        await A3.signOut(sAuth);
+        return uid;
+      } finally {
+        await appMod.deleteApp(sec);
+      }
+    },
+    onConexion(cb) {
+      conexionCbs.add(cb);
+      cb({ online: navigator.onLine });
+      return () => conexionCbs.delete(cb);
+    }
+  };
+}
+var CDN;
+var init_firestore_adapter = __esm({
+  "shared/firestore-adapter.js"() {
+    init_firebase_config();
+    CDN = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK}`;
+  }
+});
+
+// shared/reglas.js
+function reglas(t) {
+  const x = t.toLowerCase();
+  const sistema = /bomba|prensa|hidr|aceite|cilindro|compuerta|fuga|acumulador|enfriador|pala|manguera/.test(x) ? "Hidr\xE1ulico" : /motor|humo|escape|arranca|temperatura|recalienta|turbo/.test(x) ? "Motor" : /luz|luces|bater|eléctr|electr|tablero|alternador|fusible/.test(x) ? "El\xE9ctrico" : /llanta|neum|freno|suspens|dirección|direccion/.test(x) ? "Chasis" : "Por confirmar";
+  const prioridad = /no (puede )?sal|no arranca|varad|detenid|no funciona|no sale|sin frenos/.test(x) ? "alta" : /pierde|ruido|silbido|fuga|humo|recalienta|goteo/.test(x) ? "media" : "baja";
+  const acc = { "Hidr\xE1ulico": "Inspeccionar bomba, mangueras y cilindros; medir presi\xF3n del sistema", "Motor": "Diagn\xF3stico del motor por el mec\xE1nico de turno", "El\xE9ctrico": "Revisar fusibles, bater\xEDa y cableado", "Chasis": "Revisar frenos, direcci\xF3n y neum\xE1ticos", "Por confirmar": "Inspecci\xF3n general por el mec\xE1nico de turno" }[sistema];
+  return { sistema, prioridad, accion: acc };
+}
+
+// shared/permissions.js
+var ROLES = ["chofer", "mecanico", "supervisor", "administrador"];
+var T = true;
+var F = false;
+var MATRIZ = {
+  //                         chofer       mecánico  supervisor  administrador
+  verTodasLasUnidades: { chofer: F, mecanico: T, supervisor: T, administrador: T },
+  reportarIncidencia: { chofer: T, mecanico: T, supervisor: T, administrador: T },
+  verAlertas: { chofer: T, mecanico: T, supervisor: T, administrador: T },
+  registrarInspeccion: { chofer: F, mecanico: T, supervisor: T, administrador: T },
+  atenderOrden: { chofer: F, mecanico: T, supervisor: F, administrador: T },
+  observarSeguimiento: { chofer: F, mecanico: T, supervisor: T, administrador: T },
+  generarOrdenModelo: { chofer: F, mecanico: T, supervisor: F, administrador: T },
+  verIndicadores: { chofer: "limitado", mecanico: T, supervisor: T, administrador: T },
+  administrarUsuarios: { chofer: F, mecanico: F, supervisor: F, administrador: T }
+};
+function puede(rol, accion) {
+  const fila = MATRIZ[accion];
+  if (!fila || !ROLES.includes(rol)) return false;
+  return fila[rol];
+}
+
+// shared/firestore-service.js
+var A = null;
+var usarAdaptador = (a) => {
+  A = a;
+};
+var ESTADOS = { pendiente: "Pendiente", atencion: "En atenci\xF3n", resuelta: "Resuelta" };
+var ACCION_POR_SISTEMA = { "Hidr\xE1ulico": "Inspeccionar bomba, mangueras y cilindros; medir presi\xF3n del sistema", "Motor": "Diagn\xF3stico del motor por el mec\xE1nico de turno", "El\xE9ctrico": "Revisar fusibles, bater\xEDa y cableado", "Chasis": "Revisar frenos, direcci\xF3n y neum\xE1ticos", "Por confirmar": "Inspecci\xF3n general por el mec\xE1nico de turno" };
+var UNIDADES_CATALOGO = [...Array.from({ length: 7 }, (_, i) => ({ codigo: `C-0${i + 1}`, tipo: "compactadora", ruta: `R-0${i + 1}` })), { codigo: "B-01", tipo: "baranda", ruta: null }];
+var p2 = (n) => String(n).padStart(2, "0");
+function codigoOT(id, f = /* @__PURE__ */ new Date()) {
+  return `OT-${String(f.getFullYear()).slice(2)}${p2(f.getMonth() + 1)}${p2(f.getDate())}-${p2(f.getHours())}${p2(f.getMinutes())}-${id.replace(/[^a-z0-9]/gi, "").slice(0, 3).toUpperCase()}`;
+}
+var err = (code, msg) => {
+  const e = new Error(msg);
+  e.code = code;
+  return e;
+};
+var firma = (perfil) => ({ uid: perfil.uid, codigo: perfil.codigo, rol: perfil.rol });
+function validarReporte(perfil, d) {
+  const e = {};
+  if (!d.unidadId) e.unidadId = "Elija la compactadora.";
+  else if (perfil.rol === "chofer" && d.unidadId !== perfil.unidadAsignada) e.unidadId = "Solo puede reportar sobre su unidad asignada.";
+  const t = String(d.descripcion || "").trim();
+  if (t.length < 8) e.descripcion = "Describa la falla con al menos 8 caracteres.";
+  else if (t.length > 400) e.descripcion = "M\xE1ximo 400 caracteres.";
+  if (String(d.observaciones || "").length > 400) e.observaciones = "M\xE1ximo 400 caracteres.";
+  return e;
+}
+function nuevosIdsReporte() {
+  return { inc: A.newId(["incidencias"]), ot: A.newId(["ordenes_trabajo"]), seg: A.newId(["ordenes_trabajo", "x", "seguimiento"]) };
+}
+async function crearReporte(perfil, d, ids, origen) {
+  if (!puede(perfil.rol, "reportarIncidencia")) throw err("flotaia/permiso", "Su perfil no puede reportar incidencias.");
+  const e = validarReporte(perfil, d);
+  if (Object.keys(e).length) throw Object.assign(err("flotaia/validacion", "Revise los campos marcados."), { campos: e });
+  const descripcion = String(d.descripcion).trim(), c = reglas(descripcion), sistema = c.sistema;
+  const f = firma(perfil), ts = A.ts(), codigo = codigoOT(ids.ot);
+  const ops = [
+    { op: "set", path: ["incidencias", ids.inc], data: { unidadId: d.unidadId, sistema, descripcion, observaciones: String(d.observaciones || "").trim(), prioridad: c.prioridad, prioridadOrigen: "reglas", origen, autorUid: f.uid, autorCodigo: f.codigo, autorRol: f.rol, otId: ids.ot, creadoEn: ts, prototipo: true } },
+    { op: "set", path: ["ordenes_trabajo", ids.ot], data: nuevaOT({ codigo, unidadId: d.unidadId, sistema, prioridad: c.prioridad, accion: ACCION_POR_SISTEMA[sistema], resumen: descripcion, origen: "incidencia", incidenciaId: ids.inc, inspeccionId: null, motor: "reglas", detalleModelo: null }, f, ts) },
+    { op: "set", path: ["ordenes_trabajo", ids.ot, "seguimiento", ids.seg], data: entradaSeguimiento("creacion", `Reporte registrado desde ${origen === "mobile" ? "el celular" : "la tablet"}. Clasificaci\xF3n por reglas: ${sistema}, prioridad ${c.prioridad}.`, null, "pendiente", f, ts) }
+  ];
+  return enviar(
+    ops,
+    { incidenciaId: ids.inc, otId: ids.ot, codigo, sistema, prioridad: c.prioridad, accion: ACCION_POR_SISTEMA[sistema] },
+    async () => !!await A.getDoc(["incidencias", ids.inc]).catch(() => null)
+  );
+}
+function nuevaOT(o, f, ts) {
+  return {
+    codigo: o.codigo,
+    unidadId: o.unidadId,
+    sistema: o.sistema,
+    prioridad: o.prioridad,
+    accion: o.accion,
+    resumen: o.resumen,
+    origen: o.origen,
+    incidenciaId: o.incidenciaId,
+    inspeccionId: o.inspeccionId,
+    reportadoPorUid: f.uid,
+    reportadoPorCodigo: f.codigo,
+    motor: o.motor,
+    estado: "pendiente",
+    mecanicoUid: null,
+    mecanicoCodigo: null,
+    inicioEn: null,
+    resueltaEn: null,
+    trabajosRealizados: "",
+    horasReparacion: 0,
+    horasParada: 0,
+    detalleModelo: o.detalleModelo,
+    creadoEn: ts,
+    actualizadoEn: ts,
+    prototipo: true
+  };
+}
+function entradaSeguimiento(tipo, texto, estadoAnterior, estadoNuevo, f, ts) {
+  return { tipo, texto, estadoAnterior, estadoNuevo, autorUid: f.uid, autorCodigo: f.codigo, autorRol: f.rol, en: ts, prototipo: true };
+}
+var ESPERA_CONFIRMACION_MS = 12e3;
+async function enviar(ops, resultado, yaExiste) {
+  const p = A.commit(ops);
+  if (A.nombre === "firestore") {
+    const aviso = (e) => window.dispatchEvent(new CustomEvent("flotaia:fallo-cola", { detail: { error: e, resultado } }));
+    if (!navigator.onLine) {
+      p.catch(aviso);
+      return { ...resultado, enCola: true };
+    }
+    const espera = new Promise((r) => setTimeout(() => r("espera"), ESPERA_CONFIRMACION_MS));
+    try {
+      if (await Promise.race([p, espera]) === "espera") {
+        p.catch(aviso);
+        return { ...resultado, enCola: true };
+      }
+      return { ...resultado, enCola: false };
+    } catch (e) {
+      if (e && e.code === "permission-denied" && yaExiste && await yaExiste()) return { ...resultado, enCola: false, duplicadoEvitado: true };
+      throw e;
+    }
+  }
+  try {
+    await p;
+    return { ...resultado, enCola: false };
+  } catch (e) {
+    if (e && e.code === "permission-denied" && yaExiste && await yaExiste()) return { ...resultado, enCola: false, duplicadoEvitado: true };
+    throw e;
+  }
+}
+function vigilarOrdenes(perfil, cb, onError) {
+  const spec = perfil.rol === "chofer" ? { path: ["ordenes_trabajo"], where: [["reportadoPorUid", "==", perfil.uid]], orderBy: ["creadoEn", "desc"], limit: 100 } : { path: ["ordenes_trabajo"], orderBy: ["creadoEn", "desc"], limit: 300 };
+  return A.watch(spec, cb, onError);
+}
+var vigilarUnidades = (cb, onError) => A.watch({ path: ["unidades"], orderBy: ["codigo", "asc"] }, cb, onError);
+async function inicializarCatalogo(perfil) {
+  if (!puede(perfil.rol, "administrarUsuarios")) throw err("flotaia/permiso", "Solo el administrador inicializa el cat\xE1logo.");
+  const faltan = [];
+  for (const u of UNIDADES_CATALOGO) {
+    if (!await A.getDoc(["unidades", u.codigo])) faltan.push(u);
+  }
+  if (!faltan.length) return { creadas: 0 };
+  await A.commit(faltan.map((u) => ({ op: "set", path: ["unidades", u.codigo], data: { codigo: u.codigo, tipo: u.tipo, ruta: u.ruta, simulado: true, prototipo: true } })));
+  return { creadas: faltan.length };
+}
+
+// shared/auth.js
+var MODO_LOCAL = new URLSearchParams(location.search).get("modo") === "local";
+var A2 = null;
+async function iniciarDatos() {
+  if (A2) return A2;
+  if (MODO_LOCAL) {
+    const m = await Promise.resolve().then(() => (init_local_adapter(), local_adapter_exports));
+    A2 = await m.crearAdaptadorLocal();
+  } else {
+    const m = await Promise.resolve().then(() => (init_firestore_adapter(), firestore_adapter_exports));
+    A2 = await m.crearAdaptadorFirestore();
+  }
+  usarAdaptador(A2);
+  return A2;
+}
+var iniciarSesion = (email, pass) => A2.signIn(String(email).trim(), pass);
+var iniciarSesionGoogle = () => {
+  if (!A2?.signInGoogle) return Promise.reject(new Error("Google no est\xE1 disponible en el modo local de prueba."));
+  return A2.signInGoogle();
+};
+var cerrarSesion = () => A2.signOut();
+function observarSesion(cb) {
+  let dejarPerfil = null;
+  const dejarAuth = A2.onAuth((u) => {
+    if (dejarPerfil) {
+      dejarPerfil();
+      dejarPerfil = null;
+    }
+    if (!u) {
+      cb({ estado: "sin_sesion" });
+      return;
+    }
+    cb({ estado: "cargando", usuario: u });
+    dejarPerfil = A2.watchDoc(["usuarios", u.uid], (d, meta) => {
+      if (!d && meta && meta.fromCache) {
+        if (navigator.onLine) return;
+        return cb({ estado: "error", usuario: u, error: { code: "unavailable", message: "Sin conexi\xF3n: no se pudo leer su perfil. Con\xE9ctese una vez para que quede guardado en este equipo." } });
+      }
+      if (!d) return cb({ estado: "sin_perfil", usuario: u });
+      const perfil = { ...d, uid: u.uid, email: u.email };
+      if (!ROLES.includes(d.rol)) return cb({ estado: "sin_perfil", usuario: u, perfil });
+      if (d.activo !== true) return cb({ estado: "inactivo", usuario: u, perfil });
+      if (!d.codigo || !d.nombre) return cb({ estado: "incompleto", usuario: u, perfil });
+      cb({ estado: "ok", usuario: u, perfil });
+    }, (e) => cb({ estado: "error", usuario: u, error: e }));
+  });
+  return () => {
+    if (dejarPerfil) dejarPerfil();
+    dejarAuth();
+  };
+}
+var MENSAJES = {
+  "auth/popup-closed-by-user": "Se cerr\xF3 la ventana de Google. Puede volver a intentarlo.",
+  "auth/popup-blocked": "Permita la ventana emergente de Google para iniciar sesi\xF3n.",
+  "auth/cancelled-popup-request": "Ya hay un inicio de sesi\xF3n en curso.",
+  "auth/account-exists-with-different-credential": "Esta cuenta utiliza otro m\xE9todo de acceso. El administrador debe revisar la vinculaci\xF3n de la cuenta.",
+  "auth/invalid-credential": "Correo o contrase\xF1a incorrectos.",
+  "auth/wrong-password": "Correo o contrase\xF1a incorrectos.",
+  "auth/user-not-found": "Correo o contrase\xF1a incorrectos.",
+  "auth/invalid-email": "El correo no tiene un formato v\xE1lido.",
+  "auth/missing-password": "Ingrese la contrase\xF1a.",
+  "auth/too-many-requests": "Demasiados intentos. Espere unos minutos e int\xE9ntelo de nuevo.",
+  "auth/network-request-failed": "Sin conexi\xF3n. Revise la se\xF1al e int\xE9ntelo de nuevo.",
+  "auth/user-disabled": "Esta cuenta est\xE1 deshabilitada en Firebase.",
+  "auth/email-already-in-use": "Ese correo ya tiene una cuenta.",
+  "auth/weak-password": "La contrase\xF1a es demasiado d\xE9bil.",
+  "auth/operation-not-allowed": "Este m\xE9todo de acceso no est\xE1 habilitado en Firebase Authentication.",
+  "auth/unauthorized-domain": "Este dominio no est\xE1 autorizado en Firebase Authentication (agregue ktakahashi-bit.github.io).",
+  "permission-denied": "Firestore rechaz\xF3 la operaci\xF3n: su perfil no tiene permiso o los datos no cumplen las reglas de seguridad.",
+  "unavailable": "Sin conexi\xF3n con Firestore en este momento. Int\xE9ntelo de nuevo cuando tenga se\xF1al.",
+  "failed-precondition": "Falta un \xEDndice en Firestore. Despliegue firestore.indexes.json (ver README).",
+  "not-found": "El documento ya no existe.",
+  "aborted": "Otro usuario modific\xF3 la orden al mismo tiempo. Revise su estado e int\xE9ntelo de nuevo.",
+  "flotaia/config": "Falta completar shared/firebase-config.js con la configuraci\xF3n web del proyecto (ver README).",
+  "flotaia/sdk": "No se pudo cargar Firebase. Revise la conexi\xF3n a internet."
+};
+function mensajeError(e) {
+  if (!e) return "Error desconocido.";
+  if (e.code && String(e.code).startsWith("flotaia/") && !MENSAJES[e.code]) return e.message;
+  return MENSAJES[e.code] || e.message || "Error desconocido.";
+}
+
+// desktop/conexion.js
+var root = document.querySelector("#flotaia-compartida");
+var el = (tag, value) => {
+  const n = document.createElement(tag);
+  n.textContent = value;
+  return n;
+};
+var detener = () => {
+};
+var detenerUnidades = () => {
+};
+var perfilActual = null;
+var status = root.querySelector("[data-estado]");
+var listado = root.querySelector("[data-ordenes]");
+var form = root.querySelector("form");
+var reporte = root.querySelector("[data-reporte]");
+var envioIds = null;
+reporte.onsubmit = async (e) => {
+  e.preventDefault();
+  if (!perfilActual) return;
+  const boton = reporte.querySelector("button");
+  const aviso = reporte.querySelector("[data-envio]");
+  boton.disabled = true;
+  aviso.textContent = "Enviando\u2026";
+  try {
+    envioIds ||= nuevosIdsReporte();
+    const r = await crearReporte(perfilActual, { unidadId: reporte.elements.unidad.value, descripcion: reporte.elements.descripcion.value, observaciones: "" }, envioIds, "escritorio");
+    aviso.textContent = r.enCola ? "Guardado en este equipo, pendiente de confirmaci\xF3n." : "Reporte registrado: " + r.codigo;
+    envioIds = null;
+    reporte.elements.descripcion.value = "";
+  } catch (e2) {
+    aviso.textContent = mensajeError(e2);
+  } finally {
+    boton.disabled = false;
+  }
+};
+var salir = root.querySelector("[data-salir]");
+var google = root.querySelector("[data-google]");
+google.onclick = async () => {
+  google.disabled = true;
+  try {
+    await iniciarSesionGoogle();
+  } catch (e) {
+    error(e);
+  } finally {
+    google.disabled = false;
+  }
+};
+var error = (e) => {
+  status.textContent = mensajeError(e);
+};
+salir.onclick = () => cerrarSesion().catch(error);
+form.onsubmit = async (e) => {
+  e.preventDefault();
+  const b = form.querySelector("button");
+  b.disabled = true;
+  try {
+    await iniciarSesion(form.elements.email.value, form.elements.password.value);
+    form.reset();
+  } catch (e2) {
+    error(e2);
+  } finally {
+    b.disabled = false;
+  }
+};
+try {
+  await iniciarDatos();
+  observarSesion((s) => {
+    detener();
+    detenerUnidades();
+    detener = () => {
+    };
+    detenerUnidades = () => {
+    };
+    perfilActual = null;
+    reporte.hidden = true;
+    listado.replaceChildren();
+    form.hidden = s.estado !== "sin_sesion";
+    google.hidden = s.estado !== "sin_sesion";
+    salir.hidden = !s.usuario;
+    if (s.estado !== "ok") {
+      const mensajes = { sin_sesion: "Elija su cuenta de Google autorizada como supervisor o administrador.", cargando: "Comprobando perfil\u2026", incompleto: "Complete su nombre y c\xF3digo desde la interfaz tablet con ayuda del administrador.", sin_perfil: "La cuenta necesita un perfil v\xE1lido en usuarios/{uid}.", inactivo: "Cuenta desactivada." };
+      status.textContent = mensajes[s.estado] || mensajeError(s.error);
+      return;
+    }
+    if (!["supervisor", "administrador"].includes(s.perfil.rol)) {
+      status.textContent = "Este panel requiere un supervisor o administrador. Use m\xF3vil o tablet para su rol.";
+      return;
+    }
+    perfilActual = s.perfil;
+    reporte.hidden = false;
+    status.textContent = "Cargando \xF3rdenes compartidas\u2026";
+    detenerUnidades = vigilarUnidades((us) => {
+      reporte.elements.unidad.replaceChildren(...us.map((u) => {
+        const o = el("option", u.codigo);
+        o.value = u.id;
+        return o;
+      }));
+    }, error);
+    if (s.perfil.rol === "administrador") inicializarCatalogo(s.perfil).catch(error);
+    detener = vigilarOrdenes(s.perfil, (ordenes, meta) => {
+      listado.replaceChildren();
+      status.textContent = meta?.fromCache ? "Datos en cach\xE9: esperando confirmaci\xF3n del servidor." : "Datos recibidos de Firebase. Los cambios se muestran autom\xE1ticamente.";
+      if (!ordenes.length) {
+        listado.append(el("p", "Todav\xEDa no hay \xF3rdenes registradas."));
+        return;
+      }
+      const table = document.createElement("table");
+      table.style.width = "100%";
+      const encabezado = document.createElement("tr");
+      ["Orden", "Unidad", "Estado", "Prioridad", "Reporte"].forEach((t) => encabezado.append(el("th", t)));
+      const head = document.createElement("thead");
+      head.append(encabezado);
+      table.append(head);
+      const body = document.createElement("tbody");
+      ordenes.forEach((o) => {
+        const row = document.createElement("tr");
+        [o.codigo || o.id, o.unidadId, (ESTADOS[o.estado] || o.estado) + (o._pend ? " \xB7 pendiente de env\xEDo" : ""), o.prioridad, o.resumen].forEach((v) => row.append(el("td", String(v || "\u2014"))));
+        body.append(row);
+      });
+      table.append(body);
+      listado.append(table);
+    }, error);
+  });
+} catch (e) {
+  form.hidden = true;
+  google.hidden = true;
+  error(e);
+}
+
 </script>
 </body>
 </html>
