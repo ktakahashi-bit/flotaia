@@ -993,6 +993,16 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
  #registros-flotaia .rg-head,#registros-flotaia .rg-tabs{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}#registros-flotaia .rg-tabs{justify-content:start;margin:16px 0}#registros-flotaia h2{font-size:22px;margin:0}#registros-flotaia h3{font-size:18px;margin:18px 0 8px}
  #registros-flotaia form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;background:#fff;padding:16px;border:1px solid #d9e6e3;border-radius:10px}#registros-flotaia label{display:flex;flex-direction:column;gap:4px;font-weight:600}#registros-flotaia input,#registros-flotaia select,#registros-flotaia textarea{width:100%;padding:9px;border:1px solid #9abbb3;border-radius:7px;color:#173e39;background:#fff;font:inherit}#registros-flotaia input[type=checkbox]{width:auto}#registros-flotaia .rg-wide{grid-column:1/-1}#registros-flotaia .rg-check{display:block}#registros-flotaia .rg-checklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
  #registros-flotaia .rg-list{max-height:420px;overflow:auto}#registros-flotaia .rg-card{border-bottom:1px solid #cdded9;padding:12px 0}#registros-flotaia .rg-card p{margin:4px 0;white-space:pre-wrap;overflow-wrap:anywhere}#registros-flotaia .rg-status{padding:8px;background:#e8f1ed;white-space:pre-wrap}#registros-flotaia .rg-note{font-size:13px;color:#456660}#registros-flotaia .rg-error{color:#a32723}
+ #registros-flotaia dialog.rg-ck-modo{width:min(640px,100vw);max-height:100dvh;padding:14px 12px 18px;border-radius:14px}#registros-flotaia .rg-ck-modo .rg-tabs,#registros-flotaia .rg-ck-modo [data-historial],#registros-flotaia .rg-ck-modo [data-conexion],#registros-flotaia .rg-ck-modo [data-aviso]{display:none!important}#registros-flotaia .rg-ck-modo h2{font-size:20px}
+ #registros-flotaia form.rg-ck{grid-template-columns:1fr;gap:16px;padding:12px}#registros-flotaia .rg-ck fieldset{border:0;padding:0;margin:0;min-width:0}#registros-flotaia .rg-ck legend{font-weight:700;padding:0;margin-bottom:6px}#registros-flotaia .rg-ck-uni{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;background:#e8f1ed;padding:10px 12px;border-radius:8px}#registros-flotaia .rg-ck-uni b{font-size:17px}
+ #registros-flotaia .rg-ck-opts{display:grid;gap:8px}#registros-flotaia .rg-ck-2{grid-template-columns:1fr 1fr}#registros-flotaia .rg-ck-3{grid-template-columns:repeat(3,minmax(0,1fr))}#registros-flotaia .rg-ck-5{grid-template-columns:minmax(0,1.45fr) repeat(4,minmax(0,1fr))}#registros-flotaia .rg-ck-5{gap:6px}#registros-flotaia .rg-ck-5 span{font-size:14px;padding:6px 2px}#registros-flotaia .rg-ck .rg-ck-5 input:checked+span::before,#registros-flotaia .rg-ck .rg-ck-3 input:checked+span::before{content:none}#registros-flotaia .rg-ck-3 span{font-size:15px}
+ #registros-flotaia label.rg-opt{position:relative;display:grid;gap:0;min-width:0}#registros-flotaia .rg-opt input{position:absolute;opacity:0;width:1px;height:1px;margin:0;padding:0;border:0}#registros-flotaia .rg-opt span{display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;min-height:52px;padding:8px 6px;border:2px solid #9abbb3;border-radius:10px;background:#fff;color:#16433d;cursor:pointer;line-height:1.2;user-select:none}
+ #registros-flotaia .rg-opt input:checked+span{background:#12675e;border-color:#0b4842;color:#fff;box-shadow:0 0 0 3px #12675e40}#registros-flotaia .rg-opt.no input:checked+span{background:#a32723;border-color:#741b18;box-shadow:0 0 0 3px #a3272340}#registros-flotaia .rg-opt input:checked+span::before{content:"\\2713";font-weight:800}#registros-flotaia .rg-opt input:focus-visible+span{outline:3px solid #f0b400;outline-offset:2px}
+ #registros-flotaia .rg-ck fieldset.rg-ck-item{border:1px solid #d9e6e3;border-left:6px solid #c7d6d2;border-radius:10px;padding:10px;background:#fff;margin-bottom:8px}#registros-flotaia .rg-ck-item legend{display:flex;gap:8px;align-items:center;flex-wrap:wrap;float:left;width:100%;margin-bottom:8px}#registros-flotaia .rg-ck-item legend+*{clear:both}#registros-flotaia .rg-ck fieldset.rg-ck-item.ok{border-left-color:#12675e}#registros-flotaia .rg-ck fieldset.rg-ck-item.mal{border-left-color:#a32723;background:#fdf3f2}#registros-flotaia .rg-ck fieldset.rg-ck-item.rg-falta{border-color:#c98500;border-left-color:#c98500;background:#fff7e3}
+ #registros-flotaia .rg-ck-crit{font-size:12px;font-weight:700;color:#7a1f1c;background:#f7dedc;border-radius:4px;padding:1px 6px}#registros-flotaia .rg-ck-cnt{font-weight:700;color:#12675e}#registros-flotaia .rg-ck-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}#registros-flotaia .rg-ck-chips button{min-height:44px}
+ #registros-flotaia .rg-ck input[name=km],#registros-flotaia .rg-ck input[name=entrega],#registros-flotaia .rg-ck input[name=recibe]{font-size:20px;min-height:50px;letter-spacing:.03em}#registros-flotaia .rg-ck .rg-note{font-weight:400}#registros-flotaia .rg-ck .rg-obligatorio{color:#a32723}
+ #registros-flotaia .rg-ck label.rg-check{display:flex;flex-direction:row;gap:10px;align-items:flex-start;font-weight:600}#registros-flotaia .rg-ck input[type=checkbox]{width:26px;height:26px;flex:none;margin:0}#registros-flotaia .rg-ck-pie{position:sticky;bottom:-18px;display:grid;gap:8px;background:#fff;padding:10px 0 12px;border-top:1px solid #d9e6e3;margin:0 0 -12px}#registros-flotaia button.rg-ck-enviar{width:100%;min-height:58px;font-size:19px;font-weight:700}#registros-flotaia .rg-ck-msg{margin:0;padding:10px 12px;border-radius:8px;background:#e8f1ed;font-weight:600}#registros-flotaia .rg-ck-msg:empty{display:none}#registros-flotaia .rg-ck-msg.rg-error{background:#fdf1f0}
+ #registros-flotaia .rg-ck-ok{background:#fff;border:2px solid #12675e;border-radius:12px;padding:18px;display:grid;gap:8px}#registros-flotaia .rg-ck-ok.no_apta{border-color:#a32723}#registros-flotaia .rg-ck-ok b{font-size:21px}#registros-flotaia .rg-ck-ok p{margin:0}#registros-flotaia .rg-ck-ok button{min-height:52px;font-weight:700}
  </style><button type="button" class="rg-open">Registros compartidos</button><dialog aria-labelledby="rg-title"><div class="rg-head"><h2 id="rg-title">Registros compartidos</h2><button type="button" data-cerrar>Cerrar registros</button></div><p>${h(perfil2.codigo)} \xB7 ${h(perfil2.rol)} \xB7 Prototipo acad\xE9mico</p><div class="rg-status" role="status" data-conexion>Cargando registros\u2026</div><nav class="rg-tabs" aria-label="Tipos de registro">${COLECCIONES.map((c) => `<button type="button" data-tab="${c}">${NOMBRES[c]}</button>`).join("")}</nav><section data-form></section><p role="status" data-aviso></p><section data-historial></section></dialog>`;
   document.body.append(host);
   const $2 = (s) => host.querySelector(s), dialog = $2("dialog");
@@ -1003,6 +1013,110 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
   const prueba = '<label class="rg-check rg-wide"><input type="checkbox" name="casoPrueba" checked> Caso de prueba acad\xE9mico (desmarque \xFAnicamente para un registro sustentado)</label>';
   function permitido(c) {
     return c === "documentos_unidad" ? ["supervisor", "administrador"].includes(perfil2.rol) : c === "lecturas_ensayo" ? ["mecanico", "administrador"].includes(perfil2.rol) : true;
+  }
+  // ---- modo «Checklist antes de salir» (vista Chofer del móvil): misma acta, mismo guardado ----
+  let modo = "registros";
+  const CK_RES = { apta: "Apta: la unidad puede salir a ruta.", observada: "Apta con observaci\xF3n: se program\xF3 una orden para el taller.", condicionada: "Condicionada: reponga el EPP y registre una nueva revisi\xF3n antes de salir.", no_apta: "No apta: la unidad no sale a ruta." };
+  const CK_COMB = ["Reserva", "1/4", "1/2", "3/4", "Lleno"];
+  const ckOpt = (name, v, t, cls = "", marcado = false) => `<label class="rg-opt ${cls}"><input type="radio" name="${name}" value="${h(v)}"${marcado ? " checked" : ""}><span>${t}</span></label>`;
+  const ckRecientes = (rows) => rows.filter((r) => !r._pend).sort((a, b) => String(b.creadoEn || "").localeCompare(String(a.creadoEn || "")));
+  function aplicarModo() {
+    const ck = modo === "checklist";
+    dialog.classList.toggle("rg-ck-modo", ck);
+    $2("#rg-title").textContent = ck ? "Checklist antes de salir" : "Registros compartidos";
+    $2("[data-cerrar]").textContent = ck ? "Cerrar" : "Cerrar registros";
+  }
+  function pintarChecklist() {
+    const u = unidades[0], esChofer = perfil2.rol === "chofer";
+    const ult = ckRecientes(REG.actas_unidad.filter((r) => r.unidadId === u))[0];
+    const lect = ckRecientes([...REG.actas_unidad.filter((r) => r.unidadId === u).map((r) => ({ ...r, _f: "acta de entrega-recepci\xF3n" })), ...REG.combustible.filter((r) => r.unidadId === u).map((r) => ({ ...r, _f: "carga de combustible" }))].filter((r) => Number.isInteger(r.km)))[0];
+    const refKm = lect ? `Referencia, no confirmada para hoy: el \xFAltimo od\xF3metro registrado fue ${lect.km.toLocaleString("es-PE")} km (${lect._f}, ${h(String(lect.creadoEn || "").slice(0, 10).split("-").reverse().join("/"))}). Escriba la lectura que ve ahora en el tablero.` : "Escriba la lectura que ve ahora en el tablero.";
+    const sugerida = ult && /^CH-[0-9]{2}$/.test(ult.recibe || "") && ult.recibe !== (esChofer ? perfil2.codigo : "") ? ult.recibe : null;
+    $2("[data-aviso]").textContent = "";
+    $2("[data-form]").innerHTML = `<form class="rg-ck" novalidate>
+      <input type="hidden" name="unidadId" value="${h(u)}">${esChofer ? `<input type="hidden" name="recibe" value="${h(perfil2.codigo)}">` : ""}
+      <div class="rg-ck-uni"><span>Unidad</span><b>${h(u)}</b><span>Recibe</span><b>${esChofer ? h(perfil2.codigo) + " (usted)" : "Ind\xEDquelo abajo"}</b></div>
+      <fieldset><legend>Motivo</legend><div class="rg-ck-opts rg-ck-3">${ckOpt("motivo", "turno", "Inicio de turno", "", true)}${ckOpt("motivo", "cambio", "Cambio de unidad")}${ckOpt("motivo", "taller", "Retorno de taller")}</div></fieldset>
+      <label>C\xF3digo de quien entrega<input name="entrega" placeholder="BASE o CH-01" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next"><span class="rg-ck-chips"><button type="button" data-ck-entrega="BASE">Base o taller (sin chofer previo)</button>${sugerida ? `<button type="button" data-ck-entrega="${h(sugerida)}">${h(sugerida)} \xB7 recibi\xF3 en la \xFAltima acta</button>` : ""}</span></label>
+      ${esChofer ? "" : `<label>C\xF3digo del chofer que recibe<input name="recibe" placeholder="CH-01" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"><span class="rg-note">El acta queda firmada por ${h(perfil2.codigo)}; esta cuenta no asume un c\xF3digo de chofer.</span></label>`}
+      <fieldset><legend>Lista de verificaci\xF3n \xB7 <span class="rg-ck-cnt" data-ck-cnt>0 de ${PUNTOS.length}</span> revisados</legend>${PUNTOS.map(([k, t]) => `<fieldset class="rg-ck-item" data-ck-item="${k}"><legend>${h(t)}${CRITICOS.includes(k) ? '<span class="rg-ck-crit">Cr\xEDtico</span>' : ""}</legend><div class="rg-ck-opts rg-ck-2">${ckOpt("item_" + k, "si", "Conforme", "si")}${ckOpt("item_" + k, "no", "No conforme", "no")}</div></fieldset>`).join("")}</fieldset>
+      <label><span data-ck-obs-t>Observaciones (opcional)</span><textarea name="observaciones" maxlength="300" rows="3"></textarea></label>
+      <label>Od\xF3metro actual (km)<input name="km" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" enterkeyhint="done" placeholder="Lectura del tablero"><span class="rg-note">${refKm}</span></label>
+      <fieldset><legend>Nivel de combustible</legend><div class="rg-ck-opts rg-ck-5">${CK_COMB.map((v) => ckOpt("comb", v, v)).join("")}</div></fieldset>
+      ${prueba}
+      <label class="rg-check"><input type="checkbox" name="confirmado"> Confirmo la revisi\xF3n registrada. Mi cuenta identifica al autor; este registro no sustituye las firmas de ambas personas.</label>
+      <div class="rg-ck-pie"><p class="rg-ck-msg" role="alert" data-ck-msg></p><button type="submit" class="rg-ck-enviar">Enviar revisi\xF3n</button></div>
+    </form>`;
+    const form = $2("form.rg-ck");
+    form.onsubmit = enviar2;
+    form.addEventListener("change", () => ckActualizar(form));
+    form.addEventListener("input", (e) => {
+      if (e.target.name === "km") e.target.value = e.target.value.replace(/\D/g, "");
+      if (e.target.name === "entrega" || e.target.name === "recibe") e.target.value = e.target.value.toUpperCase().replace(/\s/g, "");
+    });
+    form.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-ck-entrega]");
+      if (b) {
+        form.elements.entrega.value = b.dataset.ckEntrega;
+        form.elements.entrega.removeAttribute("aria-invalid");
+      }
+    });
+    ckActualizar(form);
+  }
+  function ckActualizar(form) {
+    let n = 0, mal = false;
+    PUNTOS.forEach(([k]) => {
+      const v = form.elements["item_" + k].value, box = form.querySelector(`[data-ck-item="${k}"]`);
+      if (v) {
+        n++;
+        box.classList.remove("rg-falta");
+      }
+      if (v === "no") mal = true;
+      box.classList.toggle("ok", v === "si");
+      box.classList.toggle("mal", v === "no");
+    });
+    form.querySelector("[data-ck-cnt]").textContent = `${n} de ${PUNTOS.length}`;
+    const t = form.querySelector("[data-ck-obs-t]");
+    t.textContent = mal ? "Observaciones (obligatorio: describa lo no conforme)" : "Observaciones (opcional)";
+    t.classList.toggle("rg-obligatorio", mal);
+  }
+  // Comprobaci\xF3n previa en el tel\xE9fono con los mismos criterios de prepararRegistro(), que vuelve a validar al guardar.
+  function ckValidar(form) {
+    const el = form.elements, fallo = (msg, foco) => {
+      const m = form.querySelector("[data-ck-msg]");
+      m.className = "rg-ck-msg rg-error";
+      m.textContent = msg;
+      if (foco) {
+        if (foco.setAttribute) foco.setAttribute("aria-invalid", "true");
+        foco.focus();
+        (foco.closest?.("fieldset, label") || foco).scrollIntoView?.({ block: "center" });
+      }
+      return false;
+    };
+    form.querySelectorAll("[aria-invalid]").forEach((x) => x.removeAttribute("aria-invalid"));
+    const entrega = el.entrega.value.trim(), recibe = el.recibe.value.trim();
+    if (!/^(BASE|CH-[0-9]{2})$/.test(entrega)) return fallo("Indique qui\xE9n entrega: BASE o un c\xF3digo como CH-01.", el.entrega);
+    if (!/^CH-[0-9]{2}$/.test(recibe)) return fallo("Indique el c\xF3digo del chofer que recibe (por ejemplo, CH-01).", el.recibe.type === "hidden" ? null : el.recibe);
+    if (entrega === recibe) return fallo("Quien entrega y quien recibe deben ser distintos.", el.entrega);
+    const faltan = PUNTOS.filter(([k]) => !el["item_" + k].value);
+    faltan.forEach(([k]) => form.querySelector(`[data-ck-item="${k}"]`).classList.add("rg-falta"));
+    if (faltan.length) return fallo(`Faltan ${faltan.length} de ${PUNTOS.length} puntos: ${faltan.map(([, t]) => t).join(", ")}.`, form.querySelector(`[data-ck-item="${faltan[0][0]}"] input`));
+    if (PUNTOS.some(([k]) => el["item_" + k].value === "no") && el.observaciones.value.trim().length < 5) return fallo("Describa los puntos no conformes en Observaciones (m\xEDnimo 5 caracteres).", el.observaciones);
+    const km = el.km.value;
+    if (!/^[0-9]{1,7}$/.test(km) || Number(km) > 2e6) return fallo("Escriba el od\xF3metro actual en km: un n\xFAmero entero entre 0 y 2 000 000.", el.km);
+    if (!el.comb.value) return fallo("Seleccione el nivel de combustible.", form.querySelector("input[name=comb]"));
+    if (!el.confirmado.checked) return fallo("Marque la confirmaci\xF3n de la revisi\xF3n antes de enviar.", el.confirmado);
+    return true;
+  }
+  function ckConfirmacion(r, data) {
+    let resultado = null;
+    try {
+      resultado = prepararRegistro("actas_unidad", perfil2, data).resultado;
+    } catch (e) {
+    }
+    const fb = adaptador().nombre === "firestore";
+    $2("[data-form]").innerHTML = `<div class="rg-ck-ok ${h(resultado || "")}" role="status" tabindex="-1" data-ck-ok><b>✓ Revisi\xF3n enviada</b><p>${fb ? "Firebase confirm\xF3 el registro. Ya aparece en el escritorio y en la tablet." : "Modo local: el registro qued\xF3 confirmado en este navegador (no es Firebase)."}</p><p><strong>${h(data.unidadId)}</strong> \xB7 ${h(CK_RES[resultado] || "Acta registrada.")}</p>${r.codigo ? `<p>Se gener\xF3 la orden <strong>${h(r.codigo)}</strong> para el taller.</p>` : ""}<p class="rg-note">Acta ${h(r.id.slice(0, 8))} \xB7 autor ${h(perfil2.codigo)}</p><button type="button" data-cerrar>Cerrar</button></div>`;
+    $2("[data-ck-ok]").focus();
   }
   function pintarFormulario() {
     $2("[data-aviso]").textContent = "";
@@ -1032,12 +1146,15 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
   async function enviar2(e) {
     e.preventDefault();
     if (guardando) return;
+    const ck = e.target.classList.contains("rg-ck");
+    if (ck && !ckValidar(e.target)) return;
     const form = e.target, f = new FormData(form), tipo = tab, btn = form.querySelector("button[type=submit]");
     guardando = true;
     btn.disabled = true;
-    const aviso = $2("[data-aviso]");
-    aviso.className = "";
+    const aviso = ck ? form.querySelector("[data-ck-msg]") : $2("[data-aviso]");
+    aviso.className = ck ? "rg-ck-msg" : "";
     aviso.textContent = "Enviando: esperando confirmaci\xF3n del servidor\u2026";
+    if (ck) btn.textContent = "Enviando\u2026";
     try {
       const data = Object.fromEntries(f);
       data.casoPrueba = f.get("casoPrueba") === "on";
@@ -1057,13 +1174,15 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
       const r = await guardarRegistro(tipo, perfil2, data, ids[tipo]);
       delete ids[tipo];
       form.reset();
-      aviso.textContent = "Registro confirmado y compartido." + (r.codigo ? " Orden generada: " + r.codigo : "");
+      if (ck) ckConfirmacion(r, data);
+      else aviso.textContent = "Registro confirmado y compartido." + (r.codigo ? " Orden generada: " + r.codigo : "");
     } catch (err2) {
-      aviso.className = "rg-error";
+      aviso.className = ck ? "rg-ck-msg rg-error" : "rg-error";
       aviso.textContent = err2.code === "permission-denied" ? "Las reglas de estos m\xF3dulos todav\xEDa no est\xE1n activadas o su perfil no tiene permiso." : err2.message;
     } finally {
       guardando = false;
       btn.disabled = false;
+      if (ck) btn.textContent = "Enviar revisi\xF3n";
     }
   }
   function pintarConexion() {
@@ -1091,6 +1210,10 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
     if (!b) return;
     if (b.matches(".rg-open")) {
       focusPrev = document.activeElement;
+      if (modo === "checklist") {
+        modo = "registros";
+        aplicarModo();
+      }
       dialog.showModal();
       pintarFormulario();
       pintarHistorial();
@@ -1099,7 +1222,7 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
       dialog.close();
       focusPrev?.focus();
     }
-    if (b.dataset.tab && !guardando) {
+    if (b.dataset.tab && !guardando && modo !== "checklist") {
       tab = b.dataset.tab;
       pintarFormulario();
       pintarHistorial();
@@ -1136,6 +1259,9 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
   });
   const anterior = window.FlotaIARegistros;
   window.FlotaIARegistros = { abrir(c, datos = {}) {
+    if (guardando && modo === "checklist") return;
+    modo = "registros";
+    aplicarModo();
     tab = c || tab;
     if (!dialog.open) dialog.showModal();
     pintarFormulario();
@@ -1144,6 +1270,20 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
       if (el) el.value = v;
     }
     pintarHistorial();
+  }, abrirChecklist() {
+    if (unidades.length !== 1 || !unidades[0]) return false;
+    const borrador = modo === "checklist" && $2("form.rg-ck");
+    if (!dialog.open) {
+      focusPrev = document.activeElement;
+      dialog.showModal();
+    }
+    if (borrador) return true;
+    modo = "checklist";
+    tab = "actas_unidad";
+    aplicarModo();
+    pintarChecklist();
+    dialog.scrollTop = 0;
+    return true;
   }, guardar: (tipo, d, id) => guardarRegistro(tipo, perfil2, { ...d, origen }, id) };
   return () => {
     stop();
@@ -2115,7 +2255,7 @@ function abrirChecklist() {
     toast("Los registros compartidos todav\xEDa se est\xE1n cargando. Int\xE9ntelo en unos segundos.", "warn");
     return;
   }
-  window.FlotaIARegistros.abrir("actas_unidad", { unidadId: u });
+  if (!window.FlotaIARegistros.abrirChecklist?.()) window.FlotaIARegistros.abrir("actas_unidad", { unidadId: u });
 }
 var unidadDe = (c) => D.unidades.find((u) => u.codigo === c);
 var semaforo = (u, e) => {
