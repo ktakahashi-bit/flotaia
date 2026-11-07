@@ -981,7 +981,7 @@ var h = (x) => String(x ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": 
 var NOMBRES = { documentos_unidad: "Documentos", actas_unidad: "Actas", combustible: "Combustible", lecturas_ensayo: "Sensores de ensayo" };
 var TIPOS = { soat: "SOAT", rt: "Revisi\xF3n t\xE9cnica", ext: "Extintor" };
 function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
-} } = {}) {
+}, unidadesVisibles = null } = {}) {
   document.querySelector("#registros-flotaia")?.remove();
   const host = document.createElement("div");
   host.id = "registros-flotaia";
@@ -998,7 +998,7 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
   const $2 = (s) => host.querySelector(s), dialog = $2("dialog");
   let tab = "documentos_unidad", guardando = false, ids = {}, focusPrev = null;
   const errores = {}, metas = {}, cargados = /* @__PURE__ */ new Set(), urls = [];
-  const unidades = perfil2.rol === "chofer" ? [perfil2.unidadAsignada] : [...Array.from({ length: 7 }, (_, i) => "C-0" + (i + 1)), "B-01"];
+  const unidades = perfil2.rol === "chofer" ? [perfil2.unidadAsignada] : Array.isArray(unidadesVisibles) && unidadesVisibles.length ? unidadesVisibles : [...Array.from({ length: 7 }, (_, i) => "C-0" + (i + 1)), "B-01"];
   const unit = `<label>Unidad<select name="unidadId">${unidades.map((u) => `<option>${h(u)}</option>`).join("")}</select></label>`;
   const prueba = '<label class="rg-check rg-wide"><input type="checkbox" name="casoPrueba" checked> Caso de prueba acad\xE9mico (desmarque \xFAnicamente para un registro sustentado)</label>';
   function permitido(c) {
@@ -1986,6 +1986,10 @@ function montarApp() {
     if (b) ir(b.dataset.tab);
   });
   $("#vista", root).addEventListener("click", (e) => {
+    if (e.target.closest("[data-checklist]")) {
+      abrirChecklist();
+      return;
+    }
     const a = e.target.closest("[data-ir]");
     if (a) {
       ir(a.dataset.ir);
@@ -2022,7 +2026,7 @@ function montarApp() {
       refrescar();
     }, fallo));
   }
-  dejarRegistros = montarRegistros(perfil, { origen: "mobile", onData: () => refrescar() });
+  dejarRegistros = montarRegistros(perfil, { origen: "mobile", unidadesVisibles: cuentaDemo() && esVistaChofer() ? [unidadVista()] : null, onData: () => refrescar() });
   const ini = location.hash.slice(1);
   mostrar(tabs().some((t) => t[0] === ini) ? ini : tabs()[0][0]);
 }
@@ -2104,6 +2108,15 @@ function abrirDetalle(id) {
   history.pushState({ flotaiaHoja: 1 }, "");
   detalle = h2;
 }
+function abrirChecklist() {
+  const u = unidadVista();
+  if (!esVistaChofer() || !u) return;
+  if (!window.FlotaIARegistros) {
+    toast("Los registros compartidos todav\xEDa se est\xE1n cargando. Int\xE9ntelo en unos segundos.", "warn");
+    return;
+  }
+  window.FlotaIARegistros.abrir("actas_unidad", { unidadId: u });
+}
 var unidadDe = (c) => D.unidades.find((u) => u.codigo === c);
 var semaforo = (u, e) => {
   const r = unidadDe(u);
@@ -2145,6 +2158,7 @@ var V = {
       const u = unidadVista();
       el.innerHTML = `<div class="vhead"><div class="eyebrow">Mi unidad</div><h1 class="num">${esc(u || "Sin unidad asignada")}</h1><p class="lead">El estado se calcula con las \xF3rdenes abiertas y las inspecciones registradas de la unidad.</p></div>
         <div data-error></div><div data-sem></div>
+        ${esVistaChofer() && u ? `<section class="card" data-checklist-card><div class="card-h"><div><h2>Checklist antes de salir</h2><p>Acta de entrega-recepci\xF3n de ${esc(u)}: los 13 puntos de la lista de verificaci\xF3n. Se guarda como acta compartida y la ven el escritorio y la tablet.</p></div></div><button type="button" class="btn block accion-grande" data-checklist>${ic("check")}Checklist antes de salir</button>${cuentaDemo() ? `<p class="small muted" style="margin-top:8px">Cuenta de demostraci\xF3n: el formulario se limita a ${esc(u)}, pero el acta queda firmada por ${esc(perfil.codigo)}. Escriba el c\xF3digo del chofer que recibe; la cuenta no asume un c\xF3digo de chofer.</p>` : ""}</section>` : ""}
         <section class="card"><div class="card-h"><h2>\xD3rdenes abiertas de la unidad</h2></div><div class="list" data-ab></div></section>
         <section class="card"><div class="card-h"><div><h2>\xDAltimas inspecciones</h2><p>Registradas por el taller o la supervisi\xF3n</p></div></div><div class="list" data-ins></div></section>
         <section class="card"><dl class="dl" data-ficha></dl><p class="foot">Unidad y ruta del caso simulado de El Tambo.</p></section>`;
