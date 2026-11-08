@@ -783,7 +783,7 @@ async function crearAdaptadorFirestore() {
   await A4.setPersistence(auth, A4.browserLocalPersistence);
   let db;
   try {
-    db = F2.initializeFirestore(app, { localCache: F2.persistentLocalCache({ tabManager: F2.persistentMultipleTabManager() }) });
+    db = F2.initializeFirestore(app, { localCache: F2.persistentLocalCache({ tabManager: F2.persistentMultipleTabManager() }), experimentalForceLongPolling: true });
   } catch (e) {
     db = F2.getFirestore(app);
   }
@@ -810,6 +810,12 @@ async function crearAdaptadorFirestore() {
     nombre: "firestore",
     ts: () => TS2,
     onAuth: (cb) => A4.onAuthStateChanged(auth, (u) => cb(u ? { uid: u.uid, email: u.email } : null)),
+    async prepararSesion(forzar = false) {
+      await auth.authStateReady();
+      const u = auth.currentUser;
+      if (!u) throw Object.assign(new Error("La sesión terminó. Inicie sesión nuevamente."), { code: "auth/user-token-expired" });
+      await u.getIdToken(forzar);
+    },
     signIn: (email, pass) => A4.signInWithEmailAndPassword(auth, email, pass).then((c) => ({ uid: c.user.uid, email: c.user.email })),
     signInGoogle: async () => {
       const provider = new A4.GoogleAuthProvider();
@@ -833,12 +839,28 @@ async function crearAdaptadorFirestore() {
       if (spec.orderBy) cons.push(F2.orderBy(spec.orderBy[0], spec.orderBy[1] || "asc"));
       if (spec.limit) cons.push(F2.limit(spec.limit));
       const q = F2.query(col(spec.path), ...cons);
-      return F2.onSnapshot(
-        q,
-        { includeMetadataChanges: true },
-        (snap) => onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites }),
-        (err2) => onError && onError(err2)
-      );
+      let activo = true, confirmado = false;
+      // Una comprobación directa si la suscripción solo ha entregado caché.
+      // No se confirma caché ni se repite la consulta en un bucle.
+      const demora = setTimeout(async () => {
+        if (!activo || confirmado || !navigator.onLine) return;
+        try {
+          const snap = await Promise.race([
+            F2.getDocsFromServer(q),
+            new Promise((_, reject) => setTimeout(() => reject(Object.assign(new Error("El servidor no confirmó los datos. Revise la conexión e intente nuevamente."), { code: "unavailable" })), 12000))
+          ]);
+          if (activo && !confirmado) {
+            confirmado = true;
+            onData(snap.docs.map(fromSnap), { fromCache: false, pendientes: snap.metadata.hasPendingWrites });
+          }
+        } catch (e) { if (activo && !confirmado && onError) onError(e); }
+      }, 10000);
+      const dejar = F2.onSnapshot(q, { includeMetadataChanges: true }, (snap) => {
+        if (!activo) return;
+        if (!snap.metadata.fromCache) { confirmado = true; clearTimeout(demora); }
+        onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites });
+      }, (e) => { if (activo) { clearTimeout(demora); if(onError) onError(e); } });
+      return () => { activo = false; clearTimeout(demora); dejar(); };
     },
     watchDoc(path, onData, onError) {
       return F2.onSnapshot(
@@ -1976,12 +1998,15 @@ var iniciarSesionGoogle = () => {
 var cerrarSesion = () => A2.signOut();
 function observarSesion(cb) {
   let dejarPerfil = null, usuarioActual = null, version = 0, terminado = false;
-  function consultar(u) {
+  async function consultar(u, recuperada = false) {
     const actual = ++version;
     if (dejarPerfil) { dejarPerfil(); dejarPerfil = null; }
     usuarioActual = u;
     if (!u) { cb({ estado: "sin_sesion" }); return; }
     cb({ estado: "cargando", usuario: u });
+    try { if (A2.prepararSesion) await A2.prepararSesion(false); }
+    catch (e) { if (!terminado && actual === version) cb({ estado: "error", usuario: u, error: e }); return; }
+    if (terminado || actual !== version) return;
     dejarPerfil = A2.watchDoc(["usuarios", u.uid], (d, meta) => {
       if (terminado || actual !== version) return;
       if (!d && meta && meta.fromCache) {
@@ -1994,8 +2019,15 @@ function observarSesion(cb) {
       if (d.activo !== true) return cb({ estado: "inactivo", usuario: u, perfil: perfil2 });
       if (!d.codigo || !d.nombre) return cb({ estado: "incompleto", usuario: u, perfil: perfil2 });
       cb({ estado: "ok", usuario: u, perfil: perfil2 });
-    }, (e) => {
+    }, async (e) => {
       if (terminado || actual !== version) return;
+      if (!recuperada && A2.prepararSesion && navigator.onLine && ["permission-denied", "unauthenticated"].includes(e.code)) {
+        try {
+          await A2.prepararSesion(true);
+          if (!terminado && actual === version) consultar(u, true);
+          return;
+        } catch (renovacion) { e = renovacion; }
+      }
       console.warn("FlotaIA: no se pudo consultar el perfil", e.code || "error");
       cb({ estado: "error", usuario: u, error: e });
     });
