@@ -2598,7 +2598,7 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
       run: () => { cerrarDetalle(); ir('mantenimiento'); $('fUnidad').value = 'C-03'; $('fQuien').value = 'Chofer'; $('fTexto').value = 'La prensa pierde fuerza y hay fuga de aceite en la bomba hidráulica'; preview(); spot('#cForm'); const c = reglas($('fTexto').value); return `Reporte del chofer de C-03 registrado en el formulario. Clasificación por reglas: sistema ${c.sistema}, prioridad ${c.prioridad}.`; } },
     { t: 'Generación de la orden de trabajo', tm: '0:25', d: 'Se crea la orden con estado Pendiente.',
       g: 'Muestre la <b>nueva orden</b> en la tabla, con su prioridad, acción recomendada y estado Pendiente.',
-      run: () => { $('flU').value = ''; $('flP').value = ''; $('flE').value = ''; const o = enviarReporte(); demo.ot1 = o ? o.id : null; setTimeout(() => spot(`tr[data-ot="${demo.ot1}"]`), 60); const K = calc(); return `${o.codigo} generada (sistema ${o.sistema}, prioridad ${o.prioridad}, estado Pendiente). C-03 sigue en ruta con advertencia; MTBF ${fmt(K.mtbf, 0)} h.`; } },
+      run: async () => { $('flU').value = ''; $('flP').value = ''; $('flE').value = ''; const o = await enviarReporte(); if (!o) throw new Error('No se pudo crear la orden de demostración.'); demo.ot1 = o ? o.id : null; setTimeout(() => spot(`tr[data-ot="${demo.ot1}"]`), 60); const K = calc(); return `${o.codigo} generada (sistema ${o.sistema}, prioridad ${o.prioridad}, estado Pendiente). C-03 sigue en ruta con advertencia; MTBF ${fmt(K.mtbf, 0)} h.`; } },
     { t: 'Simulación de deterioro de la condición', tm: '0:35', d: 'El modelo de IA clasifica un ciclo con fuga débil.',
       g: 'Explique que el <b>modelo de IA</b> analiza un ciclo real del banco de pruebas asignado a C-03 y calcula la probabilidad de cada condición.',
       run: () => { ir('analisis'); $('aUnidad').value = 'C-03'; const r = leerCiclo('C-03', null, DEMO_DEBIL); renderAll(); avisoLectura('C-03', r); spot('#cRes'); return r.msg; } },
@@ -2652,10 +2652,21 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
   function demoIniciar() { Object.assign(demo, { paso: 0, hecho: -1, msg: '', ot1: null, ot2: null }); $('dock').hidden = false; $('dock').classList.remove('min'); $('dkMin').innerHTML = ico('min'); pintarDemo(); }
   function demoSalir() { $('dock').hidden = true; Object.assign(demo, { paso: 0, hecho: -1, msg: '' }); pintarDemo(); }
   $('btnDemo').addEventListener('click', demoIniciar);
-  $('btnPaso').addEventListener('click', () => {
-    if (demo.paso >= PASOS.length) Object.assign(demo, { paso: 0, hecho: -1, ot1: null, ot2: null });
-    const i = demo.paso, msg = PASOS[i].run();
-    Object.assign(demo, { paso: i + 1, hecho: i, msg }); pintarDemo();
+  let pasoEnCurso = false;
+  $('btnPaso').addEventListener('click', async () => {
+    if (pasoEnCurso) return;
+    pasoEnCurso = true;
+    $('btnPaso').disabled = true;
+    try {
+      if (demo.paso >= PASOS.length) Object.assign(demo, { paso: 0, hecho: -1, ot1: null, ot2: null });
+      const i = demo.paso, msg = await PASOS[i].run();
+      Object.assign(demo, { paso: i + 1, hecho: i, msg }); pintarDemo();
+    } catch (e) {
+      toast('No se completó el paso: ' + e.message, 'crit');
+    } finally {
+      pasoEnCurso = false;
+      $('btnPaso').disabled = false;
+    }
   });
   $('dkReset').addEventListener('click', async () => { if (await confirmar('Reiniciar la demostración', 'La demostración volverá al paso 1 y la simulación se restablecerá al ejecutarlo.', 'Reiniciar')) { demoIniciar(); } });
   $('dkClose').addEventListener('click', demoSalir);
