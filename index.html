@@ -1749,6 +1749,7 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   if (!Array.isArray(S.actas)) { S.actas = []; S.na = 0; }
   if (!S.docs || typeof S.docs !== 'object') { S.docs = docsIniciales(); S.docLog = []; }
   if (!Array.isArray(S.docLog)) S.docLog = [];
+  let registrosRecibidos = new Set(), inspeccionesRecibidas = false;
   let modoCompartido = true, datosConfirmados = false, perfilCompartido = null, ordenesCompartidas = [], errorCompartido = ''; 
   let estadoDemo = structuredClone(S);
   let registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]}, bloqueosCompartidos=()=>[], inspeccionesCompartidas=[];
@@ -2885,6 +2886,18 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
       if(!perfilCompartido){$('fCards').innerHTML='<div class="card">Inicie sesión en Cuenta y reportes compartidos para cargar la flota.</div>';}
       if(!perfilCompartido){['kOper','kAdv','kCrit','kRutas','kDisp','kMttr','kOt','kAlert'].forEach(i=>$(i).textContent='—');}
     }
+
+    if (modoCompartido && (!perfilCompartido || !registrosRecibidos.has('actas_unidad') || !registrosRecibidos.has('documentos_unidad') || !inspeccionesRecibidas || !datosConfirmados)) {
+      const aviso = errorCompartido ? 'Datos no disponibles: revise el acceso y pulse Reintentar.' : !navigator.onLine ? 'Sin conexión: esperando datos confirmados.' : 'Cargando datos: esperando confirmación de las fuentes operativas.';
+      ['kOper','kAdv','kCrit','kRutas','kDisp','kMttr','kOt','kAlert','rbCount','svOper','svCrit','svOT','svRoutes','svOper2','svCrit2','svRoutes2','svOut2','svOT2','svAlert2','svDonutVal','twinBase','twinProjected','twinIPIM','twinOT','twinBaseOption','twinRemoveOption','twinRecoverOption'].forEach(id => { if ($(id)) $(id).textContent = '—'; });
+      ['rDonut','rDispChart','rInc','rTiles','fCards','rbList','svBars','svBody','svPriority','svInsight','twinFleet','twinRoutes','twinNarrative'].forEach(id => { if ($(id)) $(id).textContent = aviso; });
+      ['svGaugeDisp','svGaugeRoutes','svGaugeOT'].forEach(id => { if ($(id)) { const v=$(id).querySelector('.value'); if(v)v.textContent='—'; $(id).style.setProperty('--pct',0); } });
+      if ($('svDonut')) $('svDonut').style.background='var(--line)';
+      if ($('kDispBar')) $('kDispBar').style.width = '0%';
+      ['kOtM','kAlertM'].forEach(id => { if ($(id)) $(id).textContent = aviso; });
+      ['heroRoutes','svKpis','svFleet','svDispChart'].forEach(id => { if ($(id)) $(id).textContent = aviso; });
+      if ($('rBanner')) $('rBanner').hidden = true;
+    }
   }
   const carga=document.createElement('button');carga.id='abrirCarga';carga.className='btn';carga.type='button';carga.textContent='Registrar carga de combustible compartida';carga.onclick=()=>window.FlotaIARegistros?.abrir('combustible');$('hcForm').before(carga);
   const estiloReg=document.createElement('style');estiloReg.textContent='#hcForm[hidden],#abrirCarga[hidden]{display:none!important}';document.head.append(estiloReg);
@@ -2895,9 +2908,9 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
   window.FlotaIAIntegracion={
     problema(texto){errorCompartido=String(texto||'');actualizarFuente();},
     recibir(ordenes,perfil,meta){errorCompartido='';ordenesCompartidas=ordenes;perfilCompartido=perfil;datosConfirmados=!meta?.fromCache;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();},
-    recibirInspecciones(items){inspeccionesCompartidas=items||[];if(modoCompartido){S.insp=inspeccionesCompartidas;renderAll();}},
-    recibirRegistros(reg,bloqueos){registrosCompartidos=structuredClone(reg);bloqueosCompartidos=bloqueos;if(modoCompartido){aplicarOrdenes();renderAll();}},
-    desconectar(){errorCompartido='';registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]};bloqueosCompartidos=()=>[];ordenesCompartidas=[];perfilCompartido=null;datosConfirmados=false;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();}
+    recibirInspecciones(items){inspeccionesRecibidas=true;inspeccionesCompartidas=items||[];if(modoCompartido){S.insp=inspeccionesCompartidas;renderAll();}},
+    recibirRegistros(reg,bloqueos,coleccion){if(coleccion)registrosRecibidos.add(coleccion);registrosCompartidos=structuredClone(reg);bloqueosCompartidos=bloqueos;if(modoCompartido){aplicarOrdenes();renderAll();}},
+    desconectar(){registrosRecibidos.clear();inspeccionesRecibidas=false;errorCompartido='';registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]};bloqueosCompartidos=()=>[];ordenesCompartidas=[];perfilCompartido=null;datosConfirmados=false;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();}
   };
   const idsRegistro={};
   async function registrarCompartido(tipo,d,msg){
@@ -4389,21 +4402,18 @@ var iniciarSesionGoogle = () => {
 };
 var cerrarSesion = () => A2.signOut();
 function observarSesion(cb) {
-  let dejarPerfil = null;
-  const dejarAuth = A2.onAuth((u) => {
-    if (dejarPerfil) {
-      dejarPerfil();
-      dejarPerfil = null;
-    }
-    if (!u) {
-      cb({ estado: "sin_sesion" });
-      return;
-    }
+  let dejarPerfil = null, usuarioActual = null, version = 0, terminado = false;
+  function consultar(u) {
+    const actual = ++version;
+    if (dejarPerfil) { dejarPerfil(); dejarPerfil = null; }
+    usuarioActual = u;
+    if (!u) { cb({ estado: "sin_sesion" }); return; }
     cb({ estado: "cargando", usuario: u });
     dejarPerfil = A2.watchDoc(["usuarios", u.uid], (d, meta) => {
+      if (terminado || actual !== version) return;
       if (!d && meta && meta.fromCache) {
         if (navigator.onLine) return;
-        return cb({ estado: "error", usuario: u, error: { code: "unavailable", message: "Sin conexi\xF3n: no se pudo leer su perfil. Con\xE9ctese una vez para que quede guardado en este equipo." } });
+        return cb({ estado: "error", usuario: u, error: { code: "unavailable", message: "Sin conexión: no se pudo leer su perfil. Conéctese y pulse Reintentar." } });
       }
       if (!d) return cb({ estado: "sin_perfil", usuario: u });
       const perfil2 = { ...d, uid: u.uid, email: u.email };
@@ -4411,9 +4421,18 @@ function observarSesion(cb) {
       if (d.activo !== true) return cb({ estado: "inactivo", usuario: u, perfil: perfil2 });
       if (!d.codigo || !d.nombre) return cb({ estado: "incompleto", usuario: u, perfil: perfil2 });
       cb({ estado: "ok", usuario: u, perfil: perfil2 });
-    }, (e) => cb({ estado: "error", usuario: u, error: e }));
-  });
+    }, (e) => {
+      if (terminado || actual !== version) return;
+      console.warn("FlotaIA: no se pudo consultar el perfil", e.code || "error");
+      cb({ estado: "error", usuario: u, error: e });
+    });
+  }
+  const reintentar = () => { if (!terminado && usuarioActual) consultar(usuarioActual); };
+  window.addEventListener("flotaia:reintentar-perfil", reintentar);
+  const dejarAuth = A2.onAuth(consultar);
   return () => {
+    terminado = true; ++version;
+    window.removeEventListener("flotaia:reintentar-perfil", reintentar);
     if (dejarPerfil) dejarPerfil();
     dejarAuth();
   };
@@ -4557,6 +4576,15 @@ try {
     form.hidden = s.estado !== "sin_sesion";
     google.hidden = s.estado !== "sin_sesion";
     salir.hidden = !s.usuario;
+    let reintentoPerfil = root.querySelector('[data-reintentar-perfil]');
+    if (!reintentoPerfil) {
+      reintentoPerfil = document.createElement('button');
+      reintentoPerfil.type = 'button'; reintentoPerfil.className = 'btn sec';
+      reintentoPerfil.dataset.reintentarPerfil = ''; reintentoPerfil.textContent = 'Reintentar';
+      reintentoPerfil.onclick = () => window.dispatchEvent(new Event('flotaia:reintentar-perfil'));
+      status.after(reintentoPerfil);
+    }
+    reintentoPerfil.hidden = s.estado !== 'error';
     if (s.estado !== "ok") {
       const mensajes = { sin_sesion: "Inicie sesi\xF3n con una cuenta autorizada de mec\xE1nico, supervisor o administrador.", cargando: "Comprobando perfil\u2026", incompleto: "Complete su nombre y c\xF3digo desde la interfaz tablet con ayuda del administrador.", sin_perfil: "La cuenta necesita un perfil v\xE1lido en usuarios/{uid}.", inactivo: "Cuenta desactivada." };
       status.textContent = mensajes[s.estado] || mensajeError(s.error);
@@ -4570,7 +4598,7 @@ try {
     }
     perfilActual = s.perfil;
     reporte.hidden = false;
-    dejarRegistros = montarRegistros(s.perfil, { onData: (reg) => window.FlotaIAIntegracion.recibirRegistros(reg, (u, os) => bloqueosUnidad(u, os)) });
+    dejarRegistros = montarRegistros(s.perfil, { onData: (reg, coleccion) => window.FlotaIAIntegracion.recibirRegistros(reg, (u, os) => bloqueosUnidad(u, os), coleccion) });
     status.textContent = "Cargando \xF3rdenes compartidas\u2026";
     detenerUnidades = vigilarUnidades((us) => {
       reporte.elements.unidad.replaceChildren(...us.map((u) => {
