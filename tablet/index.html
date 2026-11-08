@@ -1975,21 +1975,18 @@ var iniciarSesionGoogle = () => {
 };
 var cerrarSesion = () => A2.signOut();
 function observarSesion(cb) {
-  let dejarPerfil = null;
-  const dejarAuth = A2.onAuth((u) => {
-    if (dejarPerfil) {
-      dejarPerfil();
-      dejarPerfil = null;
-    }
-    if (!u) {
-      cb({ estado: "sin_sesion" });
-      return;
-    }
+  let dejarPerfil = null, usuarioActual = null, version = 0, terminado = false;
+  function consultar(u) {
+    const actual = ++version;
+    if (dejarPerfil) { dejarPerfil(); dejarPerfil = null; }
+    usuarioActual = u;
+    if (!u) { cb({ estado: "sin_sesion" }); return; }
     cb({ estado: "cargando", usuario: u });
     dejarPerfil = A2.watchDoc(["usuarios", u.uid], (d, meta) => {
+      if (terminado || actual !== version) return;
       if (!d && meta && meta.fromCache) {
         if (navigator.onLine) return;
-        return cb({ estado: "error", usuario: u, error: { code: "unavailable", message: "Sin conexi\xF3n: no se pudo leer su perfil. Con\xE9ctese una vez para que quede guardado en este equipo." } });
+        return cb({ estado: "error", usuario: u, error: { code: "unavailable", message: "Sin conexión: no se pudo leer su perfil. Conéctese y pulse Reintentar." } });
       }
       if (!d) return cb({ estado: "sin_perfil", usuario: u });
       const perfil2 = { ...d, uid: u.uid, email: u.email };
@@ -1997,9 +1994,18 @@ function observarSesion(cb) {
       if (d.activo !== true) return cb({ estado: "inactivo", usuario: u, perfil: perfil2 });
       if (!d.codigo || !d.nombre) return cb({ estado: "incompleto", usuario: u, perfil: perfil2 });
       cb({ estado: "ok", usuario: u, perfil: perfil2 });
-    }, (e) => cb({ estado: "error", usuario: u, error: e }));
-  });
+    }, (e) => {
+      if (terminado || actual !== version) return;
+      console.warn("FlotaIA: no se pudo consultar el perfil", e.code || "error");
+      cb({ estado: "error", usuario: u, error: e });
+    });
+  }
+  const reintentar = () => { if (!terminado && usuarioActual) consultar(usuarioActual); };
+  window.addEventListener("flotaia:reintentar-perfil", reintentar);
+  const dejarAuth = A2.onAuth(consultar);
   return () => {
+    terminado = true; ++version;
+    window.removeEventListener("flotaia:reintentar-perfil", reintentar);
     if (dejarPerfil) dejarPerfil();
     dejarAuth();
   };
@@ -2338,7 +2344,8 @@ async function arrancarInterfaz({ interfaz, root: root2, onPerfil, onSalir }) {
         enlazarSalir2();
         return;
       case "error":
-        pantallaEstado(root2, { titulo: "No se pudo leer su perfil", texto: esc(mensajeError(s.error)), acciones: botonSalir });
+        pantallaEstado(root2, { titulo: "No se pudo leer su perfil", texto: esc(mensajeError(s.error)), acciones: '<button type="button" class="btn" data-reintentar-perfil>Reintentar</button>' + botonSalir });
+        $("[data-reintentar-perfil]", root2).onclick = () => window.dispatchEvent(new Event("flotaia:reintentar-perfil"));
         enlazarSalir2();
         return;
       case "incompleto":
