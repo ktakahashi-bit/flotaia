@@ -2952,6 +2952,7 @@ function abrirOrden(id) {
   abrirHoja("Orden de trabajo", "", (el) => detalleOrden(el, perfil, id));
 }
 function abrirHoja(titulo, html, montar) {
+  const reemplazando = !!hojaAbierta;
   if (hojaAbierta) {
     const h3 = hojaAbierta;
     hojaAbierta = null;
@@ -2960,11 +2961,13 @@ function abrirHoja(titulo, html, montar) {
   let dejar = null;
   const h2 = hoja(titulo, html, { onClose: () => {
     if (dejar) dejar();
-    if (hojaAbierta === h2) hojaAbierta = null;
-    if (history.state && history.state.flotaiaHoja) history.back();
+    const eraActiva = hojaAbierta === h2;
+    if (eraActiva) hojaAbierta = null;
+    if (eraActiva && history.state && history.state.flotaiaHoja) history.back();
   } });
   if (montar) dejar = montar(h2.el, h2);
-  history.pushState({ flotaiaHoja: 1 }, "");
+  if (reemplazando) history.replaceState({ flotaiaHoja: 1 }, "");
+  else history.pushState({ flotaiaHoja: 1 }, "");
   hojaAbierta = h2;
   return h2;
 }
