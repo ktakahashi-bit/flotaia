@@ -1903,6 +1903,11 @@ const MODELO_FLOTAIA = {"modelo":{"features":["SE_media","FS1_media","SE_desv","
   if (!S.docs || typeof S.docs !== 'object') { S.docs = docsIniciales(); S.docLog = []; }
   if (!Array.isArray(S.docLog)) S.docLog = [];
   let registrosRecibidos = new Set(), inspeccionesRecibidas = false;
+  // Origen de cada fuente que necesitan el Observatorio y Gestión de flota: esperando, cache, servidor o error.
+  const FUENTES_OPERATIVAS = { ordenes: 'Órdenes', actas_unidad: 'Actas', documentos_unidad: 'Documentos', inspecciones: 'Inspecciones' };
+  const origenInicial = () => Object.fromEntries(Object.keys(FUENTES_OPERATIVAS).map(k => [k, { estado: 'esperando', motivo: '' }]));
+  let origenDatos = origenInicial();
+  const origenDeMeta = meta => ({ estado: meta && meta.fromCache === false ? 'servidor' : 'cache', motivo: '' });
   let modoCompartido = true, datosConfirmados = false, perfilCompartido = null, ordenesCompartidas = [], errorCompartido = ''; 
   let estadoDemo = structuredClone(S);
   let registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]}, bloqueosCompartidos=()=>[], inspeccionesCompartidas=[];
@@ -2452,7 +2457,7 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
   document.addEventListener('keydown', ev => { if (ev.key !== 'Escape') return; if (!$('ovConf').hidden) cerrarConf(false); else if (!$('ovDet').hidden) cerrarDetalle(); else menu(false); });
   $('detClose').addEventListener('click', cerrarDetalle);
   $('ovDet').addEventListener('click', ev => { if (ev.target === $('ovDet')) cerrarDetalle(); });
-  $('fSeg').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; filtroFlota = b.dataset.f; renderFlota(calc()); });
+  $('fSeg').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; filtroFlota = b.dataset.f; renderFlota(calc()); if (modoCompartido) actualizarFuente(); });
 
   // ---------- automatización: clasificación por reglas del reporte ----------
   function reglas(t) {
@@ -3391,13 +3396,23 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
     $('svNarrative').textContent = crit ? `La lectura del tablero muestra un escenario con presión operativa: ${crit} unidad(es) crítica(s), ${K.ab.length} OT abiertas y cobertura actual de ${K.cub}/7 rutas. La recomendación es contener primero el riesgo hidráulico y después recuperar disponibilidad.` : `La lectura del tablero sugiere estabilidad relativa: sin unidades críticas, cobertura de ${K.cub}/7 rutas y foco en seguimiento preventivo de las unidades con advertencia.`;
     $('svConfMean').textContent=`${fmt(meanConf,1)} %`;
     $('svWatch').textContent=adv+crit;
+    if (modoCompartido && typeof actualizarFuente === 'function') actualizarFuente();
 
   }
   ['svStatus','svUnit','svSearch'].forEach(id=>$(id).addEventListener(id==='svSearch'?'input':'change',()=>renderStudio(calc())));
   document.querySelectorAll('[data-sv-sort]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.svSort;if(svFilter.sort===k)svFilter.asc=!svFilter.asc;else {svFilter.sort=k;svFilter.asc=true;}renderStudio(calc());}));
   $('svClear').addEventListener('click',()=>{$('svStatus').value='all';$('svUnit').value='all';$('svSearch').value='';renderStudio(calc());});
   $('svBody').addEventListener('click',e=>{const btn=e.target.closest('[data-sv-unit]');if(!btn)return;const u=btn.dataset.svUnit;ir('flota');const el=$('flU');if(el){el.value=u;el.dispatchEvent(new Event('change'));}});
-  $('svExport').addEventListener('click',()=>{const names=['Normal','Advertencia','Crítica'];const data=['Unidad;Condición;Confianza_porcentaje;OT_abiertas;Disponibilidad_porcentaje',...svRows().map(r=>[r.unidad,names[r.estado],r.confianza.toFixed(2),r.ot,r.disp.toFixed(2)].join(';')),'AVISO: datos simulados del prototipo, no información operativa municipal'];descargar('FlotaIA_observatorio_simulado.csv','text/csv;charset=utf-8','\uFEFF'+data.join('\n'));});
+  $('svExport').addEventListener('click',()=>{const names=['Normal','Advertencia','Crítica'];
+    if(!modoCompartido){const data=['Unidad;Condición;Confianza_porcentaje;OT_abiertas;Disponibilidad_porcentaje',...svRows().map(r=>[r.unidad,names[r.estado],r.confianza.toFixed(2),r.ot,r.disp.toFixed(2)].join(';')),'AVISO: datos simulados del prototipo, no información operativa municipal'];descargar('FlotaIA_observatorio_simulado.csv','text/csv;charset=utf-8','\uFEFF'+data.join('\n'));return;}
+    // Operación compartida: solo con todas las fuentes recibidas; el CSV declara el origen de cada una.
+    const est=estadoDatosOperativos();if(est==='error'||est==='cargando'){toast('Exportación deshabilitada: faltan datos necesarios.','crit');return;}
+    const data=['Unidad;Condición;Confianza_porcentaje;OT_abiertas;Disponibilidad_porcentaje',...svRows().map(r=>[r.unidad,names[r.estado],'No aplica',r.ot,r.disp.toFixed(2)].join(';')),'',
+      'Origen de los datos;'+Object.entries(origenDatos).map(([k,o])=>FUENTES_OPERATIVAS[k]+': '+ORIGEN_CSV[o.estado]).join(';'),
+      'Exportado;'+fechaHora(new Date().toISOString()),
+      est==='cache'?'AVISO: hay datos en caché sin confirmar por el servidor; pueden estar desactualizados':'AVISO: datos confirmados por el servidor',
+      'AVISO: registros académicos compartidos; disponibilidad actual por unidades, no mensual; no es información operativa municipal'];
+    descargar(est==='cache'?'FlotaIA_observatorio_compartido_cache.csv':'FlotaIA_observatorio_compartido.csv','text/csv;charset=utf-8','\uFEFF'+data.join('\n'));});
 
   // Una fuente operativa; el escenario de ensayo conserva su propio estado local.
   function aplicarOrdenes() {
@@ -3420,6 +3435,38 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
     if(compartido){S.hc.reg=[];aplicarOrdenes();demoSalir();}
     resolviendo=null;syncSup();renderAll();actualizarFuente();
   }
+  // Estado conjunto de las fuentes operativas (la simulación local no depende de ellas).
+  function estadoDatosOperativos(){
+    if (!modoCompartido) return 'local';
+    const v = Object.values(origenDatos).map(o => o.estado);
+    if (errorCompartido || v.includes('error')) return 'error';
+    if (!perfilCompartido || v.includes('esperando')) return 'cargando';
+    return v.includes('cache') ? 'cache' : 'ok';
+  }
+  const ORIGEN_TXT = { servidor: 'confirmados por el servidor', cache: 'en caché, sin confirmar', esperando: 'cargando', error: 'sin acceso' };
+  const ORIGEN_CSV = { servidor: 'servidor', cache: 'cache (sin confirmar)', esperando: 'cargando', error: 'sin acceso' };
+  function motivoDatos(){
+    const f = Object.entries(origenDatos).filter(([, o]) => o.estado === 'error').map(([k, o]) => FUENTES_OPERATIVAS[k] + (o.motivo ? ': ' + o.motivo : ''));
+    return [errorCompartido, ...f].filter(Boolean).join(' · ') || 'Revise el acceso y pulse Reintentar.';
+  }
+  const detalleOrigen = () => Object.entries(origenDatos).map(([k, o]) => `${FUENTES_OPERATIVAS[k]}: ${ORIGEN_TXT[o.estado]}`).join(' · ');
+  // Aviso visible en las vistas operativas sobre el origen de las cifras (no se usa en la simulación local).
+  function avisoDatos(estado){
+    const origen = '<br><small>' + esc(detalleOrigen()) + '</small>';
+    const textos = {
+      cache: '<b>Datos en caché.</b> Parte de los datos todavía no está confirmada por el servidor: las cifras y conclusiones pueden estar desactualizadas.' + origen,
+      cargando: (navigator.onLine ? '<b>Cargando…</b> Faltan datos necesarios; las cifras se muestran cuando lleguen todas las fuentes.' : '<b>Sin conexión.</b> Se esperan datos confirmados antes de mostrar cifras.') + origen,
+      error: '<b>Datos no disponibles.</b> ' + esc(motivoDatos()) + ' Las cifras y conclusiones se ocultan hasta recibir datos.' + origen
+    };
+    ['v-resumen','v-flota','v-studio','v-gemelo'].forEach(v => {
+      const sec = $(v); if (!sec) return;
+      let a = sec.querySelector(':scope > [data-aviso-datos]');
+      if (!a) { a = document.createElement('div'); a.dataset.avisoDatos = ''; a.setAttribute('role', 'status'); a.style.margin = '0 0 14px'; sec.prepend(a); }
+      a.hidden = !textos[estado];
+      a.className = 'banner ' + (estado === 'error' ? 'crit' : 'info');
+      a.innerHTML = textos[estado] ? '<span>' + textos[estado] + '</span>' : '';
+    });
+  }
   function actualizarFuente(){
     const b=$('fuenteGlobal');if(!b)return;
     b.querySelector('strong').textContent=modoCompartido?(errorCompartido?'Operación compartida · atención al acceso':datosConfirmados?(new URLSearchParams(location.search).get('modo')==='local'?'Operación compartida · modo local de prueba (no es Firebase)':'Operación compartida · Firebase'):perfilCompartido?'Operación compartida · datos en caché':'Operación compartida · esperando datos')+(perfilCompartido?' · '+perfilCompartido.codigo:''):'Demostración local · datos de ensayo';
@@ -3437,11 +3484,19 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
       if(!perfilCompartido){['kOper','kAdv','kCrit','kRutas','kDisp','kMttr','kOt','kAlert'].forEach(i=>$(i).textContent='—');}
     }
 
-    if (modoCompartido && (!perfilCompartido || !registrosRecibidos.has('actas_unidad') || !registrosRecibidos.has('documentos_unidad') || !inspeccionesRecibidas || !datosConfirmados)) {
-      const aviso = errorCompartido ? 'Datos no disponibles: revise el acceso y pulse Reintentar.' : !navigator.onLine ? 'Sin conexión: esperando datos confirmados.' : 'Cargando datos: esperando confirmación de las fuentes operativas.';
-      ['kOper','kAdv','kCrit','kRutas','kDisp','kMttr','kOt','kAlert','rbCount','svOper','svCrit','svOT','svRoutes','svOper2','svCrit2','svRoutes2','svOut2','svOT2','svAlert2','svDonutVal','twinBase','twinProjected','twinIPIM','twinOT','twinBaseOption','twinRemoveOption','twinRecoverOption'].forEach(id => { if ($(id)) $(id).textContent = '—'; });
-      ['rDonut','rDispChart','rInc','rTiles','fCards','rbList','svBars','svBody','svPriority','svInsight','twinFleet','twinRoutes','twinNarrative'].forEach(id => { if ($(id)) $(id).textContent = aviso; });
-      ['svGaugeDisp','svGaugeRoutes','svGaugeOT'].forEach(id => { if ($(id)) { const v=$(id).querySelector('.value'); if(v)v.textContent='—'; $(id).style.setProperty('--pct',0); } });
+    // Estado de los datos compartidos en las vistas operativas. La simulación local no se modifica.
+    const estadoDatos = estadoDatosOperativos();
+    avisoDatos(estadoDatos);
+    const exp = $('svExport');
+    if (exp) { const bloq = estadoDatos === 'error' || estadoDatos === 'cargando'; exp.disabled = bloq; exp.title = bloq ? 'Exportación deshabilitada: faltan datos necesarios.' : ''; }
+    if (estadoDatos === 'error' || estadoDatos === 'cargando') {
+      const aviso = estadoDatos === 'error' ? 'Datos no disponibles. ' + motivoDatos() : !navigator.onLine ? 'Sin conexión: esperando datos confirmados.' : 'Cargando…';
+      const valor = estadoDatos === 'cargando' && navigator.onLine ? 'Cargando…' : '—';
+      ['kOper','kAdv','kCrit','kRutas','kDisp','kMttr','kOt','kAlert','rbCount','svOper','svCrit','svOT','svRoutes','svOper2','svCrit2','svRoutes2','svOut2','svOT2','svAlert2','svDonutVal','twinBase','twinProjected','twinIPIM','twinOT','twinBaseOption','twinRemoveOption','twinRecoverOption',
+        'svGaugeDispVal','svGaugeRoutesVal','svGaugeOTVal','svExecutive','svDecision','svFocus','svConfMean','svWatch','fs0','fs1','fs2'].forEach(id => { if ($(id)) $(id).textContent = valor; });
+      ['rDonut','rDispChart','rInc','rTiles','fCards','rbList','svBars','svBody','svPriority','svInsight','twinFleet','twinRoutes','twinNarrative',
+        'svExecutiveTxt','svDecisionTxt','svFocusTxt','svNarrative','svHeat','svCount'].forEach(id => { if ($(id)) $(id).textContent = aviso; });
+      ['svGaugeDisp','svGaugeRoutes','svGaugeOT'].forEach(id => { if ($(id)) { const v=$(id).querySelector('.value'); if(v)v.textContent=valor; $(id).style.setProperty('--pct',0); } });
       if ($('svDonut')) $('svDonut').style.background='var(--line)';
       if ($('kDispBar')) $('kDispBar').style.width = '0%';
       ['kOtM','kAlertM'].forEach(id => { if ($(id)) $(id).textContent = aviso; });
@@ -3457,10 +3512,12 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
   $('modoFuente').onclick=()=>cambiarModo(!modoCompartido);
   window.FlotaIAIntegracion={
     problema(texto){errorCompartido=String(texto||'');actualizarFuente();},
-    recibir(ordenes,perfil,meta){errorCompartido='';ordenesCompartidas=ordenes;perfilCompartido=perfil;datosConfirmados=!meta?.fromCache;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();},
-    recibirInspecciones(items){inspeccionesRecibidas=true;inspeccionesCompartidas=items||[];if(modoCompartido){S.insp=inspeccionesCompartidas;renderAll();}},
-    recibirRegistros(reg,bloqueos,coleccion){if(coleccion)registrosRecibidos.add(coleccion);registrosCompartidos=structuredClone(reg);bloqueosCompartidos=bloqueos;if(modoCompartido){aplicarOrdenes();renderAll();}},
-    desconectar(){registrosRecibidos.clear();inspeccionesRecibidas=false;errorCompartido='';registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]};bloqueosCompartidos=()=>[];ordenesCompartidas=[];perfilCompartido=null;datosConfirmados=false;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();}
+    recibir(ordenes,perfil,meta){errorCompartido='';ordenesCompartidas=ordenes;perfilCompartido=perfil;datosConfirmados=!meta?.fromCache;origenDatos.ordenes=origenDeMeta(meta);if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();},
+    recibirInspecciones(items,meta){inspeccionesRecibidas=true;origenDatos.inspecciones=origenDeMeta(meta);inspeccionesCompartidas=items||[];if(modoCompartido){S.insp=inspeccionesCompartidas;renderAll();}},
+    recibirRegistros(reg,bloqueos,coleccion,meta){if(coleccion)registrosRecibidos.add(coleccion);if(coleccion&&origenDatos[coleccion])origenDatos[coleccion]=origenDeMeta(meta);registrosCompartidos=structuredClone(reg);bloqueosCompartidos=bloqueos;if(modoCompartido){aplicarOrdenes();renderAll();}},
+    // Fallo de una fuente operativa: las vistas que dependen de ella ocultan cifras y conclusiones.
+    origenFallo(fuente,motivo){if(!origenDatos[fuente])return;origenDatos[fuente]={estado:'error',motivo:String(motivo||'')};actualizarFuente();},
+    desconectar(){registrosRecibidos.clear();inspeccionesRecibidas=false;origenDatos=origenInicial();errorCompartido='';registrosCompartidos={documentos_unidad:[],actas_unidad:[],combustible:[],lecturas_ensayo:[]};bloqueosCompartidos=()=>[];ordenesCompartidas=[];perfilCompartido=null;datosConfirmados=false;if(modoCompartido){aplicarOrdenes();renderAll();}actualizarFuente();}
   };
   const idsRegistro={};
   async function registrarCompartido(tipo,d,msg){
@@ -3780,6 +3837,14 @@ async function crearAdaptadorFirestore() {
     return o;
   };
   const conexionCbs = /* @__PURE__ */ new Set();
+  // Diagnóstico en consola: interfaz, vista, operación, ruta (sin identificadores) y código de error.
+  // No registra credenciales, valores de consulta, identificadores de documentos ni datos personales.
+  const diagInterfaz = /\/mobile\//.test(location.pathname) ? "celular" : /\/tablet\//.test(location.pathname) ? "tablet" : "escritorio";
+  const diagRuta = (path) => (path || []).map((p, i) => i % 2 ? "{id}" : p).join("/");
+  const diagConsulta = (spec) => ({ filtros: (spec.where || []).map(([f, op]) => `${f} ${op}`), orden: spec.orderBy ? spec.orderBy.join(" ") : null, limite: spec.limit || null });
+  const diag = (operacion, path, e, extra, nivel) => {
+    try { console[nivel || "warn"]("[FlotaIA diagnóstico]", { interfaz: diagInterfaz, vista: location.hash.slice(1) || "inicio", operacion, ruta: diagRuta(path), ...extra || {}, codigo: e && e.code || "sin-codigo" }); } catch (x) {}
+  };
   const avisar = () => conexionCbs.forEach((cb) => cb({ online: navigator.onLine }));
   window.addEventListener("online", avisar);
   window.addEventListener("offline", avisar);
@@ -3802,12 +3867,14 @@ async function crearAdaptadorFirestore() {
     },
     signOut: () => A4.signOut(auth),
     async getDoc(path) {
-      const s = await F2.getDoc(ref(path));
+      let s;
+      try { s = await F2.getDoc(ref(path)); } catch (e) { diag("lectura-documento", path, e); throw e; }
       return s.exists() ? fromSnap(s) : null;
     },
     // Lectura directa del servidor (nunca de la caché): falla si el servidor no responde.
     async getDocServidor(path) {
-      const s = await F2.getDocFromServer(ref(path));
+      let s;
+      try { s = await F2.getDocFromServer(ref(path)); } catch (e) { diag("lectura-servidor", path, e); throw e; }
       return s.exists() ? fromSnap(s) : null;
     },
     watch(spec, onData, onError) {
@@ -3821,6 +3888,7 @@ async function crearAdaptadorFirestore() {
       // No se confirma caché ni se repite la consulta en un bucle.
       const demora = setTimeout(async () => {
         if (!activo || confirmado || !navigator.onLine) return;
+        diag("escucha-sin-confirmar-10s", spec.path, { code: "solo-cache" }, diagConsulta(spec), "info");
         try {
           const snap = await Promise.race([
             F2.getDocsFromServer(q),
@@ -3830,13 +3898,13 @@ async function crearAdaptadorFirestore() {
             confirmado = true;
             onData(snap.docs.map(fromSnap), { fromCache: false, pendientes: snap.metadata.hasPendingWrites });
           }
-        } catch (e) { if (activo && !confirmado && onError) onError(e); }
+        } catch (e) { if (activo && !confirmado) { diag("comprobacion-servidor", spec.path, e, diagConsulta(spec)); if (onError) onError(e); } }
       }, 10000);
       const dejar = F2.onSnapshot(q, { includeMetadataChanges: true }, (snap) => {
         if (!activo) return;
         if (!snap.metadata.fromCache) { confirmado = true; clearTimeout(demora); }
         onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites });
-      }, (e) => { if (activo) { clearTimeout(demora); if(onError) onError(e); } });
+      }, (e) => { if (activo) { clearTimeout(demora); diag("escucha", spec.path, e, diagConsulta(spec)); if(onError) onError(e); } });
       return () => { activo = false; clearTimeout(demora); dejar(); };
     },
     watchDoc(path, onData, onError) {
@@ -3844,7 +3912,7 @@ async function crearAdaptadorFirestore() {
         ref(path),
         { includeMetadataChanges: true },
         (s) => onData(s.exists() ? fromSnap(s) : null, { fromCache: s.metadata.fromCache, pendientes: s.metadata.hasPendingWrites }),
-        (err2) => onError && onError(err2)
+        (err2) => { diag("escucha-documento", path, err2); if (onError) onError(err2); }
       );
     },
     newId: (path) => F2.doc(col(path)).id,
@@ -3854,17 +3922,19 @@ async function crearAdaptadorFirestore() {
         if (o.op === "set") b.set(ref(o.path), prep(o.data));
         else b.update(ref(o.path), prep(o.data));
       });
-      return b.commit();
+      return b.commit().catch((e) => { diag("escritura", null, e, { operaciones: ops.map((o) => `${o.op} ${diagRuta(o.path)}`) }); throw e; });
     },
     tx(fn) {
+      const rutas = [];
       return F2.runTransaction(db, async (t) => fn({
         get: async (p) => {
+          rutas.push("get " + diagRuta(p));
           const s = await t.get(ref(p));
           return s.exists() ? fromSnap(s) : null;
         },
-        set: (p, d) => t.set(ref(p), prep(d)),
-        update: (p, d) => t.update(ref(p), prep(d))
-      }));
+        set: (p, d) => { rutas.push("set " + diagRuta(p)); return t.set(ref(p), prep(d)); },
+        update: (p, d) => { rutas.push("update " + diagRuta(p)); return t.update(ref(p), prep(d)); }
+      })).catch((e) => { diag("transaccion", null, e, { operaciones: [...new Set(rutas)] }); throw e; });
     },
     // Alta de una cuenta por el administrador sin cerrar su propia sesión: se usa una instancia secundaria de Firebase.
     async crearCuenta(email, pass) {
@@ -4554,6 +4624,7 @@ var h = (x) => String(x ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": 
 var NOMBRES = { documentos_unidad: "Documentos", actas_unidad: "Actas", combustible: "Combustible", lecturas_ensayo: "Sensores de ensayo" };
 var TIPOS = { soat: "SOAT", rt: "Revisi\xF3n t\xE9cnica", ext: "Extintor" };
 function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
+}, onError = () => {
 }, unidadesVisibles = null, forzarPrueba = false, ordenes = () => [] } = {}) {
   document.querySelector("#registros-flotaia")?.remove();
   const host = document.createElement("div");
@@ -4913,6 +4984,7 @@ function montarRegistros(perfil2, { origen = "escritorio", onData = () => {
     errores[c] = err2;
     pintarConexion();
     if (dialog.open) pintarHistorial();
+    onError(err2, c);
   });
   const anterior = window.FlotaIARegistros;
   window.FlotaIARegistros = { abrir(c, datos = {}) {
@@ -5172,7 +5244,7 @@ try {
     if (s.estado !== "ok") {
       const mensajes = { sin_sesion: "Inicie sesi\xF3n con una cuenta autorizada de mec\xE1nico, supervisor o administrador.", cargando: "Comprobando perfil\u2026", incompleto: "Complete su nombre y c\xF3digo desde la interfaz tablet con ayuda del administrador.", sin_perfil: "La cuenta necesita un perfil v\xE1lido en usuarios/{uid}.", inactivo: "Cuenta desactivada." };
       status.textContent = mensajes[s.estado] || mensajeError(s.error);
-      window.FlotaIAIntegracion.problema(status.textContent);
+      if (s.estado !== "cargando") window.FlotaIAIntegracion.problema(status.textContent);
       return;
     }
     if (!["mecanico", "supervisor", "administrador"].includes(s.perfil.rol)) {
@@ -5182,7 +5254,11 @@ try {
     }
     perfilActual = s.perfil;
     reporte.hidden = false;
-    dejarRegistros = montarRegistros(s.perfil, { onData: (reg, coleccion) => window.FlotaIAIntegracion.recibirRegistros(reg, (u, os) => bloqueosUnidad(u, os), coleccion) });
+    // Fallos de esta sesión. vigilarOrdenes une dos consultas: si una falla después de entregar caché,
+    // la otra sigue emitiendo con fromCache=true y antes reemplazaba el error por «Datos en caché».
+    let falloOrdenes = null, falloOtro = null;
+    const falloAuxiliar = (e) => { falloOtro = e; error(e); };
+    dejarRegistros = montarRegistros(s.perfil, { onData: (reg, coleccion, meta) => window.FlotaIAIntegracion.recibirRegistros(reg, (u, os) => bloqueosUnidad(u, os), coleccion, meta), onError: (e, coleccion) => window.FlotaIAIntegracion.origenFallo?.(coleccion, mensajeError(e)) });
     status.textContent = "Cargando \xF3rdenes compartidas\u2026";
     detenerUnidades = vigilarUnidades((us) => {
       reporte.elements.unidad.replaceChildren(...us.map((u) => {
@@ -5190,12 +5266,18 @@ try {
         o.value = u.id;
         return o;
       }));
-    }, error);
-    if (s.perfil.rol === "administrador") inicializarCatalogo(s.perfil).catch(error);
+    }, falloAuxiliar);
+    if (s.perfil.rol === "administrador") inicializarCatalogo(s.perfil).catch(falloAuxiliar);
     detener = vigilarOrdenes(s.perfil, (ordenes, meta) => {
+      if (meta && !meta.fromCache) falloOrdenes = null;
       window.FlotaIAIntegracion.recibir(ordenes, s.perfil, meta);
       listado.replaceChildren();
-      status.textContent = meta?.fromCache ? "Datos en cach\xE9: esperando confirmaci\xF3n del servidor." : "Datos recibidos de Firebase. Los cambios se muestran autom\xE1ticamente.";
+      const base = falloOrdenes ? mensajeError(falloOrdenes) + " Las \xF3rdenes que se muestran vienen de la cach\xE9 y no est\xE1n confirmadas por el servidor." : meta?.fromCache ? "Datos en cach\xE9: esperando confirmaci\xF3n del servidor." : "Datos recibidos de Firebase. Los cambios se muestran autom\xE1ticamente.";
+      status.textContent = falloOtro && !falloOrdenes ? base + " Atenci\xF3n: " + mensajeError(falloOtro) : base;
+      if (falloOrdenes) {
+        window.FlotaIAIntegracion.origenFallo?.("ordenes", mensajeError(falloOrdenes));
+        window.FlotaIAIntegracion.problema(status.textContent);
+      }
       if (!ordenes.length) {
         listado.append(el("p", "Todav\xEDa no hay \xF3rdenes registradas."));
         return;
@@ -5215,18 +5297,25 @@ try {
       });
       table.append(body);
       listado.append(table);
-    }, error);
+    }, (e) => {
+      falloOrdenes = e;
+      window.FlotaIAIntegracion.origenFallo?.("ordenes", mensajeError(e));
+      error(e);
+    });
     let inspecciones = root.querySelector("[data-inspecciones]");
     if (!inspecciones) {
       inspecciones = document.createElement("div");
       inspecciones.dataset.inspecciones = "";
       root.append(inspecciones);
     }
-    detenerInspecciones = vigilarInspecciones((items) => {
-      window.FlotaIAIntegracion.recibirInspecciones?.(items);
+    detenerInspecciones = vigilarInspecciones((items, meta) => {
+      window.FlotaIAIntegracion.recibirInspecciones?.(items, meta);
       inspecciones.replaceChildren(el("h3", "Inspecciones compartidas \xB7 \xFAltimas " + items.length));
       items.slice(0, 20).forEach((i) => inspecciones.append(el("p", `${i.unidadId} \xB7 ${i.sistema} \xB7 ${i.condicion} \xB7 ${i.observaciones || "Sin observaciones"}`)));
-    }, error);
+    }, (e) => {
+      window.FlotaIAIntegracion.origenFallo?.("inspecciones", mensajeError(e));
+      falloAuxiliar(e);
+    });
   });
 } catch (e) {
   form.hidden = true;
