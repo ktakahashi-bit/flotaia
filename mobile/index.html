@@ -738,7 +738,7 @@ async function crearAdaptadorFirestore() {
   const diagRuta = (path) => (path || []).map((p, i) => i % 2 ? "{id}" : p).join("/");
   const diagConsulta = (spec) => ({ filtros: (spec.where || []).map(([f, op]) => `${f} ${op}`), orden: spec.orderBy ? spec.orderBy.join(" ") : null, limite: spec.limit || null });
   const diag = (operacion, path, e, extra, nivel) => {
-    try { console[nivel || "warn"]("[FlotaIA diagnóstico]", { interfaz: diagInterfaz, vista: location.hash.slice(1) || "inicio", operacion, ruta: diagRuta(path), ...extra || {}, codigo: e && e.code || "sin-codigo" }); } catch (x) {}
+    try { console[nivel || "warn"]("[FlotaIA diagnóstico] " + JSON.stringify({ interfaz: diagInterfaz, vista: location.hash.slice(1) || "inicio", operacion, ruta: diagRuta(path), ...extra || {}, codigo: e && e.code || "sin-codigo" })); } catch (x) {}
   };
   const avisar = () => conexionCbs.forEach((cb) => cb({ online: navigator.onLine }));
   window.addEventListener("online", avisar);
@@ -1944,6 +1944,7 @@ function observarSesion(cb) {
     const actual = ++version;
     if (dejarPerfil) { dejarPerfil(); dejarPerfil = null; }
     usuarioActual = u;
+    let perfilPublicado = null;
     if (!u) { cb({ estado: "sin_sesion" }); return; }
     cb({ estado: "cargando", usuario: u });
     try { if (A2.prepararSesion) await A2.prepararSesion(false); }
@@ -1955,11 +1956,16 @@ function observarSesion(cb) {
         if (navigator.onLine) return;
         return cb({ estado: "error", usuario: u, error: { code: "unavailable", message: "Sin conexión: no se pudo leer su perfil. Conéctese y pulse Reintentar." } });
       }
+      if (!d || !ROLES.includes(d.rol) || d.activo !== true || !d.codigo || !d.nombre) perfilPublicado = null;
       if (!d) return cb({ estado: "sin_perfil", usuario: u });
       const perfil2 = { ...d, uid: u.uid, email: u.email };
       if (!ROLES.includes(d.rol)) return cb({ estado: "sin_perfil", usuario: u, perfil: perfil2 });
       if (d.activo !== true) return cb({ estado: "inactivo", usuario: u, perfil: perfil2 });
       if (!d.codigo || !d.nombre) return cb({ estado: "incompleto", usuario: u, perfil: perfil2 });
+      // Un cambio de metadatos del mismo perfil no debe reiniciar las consultas de la vista.
+      const firmaPerfil = JSON.stringify(Object.keys(d).filter((k) => k !== "_pend").sort().map((k) => [k, d[k]]));
+      if (firmaPerfil === perfilPublicado) return;
+      perfilPublicado = firmaPerfil;
       cb({ estado: "ok", usuario: u, perfil: perfil2 });
     }, async (e) => {
       if (terminado || actual !== version) return;
