@@ -587,6 +587,95 @@ body{background:radial-gradient(circle at top left,#f8fbfd 0,#edf3f7 40%,#eef4f8
 
 /* Gemelo operativo académico V11 */
 .twin-hero{background:linear-gradient(125deg,#071c32,#164466 60%,#187d72);border:0;color:white;border-radius:20px;padding:24px 28px}.twin-hero h1{color:white;font-size:1.6rem}.twin-hero p{color:#d5e8f1;max-width:85ch}.twin-fleet{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.twin-unit{cursor:pointer;background:#f7fafc;border:1px solid #dce7ed;border-top:5px solid #15997d;border-radius:15px;padding:14px 7px;display:grid;gap:8px;text-align:center;justify-items:center;transition:.2s}.twin-unit:hover,.twin-unit.selected{transform:translateY(-3px);box-shadow:0 10px 24px #123c5d22;border-color:#5382a0}.twin-unit.warn{border-top-color:#e7a632}.twin-unit.crit{border-top-color:#d85e56;background:#fff4f2}.twin-unit svg{width:48px;height:38px;color:#184765}.twin-unit strong{font:700 .94rem var(--mono)}.twin-unit small{font-size:.67rem;color:#61778c}.twin-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.twin-metric{padding:16px 17px;background:#f4f8fa;border-radius:13px;display:grid;gap:5px}.twin-metric small{font-size:.7rem;color:#5c7487}.twin-metric strong{font:700 1.55rem var(--mono);color:#122e48}.twin-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.twin-option{display:grid;gap:8px;background:#fff;border:1px solid #dce6ed;border-radius:15px;padding:17px;cursor:pointer;text-align:left}.twin-option.selected{border:2px solid #159581;background:#effaf6}.twin-option b{color:#193952}.twin-option p{font-size:.78rem;color:#5b7284;line-height:1.5}.twin-option em{font:700 1.4rem var(--mono);font-style:normal;color:#138771}.twin-layout{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}.twin-note{padding:13px 16px;background:#edf4f8;border-left:4px solid #5889a8;border-radius:7px;color:#476276;font-size:.79rem}.twin-route{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.twin-route span{border-radius:9px;padding:12px 4px;text-align:center;background:#e2f4ed;color:#197c5a;font-weight:700;font-size:.75rem}.twin-route span.missing{background:#ffebe6;color:#b74336}.twin-route span.recovered{background:#e8efff;color:#2d60a0}@media(max-width:1100px){.twin-fleet{grid-template-columns:repeat(4,1fr)}.twin-layout{grid-template-columns:1fr}.twin-options{grid-template-columns:1fr}}@media(max-width:620px){.twin-fleet{grid-template-columns:repeat(3,1fr)}.twin-route{grid-template-columns:repeat(4,1fr)}.twin-metrics{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------- dashboard de KPIs (módulo de sustentación) ---------- */
+#v-kpi { min-width: 0; }
+#v-kpi:fullscreen { background: var(--bg); overflow: auto; padding: 22px 26px; }
+.kp-toolbar { display: grid; gap: 12px; }
+.kp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.kp-l { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+.kp-sep { width: 1px; height: 22px; background: var(--line-2); margin: 0 6px; }
+.kp-tab { border: 1px solid var(--line-2); background: var(--surface); color: var(--navy-800); border-radius: 999px; padding: 6px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; }
+.kp-tab:hover { background: var(--navy-50); }
+.kp-tab.on { background: var(--navy-800); border-color: var(--navy-800); color: #fff; }
+.kp-tab[hidden] { display: none; }
+.kp-sel { border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); border-radius: 7px; padding: 6px 8px; font-size: .8rem; }
+.kp-head { margin: 0; padding: 12px 14px; border-radius: 8px; background: var(--navy-50); color: var(--ink-2); font-size: .88rem; line-height: 1.5; display: grid; gap: 4px; }
+.kp-head b { color: var(--ink); }
+.kp-simtag { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--sim, #6b4fa1); background: var(--sim-soft, #efe9f8); border-radius: 4px; padding: 3px 8px; justify-self: start; }
+.kp-sum { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.kp-sum div { background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; display: grid; gap: 2px; }
+.kp-sum b { font-size: 1.5rem; line-height: 1.1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.kp-sum span { font-size: .74rem; color: var(--muted); }
+.kp-sum .ok b { color: var(--good); } .kp-sum .no b { color: var(--crit); } .kp-sum .pe b { color: var(--faint); }
+.kp-levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.kp-col { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.kp-col > h2 { font-size: .74rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.kp-col > h2 span { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.kp-card { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--line-2); border-radius: 10px; padding: 14px 16px; display: grid; gap: 7px; box-shadow: var(--shadow); min-width: 0; }
+.kp-card[hidden] { display: none; }
+.kp-card h3 { margin: 0; font-size: .95rem; color: var(--ink); }
+.kp-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kp-src { font-size: .7rem; color: var(--muted); }
+.kp-st { font-size: .66rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; background: var(--navy-50); color: var(--muted); white-space: nowrap; }
+.kp-val { font-size: 1.9rem; font-weight: 700; line-height: 1.05; color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.kp-meta { font-size: .78rem; color: var(--muted); }
+.kp-gap { font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.kp-note { font-size: .8rem; color: var(--ink-2); line-height: 1.45; }
+.kp-sub { display: grid; gap: 3px; font-size: .78rem; color: var(--ink-2); padding: 7px 9px; background: var(--surface-2); border-radius: 7px; }
+.kp-sub span b { font-weight: 600; }
+.kp-act { font-size: .8rem; color: var(--ink-2); margin: 0; padding-top: 7px; border-top: 1px dashed var(--line-2); line-height: 1.45; }
+.kp-act small { display: block; color: var(--muted); margin-top: 2px; }
+.kp-ctl { display: grid; gap: 6px; padding: 8px 9px; border: 1px dashed var(--line-2); border-radius: 7px; }
+.kp-ctl label { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: center; font-size: .74rem; color: var(--muted); }
+.kp-ctl label input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--navy-700); }
+.kp-ctl output { font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.kp-ctl select { border: 1px solid var(--line-2); border-radius: 6px; padding: 3px 6px; font-size: .76rem; background: var(--surface); }
+.kp-ficha { font-size: .78rem; color: var(--ink-2); }
+.kp-ficha summary { cursor: pointer; color: var(--navy-700); font-weight: 600; }
+.kp-ficha dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 10px; margin: 8px 0 0; }
+.kp-ficha dt { color: var(--muted); } .kp-ficha dd { margin: 0; }
+.kp-card.s-cumple { border-left-color: var(--good); } .kp-card.s-cumple .kp-st { background: var(--good-soft, #e5f3eb); color: var(--good); } .kp-card.s-cumple .kp-val { color: var(--good); }
+.kp-card.s-vigilancia { border-left-color: var(--warn); } .kp-card.s-vigilancia .kp-st { background: var(--warn-soft, #fcf1dc); color: var(--warn); } .kp-card.s-vigilancia .kp-val { color: var(--warn); }
+.kp-card.s-accion { border-left-color: var(--crit); } .kp-card.s-accion .kp-st { background: var(--crit-soft, #fbe8e6); color: var(--crit); } .kp-card.s-accion .kp-val { color: var(--crit); }
+.kp-card.s-pendiente, .kp-card.s-info { background: var(--surface-2); } .kp-card.s-pendiente .kp-val { color: var(--faint); font-size: 1.25rem; }
+.kp-chip { display: inline-block; font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: var(--navy-50); color: var(--muted); white-space: nowrap; }
+.kp-chip.s-cumple { background: var(--good-soft, #e5f3eb); color: var(--good); } .kp-chip.s-vigilancia { background: var(--warn-soft, #fcf1dc); color: var(--warn); } .kp-chip.s-accion { background: var(--crit-soft, #fbe8e6); color: var(--crit); }
+.kp-panels { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 14px; }
+.kp-gates { display: grid; gap: 8px; }
+.kp-gate { border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; display: grid; gap: 4px; background: var(--surface-2); }
+.kp-gate b { font-size: .85rem; } .kp-gate ul { margin: 0; padding-left: 18px; font-size: .78rem; color: var(--ink-2); }
+.kp-gate p { margin: 0; font-size: .78rem; color: var(--muted); }
+.kp-model { padding: 10px 12px; border-radius: 8px; border-left: 4px solid var(--line-2); background: var(--surface-2); font-size: .85rem; color: var(--ink-2); }
+.kp-model.s-accion { border-left-color: var(--crit); } .kp-model.s-vigilancia { border-left-color: var(--warn); } .kp-model.s-cumple { border-left-color: var(--good); }
+.kp-gp { display: grid; gap: 8px; }
+.kp-gp-row { display: grid; grid-template-columns: minmax(120px, 190px) minmax(0, 1fr) minmax(90px, 150px); gap: 10px; align-items: center; font-size: .78rem; }
+.kp-gp-row > span:first-child { color: var(--ink-2); font-weight: 600; }
+.kp-gp-tr { position: relative; height: 10px; border-radius: 6px; background: var(--navy-50); }
+.kp-gp-tr i { position: absolute; top: -3px; width: 2px; height: 16px; background: var(--navy-700); }
+.kp-gp-tr em { position: absolute; top: -2px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line-2); }
+.kp-gp-row small { color: var(--muted); }
+.kp-tbl-wrap { overflow-x: auto; max-width: 100%; }
+.kp-tbl { width: 100%; border-collapse: collapse; font-size: .78rem; min-width: 760px; }
+.kp-tbl th, .kp-tbl td { text-align: left; vertical-align: top; padding: 8px 9px; border-bottom: 1px solid var(--line); }
+.kp-tbl th { font-size: .68rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--surface-2); }
+.kp-tbl tr.kp-grp td { background: var(--navy-50); font-weight: 700; color: var(--navy-800); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
+.kp-tbl tr[hidden] { display: none; }
+.kp-acc { display: grid; gap: 8px; }
+.kp-arow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+.kp-arow .dot { width: 10px; height: 10px; border-radius: 50%; }
+.kp-arow b { font-size: .86rem; } .kp-arow p { margin: 2px 0 0; font-size: .8rem; color: var(--muted); }
+.kp-log td select { font-size: .76rem; }
+.kp-count { font-weight: 700; color: var(--navy-800); }
+.kp-present { position: fixed; inset: 0; z-index: 900; background: var(--bg); overflow: auto; padding: 22px clamp(14px, 3vw, 40px); display: grid; gap: 14px; align-content: start; }
+.kp-present[hidden] { display: none; }
+.kp-present h1 { margin: 0; font-size: 1.5rem; color: var(--ink); }
+.kp-present .kp-card { padding: 16px 18px; }
+.kp-present .kp-val { font-size: 2.4rem; }
+.kp-present .kp-act { font-size: .92rem; }
+.kp-ptop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+@media (max-width: 1100px) { .kp-panels { grid-template-columns: 1fr; } }
+@media (max-width: 980px) { .kp-levels { grid-template-columns: 1fr; } .kp-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kp-gp-row { grid-template-columns: 1fr; } }
 </style>
 <style id="v13">
 /* =====================================================================
@@ -879,6 +968,7 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
        <a href="#impacto" data-v="impacto"><svg class="i"><use href="#i-gauge"/></svg>Simulador de impacto</a>
        <div class="nav-l">Sustentación</div>
       <a href="#studio" data-v="studio"><svg class="i"><use href="#i-grid"/></svg>Observatorio visual</a>
+      <a href="#kpi" data-v="kpi"><svg class="i"><use href="#i-gauge"/></svg>Dashboard de KPIs</a>
       <a href="#demo" data-v="demo"><svg class="i"><use href="#i-play"/></svg>Demostración C-03</a>
     </nav>
     <div class="side-foot">
@@ -1390,6 +1480,69 @@ table.dt th,.studio-table th{font-family:var(--cond);font-size:.84rem;font-weigh
 
         <div class="studio-split"><div class="studio-panel dark"><div class="studio-heading"><div><h2>Mapa de prioridad por componente</h2><p class="studio-muted">Matriz rápida para explicar dónde se concentra el riesgo operativo.</p></div></div><div class="studio-heat" id="svHeat"></div><p class="studio-note">Mayor intensidad de color = mayor concentración de órdenes registradas en ese componente y prioridad.</p></div><div class="studio-panel"><div class="studio-heading"><div><h2>Lectura gerencial</h2><p class="studio-muted">Narrativa de apoyo para sustentar el tablero.</p></div></div><div class="studio-insight" id="svNarrative">—</div><div class="studio-kpi-stack" style="margin-top:12px"><div class="studio-kpi-card" style="--tone:#2B5D6E"><small>Confianza promedio del modelo</small><strong id="svConfMean">—</strong><span>Promedio simple de las siete unidades</span></div><div class="studio-kpi-card" style="--tone:#5B4BB7"><small>Unidades con advertencia o crítica</small><strong id="svWatch">—</strong><span>Requieren seguimiento o intervención</span></div></div></div></div>
       </section>
+
+      <!-- ================= DASHBOARD DE KPIs ================= -->
+      <section class="view" id="v-kpi" aria-labelledby="h-kpi" hidden>
+        <div class="vhead">
+          <div><div class="eyebrow">Sustentación</div><h1 id="h-kpi">Dashboard de KPIs</h1><p class="lead">Indicadores del Anexo L con su meta, estado, brecha, fuente del dato, acción correctiva y responsable. Las recomendaciones son informativas: este módulo no modifica unidades, órdenes de trabajo, el modelo de IA ni los registros compartidos.</p></div>
+          <div class="badges"><span class="badge b-auto">Automatización</span><span class="badge b-sim">Simulación</span></div>
+        </div>
+        <div class="card kp-toolbar">
+          <div class="kp-row" role="group" aria-label="Vista del módulo">
+            <span class="kp-l">Vista</span>
+            <button type="button" class="kp-tab" data-kpvista="ejecutiva">Ejecutiva · 6 KPIs</button>
+            <button type="button" class="kp-tab" data-kpvista="ampliada">Ampliada · Anexo L</button>
+            <span class="kp-sep" aria-hidden="true"></span>
+            <button type="button" class="btn" id="kpPresent"><svg class="i"><use href="#i-play"/></svg>Modo sustentación</button>
+            <button type="button" class="btn sec" id="kpFull">Pantalla completa</button>
+            <button type="button" class="btn sec" id="kpCsv">Exportar CSV</button>
+          </div>
+          <div class="kp-row" role="group" aria-label="Fuente de los indicadores">
+            <span class="kp-l">Fuente</span>
+            <button type="button" class="kp-tab" data-kpsrc="proto">Situación inicial del prototipo (datos actuales)</button>
+            <span class="kp-sep" aria-hidden="true"></span>
+            <span class="kp-l">Escenarios simulados</span>
+            <button type="button" class="kp-tab" data-kpsrc="m6">Mes 6 · compuerta 1</button>
+            <button type="button" class="kp-tab" data-kpsrc="m14">Mes 14 · piloto y deriva</button>
+            <button type="button" class="kp-tab" data-kpsrc="m18">Mes 18 · evaluación</button>
+            <button type="button" class="kp-tab" data-kpsrc="custom" hidden>Personalizado</button>
+            <button type="button" class="btn sec sm" id="kpReset">Restablecer escenario</button>
+          </div>
+          <div class="kp-row" role="group" aria-label="Filtros">
+            <span class="kp-l">Filtros</span>
+            <select class="kp-sel" id="kpFNivel" aria-label="Filtrar por nivel"><option value="">Todos los niveles</option><option value="tec">Técnico</option><option value="pro">Producto</option><option value="neg">Negocio</option></select>
+            <select class="kp-sel" id="kpFEstado" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="cumple">Cumple</option><option value="vigilancia">Vigilancia</option><option value="accion">Acción requerida</option><option value="pendiente">Pendiente o informativo</option></select>
+          </div>
+          <div class="kp-head" id="kpHead" aria-live="polite"></div>
+          <div class="kp-sum" id="kpSum"></div>
+        </div>
+        <div id="kpExec" style="margin-top:14px">
+          <div class="kp-levels" id="kpGrid"></div>
+        </div>
+        <div id="kpAmp" style="margin-top:14px" hidden>
+          <div class="card"><div class="card-h"><div><h2>Indicadores del Anexo L</h2><p>Fichas tomadas de las Tablas L1, L2, L3 y L5. Los seis KPIs de la vista ejecutiva usan la fuente seleccionada; los demás muestran solo lo que el prototipo puede calcular con sus propios registros.</p></div></div>
+          <div class="kp-tbl-wrap"><table class="kp-tbl" id="kpTbl"></table></div></div>
+        </div>
+        <div class="kp-panels" style="margin-top:14px">
+          <div class="card"><div class="card-h"><div><h2>Modelo y compuertas del roadmap</h2><p>Evaluación consolidada e informativa (sección 2.3 y Tabla N1).</p></div></div><div id="kpModel" class="kp-model"></div><div id="kpGates" class="kp-gates"></div><div id="kpGateCtl"></div></div>
+          <div class="card"><div class="card-h"><div><h2>Brechas frente a la meta</h2><p>Valor (círculo) y meta (línea) de cada KPI ejecutivo en su propia escala.</p></div></div><div id="kpGap" class="kp-gp"></div></div>
+        </div>
+        <div class="card" style="margin-top:14px"><div class="card-h"><div><h2>Comparación entre escenarios</h2><p>Mismos seis KPIs y reglas en cada escenario simulado.</p></div><span class="badge b-sim">Simulación</span></div><div class="kp-tbl-wrap"><table class="kp-tbl" id="kpCmp"></table></div></div>
+        <div class="card" style="margin-top:14px" id="kpAccCard">
+          <div class="card-h"><div><h2>Acciones que exige el tablero</h2><p>Indicadores fuera de umbral en la vista actual. <span class="kp-count" id="kpCount"></span></p></div><span class="badge b-auto">Regla de decisión</span></div>
+          <div class="kp-acc" id="kpAcc"></div>
+          <h3 style="margin:6px 0 0;font-size:.9rem">Registro local de acciones correctivas simuladas</h3>
+          <div class="kp-tbl-wrap"><table class="kp-tbl kp-log" id="kpLog"></table></div>
+          <p class="foot">El registro se guarda solo en este navegador (almacenamiento local). No es una auditoría institucional, no se comparte entre dispositivos y no se envía a Firebase.</p>
+        </div>
+        <p class="foot" style="margin-top:12px">Tipos de dato: <b>simulación académica</b> (escenarios), <b>datos simulados de la demostración local</b>, <b>registros académicos compartidos</b> (Firebase), <b>datos experimentales de laboratorio</b> (banco de pruebas) y <b>metas proyectadas</b>. Los <b>datos municipales reales</b> están pendientes: ninguna meta puede declararse alcanzada antes de la línea base del sprint 4. La exactitud de laboratorio del modelo no se usa como exactitud en campo (Tabla L4).</p>
+      </section>
+      <div class="kp-present" id="kpPres" hidden role="dialog" aria-modal="true" aria-labelledby="kpPresT">
+        <div class="kp-ptop"><div><div class="eyebrow">FlotaIA · Sustentación</div><h1 id="kpPresT">De los indicadores a las decisiones</h1></div>
+          <div class="kp-row"><span class="kp-simtag">Simulación académica</span><button type="button" class="kp-tab" data-kppres="m18">Escenario favorable · mes 18</button><button type="button" class="kp-tab" data-kppres="m14">Escenario crítico · mes 14</button><button type="button" class="btn sec sm" id="kpPresDeriva">Simular deriva</button><button type="button" class="btn sm" id="kpPresClose">Salir (Esc)</button></div></div>
+        <div class="kp-head" id="kpPresHead"></div>
+        <div class="kp-levels" id="kpPresGrid"></div>
+      </div>
 
       <!-- ================= F. DEMOSTRACIÓN ================= -->
       <section class="view" id="v-demo" aria-labelledby="h-demo" hidden>
@@ -2252,7 +2405,7 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
   }
   function renderAll() {
     const K = calc(), A = amb(K.F);
-    renderResumen(K, A); renderFlota(K); renderMant(); renderAer(); renderDocs(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K); renderImpactLab(); renderIPIM(); renderStudio(K); renderTwin(K); renderHeroRoutes(K);
+    renderResumen(K, A); renderFlota(K); renderMant(); renderAer(); renderDocs(); renderAnalisis(); renderAmb(K, A); renderHC(); renderDetalle(K); renderImpactLab(); renderIPIM(); renderStudio(K); renderTwin(K); renderHeroRoutes(K); if (vista === 'kpi' && $('kpc-exa')) kpPintarTarjetas();
     $('clock').textContent = (modoCompartido?'Órdenes compartidas · ':'Simulación local · ') + fechaHora(new Date().toISOString());
     if (typeof actualizarFuente === 'function') actualizarFuente();
     return { K, A };
@@ -2271,7 +2424,7 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
   $('confNo').addEventListener('click', () => cerrarConf(false));
 
   // ---------- navegación ----------
-  const VIEWS = { resumen: 'Resumen ejecutivo', flota: 'Gestión de flota', mantenimiento: 'Mantenimiento y órdenes de trabajo', analisis: 'Análisis inteligente', ambiental: 'Impacto ambiental', huella: 'Huella de carbono de la flota', decisiones: 'Centro de decisiones', impacto: 'Simulador de impacto', gemelo: 'Gemelo operativo', studio: 'Observatorio visual', demo: 'Demostración guiada C-03' };
+  const VIEWS = { resumen: 'Resumen ejecutivo', flota: 'Gestión de flota', mantenimiento: 'Mantenimiento y órdenes de trabajo', analisis: 'Análisis inteligente', ambiental: 'Impacto ambiental', huella: 'Huella de carbono de la flota', decisiones: 'Centro de decisiones', impacto: 'Simulador de impacto', gemelo: 'Gemelo operativo', studio: 'Observatorio visual', kpi: 'Dashboard de KPIs', demo: 'Demostración guiada C-03' };
   let vista = 'resumen';
   function ir(v, sinScroll) {
     if (!VIEWS[v]) v = 'resumen';
@@ -2281,7 +2434,7 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
     if (location.hash !== '#' + v) { try { history.replaceState(null, '', '#' + v); } catch (e) {} }
     menu(false); if (!sinScroll) window.scrollTo({ top: 0 });
     if (v === 'resumen') $('rDispChart').innerHTML = dispChart(calc().lv);
-    if (v === 'gemelo') renderTwin(calc()); if (v === 'huella') renderHC(); if (v === 'decisiones' || v === 'impacto') renderImpactLab();
+    if (v === 'gemelo') renderTwin(calc()); if (v === 'huella') renderHC(); if (v === 'decisiones' || v === 'impacto') renderImpactLab(); if (v === 'kpi') renderKPI();
   }
   let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (vista === 'resumen') $('rDispChart').innerHTML = dispChart(calc().lv); if (vista === 'huella') renderHC(); }, 150); });
   function menu(abrir) { $('side').classList.toggle('open', abrir); $('scrim').hidden = !abrir; $('btnMenu').setAttribute('aria-expanded', abrir ? 'true' : 'false'); }
@@ -2790,6 +2943,403 @@ ${t.sinDatos ? '<h2>Resultados</h2><p><b>Sin datos</b> para el filtro elegido.</
   const svFilter={sort:'unidad',asc:true};
   function svDisp(unit){if(modoCompartido)return dispU(unit);const os=S.ots.filter(o=>o.unidad===unit);const par=os.reduce((n,o)=>n+horasParada(o),0);return Math.max(0,Math.min(100,(H_U-par)/H_U*100));}
   function svRows(){return UNITS.map(u=>{const n=nivel(u);return {unidad:u,estado:n,confianza:modoCompartido?0:S.unidades[u].pred.confianza*100,ot:S.ots.filter(o=>o.unidad===u&&o.estado!=='resuelta').length,disp:svDisp(u)};});}
+
+  // ================= DASHBOARD DE KPIs (sustentación) =================
+  // Módulo de solo lectura: lee el estado del escritorio (S y las banderas de la operación compartida),
+  // no escribe en Firebase y no cambia unidades, órdenes ni el modelo. Fuente académica: sección 7 y Anexo L.
+  const KPF = { esc: 'Simulación académica (escenario)', loc: 'Datos simulados de la demostración local', fb: 'Registros académicos compartidos (Firebase)', lab: 'Datos experimentales de laboratorio', meta: 'Meta proyectada', mun: 'Datos municipales reales: pendientes' };
+  const KPE = { cumple: 'Cumple', vigilancia: 'Vigilancia', accion: 'Acción requerida', pendiente: 'Pendiente', info: 'Informativo' };
+  const KPL = { tec: ['Técnico', '¿Funcionan el modelo y los datos?'], pro: ['Producto', '¿El personal usa el sistema y actúa?'], neg: ['Negocio y valor público', '¿Mejora el servicio?'] };
+  const kpNum = (v, d = 0) => fmt(v, d);
+  const kpPct = (v, d = 0) => kpNum(v, d) + ' %';
+  const kpSig = (v, d = 0) => (v > 0 ? '+' : v < 0 ? '−' : '') + kpNum(Math.abs(v), d);
+
+  // ---- PSI reproducible: referencia = 60 ciclos del banco; semana actual = mezcla con ciclos desplazados +1 σ ----
+  // PSI = Σ (p_act − p_ref) · ln(p_act / p_ref), 5 intervalos por quintiles de la referencia, ε = 0.0001.
+  function kpPSI(w) {
+    const una = j => {
+      const ref = CICLOS.map(k => k.x[j]), n = ref.length, B = 5, r = [...ref].sort((a, b) => a - b);
+      const media = ref.reduce((s, v) => s + v, 0) / n, sd = Math.sqrt(ref.reduce((s, v) => s + (v - media) ** 2, 0) / n);
+      const bordes = Array.from({ length: B - 1 }, (_, q) => r[Math.floor(n * (q + 1) / B)]);
+      const dist = a => { const c = new Array(B).fill(0); a.forEach(v => { c[bordes.filter(e => v > e).length]++; }); return c.map(x => x / a.length); };
+      const pr = dist(ref), ps = dist(ref.map(v => v + sd)), pa = pr.map((p, i) => (1 - w) * p + w * ps[i]);
+      return pr.reduce((s, p, i) => { const a = Math.max(pa[i], 1e-4), e = Math.max(p, 1e-4); return s + (a - e) * Math.log(a / e); }, 0);
+    };
+    const se = una(0), fs = una(1);
+    return { se, fs, v: Math.max(se, fs) };
+  }
+
+  // ---- seis KPIs ejecutivos (Tablas L1, L2, L3 y L5) ----
+  const KP6 = [
+    { id: 'exa', lvl: 'tec', n: 'Exactitud del modelo en campo', meta: '≥ 85 %', f: 'Clasificaciones correctas respecto de una condición de referencia verificada por el taller / total de casos evaluados × 100, en las unidades piloto', fuente: 'Validación del taller', frec: 'Semanal', resp: 'Analista de datos', lb: 'Pendiente (laboratorio: 99.05 %, no comparable)', umbral: '< 85 % dos semanas seguidas → el modelo deja de emitir alertas y se reentrena', ref: 'Tablas L1 y L5', esc: [60, 100], meta0: 85 },
+    { id: 'psi', lvl: 'tec', n: 'Deriva del modelo (PSI de SE y FS1)', meta: '< 0.1', f: 'Índice de estabilidad poblacional de SE y FS1 entre el entrenamiento y la última semana', fuente: 'Registro de ciclos', frec: 'Semanal', resp: 'Analista de datos', lb: 'Pendiente', umbral: '> 0.2 → reentrenar con datos recientes antes de seguir usando las alertas', ref: 'Tabla L1 y sección 7.4', esc: [0, 0.5], meta0: 0.1 },
+    { id: 'dig', lvl: 'pro', n: 'Órdenes registradas en forma digital', meta: '≥ 90 %', f: 'Órdenes digitales / órdenes totales × 100', fuente: 'Bot y registro del taller', frec: 'Semanal', resp: 'Jefe de taller', lb: 'Pendiente', umbral: '< 90 % en la semana 24 → no se avanza a la fase 2 (compuerta 1)', ref: 'Tabla L2', esc: [40, 100], meta0: 90 },
+    { id: 'a72', lvl: 'pro', n: 'Alertas atendidas en 72 horas', meta: '≥ 80 %', f: 'Alertas atendidas en 72 h o menos / alertas emitidas × 100; mediana de horas entre alerta y atención', fuente: 'Tablero', frec: 'Semanal', resp: 'Jefe de taller', lb: 'Pendiente', umbral: '< 80 % → revisión de plazos en la reunión semanal y escalamiento a la subgerencia', ref: 'Tablas L2 y L5', esc: [40, 100], meta0: 80 },
+    { id: 'p7', lvl: 'neg', n: 'Pedidos sin respuesta por más de 7 días', meta: '0', f: 'Órdenes abiertas con más de 7 días sin programar (n.°)', fuente: 'Tablero', frec: 'Semanal', resp: 'Subgerente de gestión ambiental', lb: 'Pendiente (sprint 4). Antecedente no comparable: 11 pedidos sin atender desde nov. 2024, de antigüedad no verificada', umbral: '> 0 → escalamiento inmediato al subgerente', ref: 'Tablas L3 y L5', esc: [0, 11], meta0: 0 },
+    { id: 'emi', lvl: 'neg', n: 'Intensidad de emisiones', meta: '−10 % de kg CO₂e/t frente a la línea base', f: 'kg CO₂e / toneladas recolectadas, solo con registros que tienen diésel y toneladas del mismo turno; CO₂e (kg) = litros × 2.718', fuente: 'Vales de combustible y pesaje', frec: 'Mensual', resp: 'Subgerencia de gestión ambiental', lb: 'Pendiente (prototipo: 3.6 kg CO₂e/t, simulado)', umbral: 'Una unidad > 10 % sobre la media de la flota → revisión mecánica de esa unidad', ref: 'Tablas L3 y L5; Anexo M.1.3', esc: [-20, 10], meta0: -10 }
+  ];
+
+  // ---- escenarios simulados (valores académicos, no resultados) ----
+  const KP_ESC = {
+    m6: { nombre: 'Mes 6 · compuerta 1', mes: 6, ctx: 'Cierre de la fase 1 (semana 24): registro digital y MVP sin sensores.', exa: null, exaSem: 0, psiW: null, sens: null, dig: 84, lb: true, dias: null, a72: 71, p7: 2, emiVar: 1, emiU: 'C-03', emiUPct: 16.5 },
+    m14: { nombre: 'Mes 14 · piloto y deriva', mes: 14, ctx: 'Fase 2: modelo reentrenado con datos de dos unidades piloto.', exa: 82, exaSem: 1, psiW: 31, sens: 92, dig: 93, lb: true, dias: 94, a72: 74, p7: 0, emiVar: -4, emiU: 'C-03', emiUPct: 16.5 },
+    m18: { nombre: 'Mes 18 · evaluación', mes: 18, ctx: 'Evaluación de la compuerta 3: desempeño del modelo en campo.', exa: 88, exaSem: 0, psiW: 15, sens: 96, dig: 95, lb: true, dias: 95, a72: 86, p7: 0, emiVar: -11, emiU: 'C-03', emiUPct: 6 }
+  };
+  const kp = { vista: 'ejecutiva', src: 'proto', custom: null, customBase: null, fN: '', fE: '', anim: null, pres: false };
+
+  // ---- estado de los datos del escritorio (sin consultar Firebase: solo se leen las banderas existentes) ----
+  function kpOrdenes() {
+    if (!modoCompartido) return { ok: true, fuente: KPF.loc };
+    if (errorCompartido) return { ok: false, et: 'Consulta no disponible', nota: 'La consulta compartida informó un problema de acceso o conexión.' };
+    if (!perfilCompartido) return { ok: false, et: 'Esperando confirmación del servidor', nota: 'Aún no se reciben las órdenes compartidas (o no hay sesión iniciada).' };
+    if (!datosConfirmados) return { ok: false, cache: true, et: 'Datos en caché sin confirmar', nota: 'Las órdenes provienen de la caché del navegador; se espera la confirmación del servidor.' };
+    return { ok: true, fuente: KPF.fb };
+  }
+  function kpColeccion(c) {
+    if (!modoCompartido) return { ok: true, fuente: KPF.loc };
+    if (errorCompartido) return { ok: false, et: 'Consulta no disponible', nota: 'La consulta compartida informó un problema de acceso o conexión.' };
+    if (!registrosRecibidos.has(c)) return { ok: false, et: 'Esperando confirmación del servidor', nota: 'La colección todavía no se ha recibido.' };
+    // El escritorio no recibe la marca servidor/caché de esta colección: el dato se muestra, pero no se declara cumplimiento.
+    return { ok: true, sinConfirmar: true, fuente: KPF.fb };
+  }
+  const kpPend = (et, nota, fuente) => ({ st: 'pendiente', et, val: et, nota, fuente: fuente || KPF.mun, gap: 'Sin brecha calculable', v: null });
+
+  // ---- evaluación de los seis KPIs en un escenario ----
+  function kpEvalEsc(d, V) {
+    const r = { fuente: KPF.esc, v: null };
+    const fin = (st, val, v, gap, acc, nota) => Object.assign(r, { st, val, v, gap, acc, nota: nota || '' });
+    if (d.id === 'exa') {
+      const v = V.exa;
+      if (v == null) return Object.assign(kpPend('Indicador no aplicable en esta fase', 'Sin sensores en unidades piloto: todavía no hay casos verificados por el taller.', KPF.esc), { acc: 'Ninguna por este indicador.' });
+      if (v >= 85) return fin('cumple', kpPct(v), v, `Margen de ${kpNum(v - 85)} pts sobre la meta`, 'Sin acción por este indicador.', 'Exactitud de la última semana sobre casos verificados (simulada).');
+      if (V.exaSem >= 2) return fin('accion', kpPct(v), v, `${kpNum(85 - v)} pts bajo la meta`, 'El modelo deja de emitir alertas y se reentrena.', 'Dos semanas consecutivas bajo la meta.');
+      return fin('vigilancia', kpPct(v), v, `${kpNum(85 - v)} pts bajo la meta`, 'Vigilancia: si la próxima semana sigue bajo 85 %, el modelo deja de emitir alertas y se reentrena.', 'Primera semana bajo la meta (una semana no activa la regla).');
+    }
+    if (d.id === 'psi') {
+      if (V.psiW == null) return Object.assign(kpPend('Indicador no aplicable en esta fase', 'Sin lecturas de sensores en campo no hay distribución actual que comparar.', KPF.esc), { acc: 'Ninguna por este indicador.' });
+      const P = kpPSI(V.psiW / 100), v = Math.round(P.v * 100) / 100;
+      const nota = `PSI simulado: SE ${kpNum(P.se, 2)} · FS1 ${kpNum(P.fs, 2)}. Referencia: 60 ciclos del banco de pruebas; semana actual: ${kpNum(V.psiW)} % de los ciclos desplazados +1 desviación estándar. No proviene de sensores reales.`;
+      if (v < 0.1) return fin('cumple', kpNum(v, 2), v, `Margen de ${kpNum(0.1 - v, 2)} bajo 0.1`, 'Sin acción: datos estables.', nota);
+      if (v <= 0.2) return fin('vigilancia', kpNum(v, 2), v, `${kpNum(v - 0.1, 2)} sobre la meta`, 'Vigilancia y revisión semanal de la distribución; el informe fija el reentrenamiento solo por encima de 0.2.', nota);
+      return fin('accion', kpNum(v, 2), v, `${kpNum(v - 0.1, 2)} sobre la meta`, 'Reentrenar con datos recientes antes de seguir usando las alertas.', nota);
+    }
+    if (d.id === 'dig') {
+      const v = V.dig;
+      if (v >= 90) return fin('cumple', kpPct(v), v, `Margen de ${kpNum(v - 90)} pts`, 'Sin acción. Cumple el criterio de órdenes digitales; la compuerta 1 también exige la línea base.', '');
+      if (V.mes >= 6) return fin('accion', kpPct(v), v, `${kpNum(90 - v)} pts bajo la meta`, 'No se cumple la compuerta 1: no se avanza a la fase 2; se corrige el proceso o el canal de reporte.', 'Medición en la semana 24 o después.');
+      return fin('vigilancia', kpPct(v), v, `${kpNum(90 - v)} pts bajo la meta`, 'La regla se aplica en la semana 24.', '');
+    }
+    if (d.id === 'a72') {
+      const v = V.a72;
+      if (v >= 80) return fin('cumple', kpPct(v), v, `Margen de ${kpNum(v - 80)} pts`, 'Sin acción.', '');
+      return fin('accion', kpPct(v), v, `${kpNum(80 - v)} pts bajo la meta`, 'Revisión de plazos en la reunión semanal y escalamiento a la subgerencia.', '');
+    }
+    if (d.id === 'p7') {
+      const v = V.p7;
+      if (v === 0) return fin('cumple', '0', 0, 'Meta alcanzada', 'Sin acción.', '');
+      return fin('accion', kpNum(v), v, `${kpNum(v)} pedido(s) sobre la meta`, 'Escalamiento inmediato al subgerente de gestión ambiental.', '');
+    }
+    // emisiones: comparación con la media de la flota (umbral de acción) ≠ variación frente a la línea base (meta)
+    const u = V.emiUPct != null && V.emiUPct > 10 ? V.emiU : null;
+    r.sub = [['Emisiones totales', 'No incluidas en el escenario'], ['Intensidad (kg CO₂e/t)', 'No incluida en el escenario'],
+      ['Variación vs. línea base', V.emiVar == null ? 'Línea base municipal pendiente' : kpSig(V.emiVar) + ' %'],
+      ['Unidad vs. media de la flota', V.emiU && V.emiUPct != null ? `${V.emiU}: ${kpSig(V.emiUPct, 1)} %` : 'Ninguna unidad sobre el umbral']];
+    const metaOk = V.emiVar != null && V.emiVar <= -10;
+    const gap = V.emiVar == null ? 'Sin línea base' : metaOk ? `Margen de ${kpNum(-10 - V.emiVar)} pts` : `Faltan ${kpNum(V.emiVar + 10)} pts para −10 %`;
+    const val = V.emiVar == null ? 'Sin línea base' : kpSig(V.emiVar) + ' %';
+    if (u) return fin('accion', val, V.emiVar, gap, `Revisión mecánica de ${u} (supera en más de 10 % la media de la flota).`, metaOk ? 'La flota alcanza la meta, pero una unidad supera el umbral.' : 'Meta de flota no alcanzada y una unidad sobre el umbral.');
+    if (V.emiVar == null) return Object.assign(kpPend('Línea base municipal pendiente', 'La meta de −10 % requiere una línea base comparable.', KPF.esc), { acc: 'Sin acción por unidad.', sub: r.sub });
+    if (metaOk) return fin('cumple', val, V.emiVar, gap, 'Sin acción.', 'Ninguna unidad supera en más de 10 % la media.');
+    return fin('vigilancia', val, V.emiVar, gap, 'Seguimiento mensual. Ninguna unidad supera el umbral de acción; el informe no fija otra acción para la meta de flota.', '');
+  }
+
+  // ---- evaluación de los seis KPIs con los datos del prototipo ----
+  function kpEvalProto(d) {
+    const H = 36e5, ahora = Date.now(), ms = t => { const n = Date.parse(t); return Number.isFinite(n) ? n : null; };
+    if (d.id === 'exa') return Object.assign(kpPend('No medible todavía', 'No hay casos verificados por el taller. Las lecturas del prototipo son ciclos del banco de laboratorio: su exactitud no sustituye la exactitud en campo.', KPF.lab), { acc: 'Se medirá con las unidades piloto (fase 2).' });
+    if (d.id === 'psi') return Object.assign(kpPend('No medible todavía', 'Sin sensores en campo no existe la distribución de la última semana. Use un escenario para ver la simulación reproducible del cálculo.', KPF.lab), { acc: 'Se medirá con las unidades piloto (fase 2).' });
+    if (d.id === 'dig') return Object.assign(kpPend('Datos insuficientes', 'El prototipo solo conoce las órdenes que se registran en él; falta el total de órdenes del taller (incluidas las de papel) para el denominador.', KPF.mun), { acc: 'Se medirá con el registro del taller (sprint 4).' });
+    if (d.id === 'a72') {
+      const n = S.ots.filter(o => o.motor === 'modelo').length;
+      return Object.assign(kpPend('Datos insuficientes', `Las alertas no tienen un identificador vinculado a la orden y a la hora de atención, por lo que no se usan las órdenes altas o medias como alertas emitidas.${n ? ` Órdenes generadas por el modelo en el prototipo: ${n}.` : ''}`, modoCompartido ? KPF.fb : KPF.loc), { acc: 'Requiere trazabilidad alerta → orden → atención.' });
+    }
+    if (d.id === 'p7') {
+      const E = kpOrdenes();
+      const cuenta = () => S.ots.filter(o => o.estado === 'pendiente' && ms(o.creada) != null && ahora - ms(o.creada) > 7 * 24 * H).length;
+      if (!E.ok) return Object.assign(kpPend(E.et, E.nota + (E.cache ? ` Valor en caché, sin confirmar: ${cuenta()}.` : ''), KPF.fb), { acc: 'Sin acción hasta confirmar los datos.' });
+      if (!S.ots.length) return Object.assign(kpPend('Datos insuficientes', modoCompartido ? 'Colección de órdenes vacía confirmada por el servidor: no hay pedidos que evaluar.' : 'No hay órdenes en la demostración local.', E.fuente), { acc: 'Sin acción.' });
+      const v = cuenta();
+      return { st: v > 0 ? 'accion' : 'cumple', val: kpNum(v), v, fuente: E.fuente, gap: v > 0 ? `${v} pedido(s) sobre la meta` : 'Meta alcanzada', acc: v > 0 ? 'Escalamiento inmediato al subgerente de gestión ambiental.' : 'Sin acción.', nota: `Órdenes en estado Pendiente con más de 7 días desde su registro, de ${S.ots.length} órdenes.` };
+    }
+    // emisiones
+    const E = kpColeccion('combustible');
+    if (!E.ok) return Object.assign(kpPend(E.et, E.nota, KPF.fb), { acc: 'Sin acción hasta recibir los datos.' });
+    const filas = hcFilas(), origen = hcOrigenActivo(filas), base = AMB.filtrar(filas, { origen });
+    const meses = [...new Set(base.map(r => r.periodo))].filter(Boolean).sort(), per = meses[meses.length - 1];
+    if (!per) return Object.assign(kpPend('Datos insuficientes', 'No hay cargas de combustible registradas.', E.fuente), { acc: 'Sin acción.' });
+    const R = AMB.resumen(base.filter(r => r.periodo === per), UNITS), t = R.tot;
+    const fuente = modoCompartido ? `${KPF.fb} · ${ORIGENES()[origen]}` : KPF.loc;
+    let peor = null;
+    if (t.int) R.porU.forEach(q => { if (q.int != null) { const dd = (q.int / t.int - 1) * 100; if (!peor || dd > peor.d) peor = { u: q.u, d: dd }; } });
+    const sub = [['Emisiones totales', `${kpNum(t.co2e / 1000, 2)} t CO₂e (${mesTxt(per)})`], ['Intensidad (kg CO₂e/t)', t.int == null ? 'Sin registros compatibles de diésel y toneladas del mismo turno' : `${kpNum(t.int, 2)} · ${t.unidadesCompatibles} de ${t.totalUnidades} unidades con datos compatibles`],
+      ['Variación vs. línea base', 'Línea base municipal pendiente'], ['Unidad vs. media de la flota', peor ? `${peor.u}: ${kpSig(peor.d, 1)} %` : 'Sin comparación posible']];
+    if (t.int == null) return Object.assign(kpPend('Datos insuficientes', 'No hay bloques con diésel y toneladas del mismo turno en el último periodo.', fuente), { acc: 'Sin acción.', sub });
+    const sobre = peor && peor.d > 10;
+    if (E.sinConfirmar) return Object.assign(kpPend('Pendiente de confirmación del servidor', `El escritorio no recibe la marca servidor/caché de los registros de combustible.${sobre ? ` ${peor.u} supera en más de 10 % la media (por confirmar).` : ''}`, fuente), { acc: sobre ? `Por confirmar: revisión mecánica de ${peor.u}.` : 'Sin acción.', sub, val: kpNum(t.int, 2) + ' kg CO₂e/t' });
+    if (sobre) return { st: 'accion', val: kpNum(t.int, 2) + ' kg CO₂e/t', v: null, fuente, gap: 'Variación vs. línea base no calculable', acc: `Revisión mecánica de ${peor.u} (supera en más de 10 % la media de la flota).`, nota: 'La meta de −10 % requiere la línea base municipal.', sub };
+    return Object.assign(kpPend('Línea base municipal pendiente', 'Ninguna unidad supera en más de 10 % la media; la meta de −10 % requiere la línea base.', fuente), { acc: 'Sin acción por unidad.', sub, val: kpNum(t.int, 2) + ' kg CO₂e/t' });
+  }
+
+  const kpV = () => kp.src === 'custom' ? kp.custom : KP_ESC[kp.src];
+  const kpEval = (d, src) => { const s = src || kp.src; return s === 'proto' ? kpEvalProto(d) : kpEvalEsc(d, s === 'custom' ? kp.custom : KP_ESC[s]); };
+
+  // ---- modelo y compuertas (lógica consolidada, solo informativa) ----
+  function kpCompuertas(V) {
+    if (!V) {
+      const g = n => ({ n, res: 'No evaluable con el prototipo', st: 'pendiente', crit: [], si: '' });
+      return { modelo: { st: 'pendiente', c: 'Sin modelo en campo', t: 'Sin modelo en campo: el prototipo usa ciclos de laboratorio y no tiene sensores en unidades piloto. Las alertas del modelo solo ilustran el flujo.' },
+        gates: [g('Compuerta 1 · registro digital (semana 24)'), g('Compuerta 2 · datos piloto (mes 12)'), g('Compuerta 3 · modelo en campo (mes 18)'), g('Compuerta 4 · escala (meses 18–36)')] };
+    }
+    const psi = V.psiW == null ? null : kpPSI(V.psiW / 100).v;
+    const eva = (mes, crit, si) => {
+      if (V.mes < mes) return { res: `Aún no corresponde (mes ${mes})`, st: 'pendiente', crit, si };
+      if (crit.some(c => c.ok == null)) return { res: 'No evaluable: faltan datos', st: 'pendiente', crit, si };
+      const ok = crit.every(c => c.ok);
+      return { res: ok ? 'Superada' : 'No superada', st: ok ? 'cumple' : 'accion', crit, si };
+    };
+    const g1 = eva(6, [{ t: `Órdenes digitales ≥ 90 % (${kpPct(V.dig)})`, ok: V.dig >= 90 }, { t: 'Línea base de disponibilidad, MTBF y MTTR', ok: V.lb }], 'Si no se cumple: no se compran GPS ni sensores; se corrige el proceso o el canal de reporte.');
+    const g2 = eva(12, [{ t: `Tres meses de datos de dos unidades piloto con ≥ 90 % de días completos y etiquetados (${V.dias == null ? 'sin dato' : kpPct(V.dias)})`, ok: V.dias == null ? null : V.dias >= 90 }], 'Si no se cumple: se prolonga la captura y no se reentrena el modelo.');
+    const g3 = eva(18, [{ t: `Exactitud en campo ≥ 85 % (${V.exa == null ? 'sin dato' : kpPct(V.exa)})`, ok: V.exa == null ? null : V.exa >= 85 }, { t: `Sensibilidad para fuga severa ≥ 95 % (${V.sens == null ? 'sin dato' : kpPct(V.sens)})`, ok: V.sens == null ? null : V.sens >= 95 }], 'Si no se cumple: las alertas siguen como apoyo y no generan órdenes.');
+    const g4 = { res: 'No evaluada en los escenarios', st: 'pendiente', crit: [{ t: 'Concordancia del IPIM ≥ 80 % con el taller', ok: null }, { t: 'Gemelo alimentado por GPS y rutas oficiales', ok: null }], si: 'Si no se cumple: el servicio no se ofrece a otras municipalidades.' };
+    let modelo;
+    if (V.exa == null && psi == null) modelo = { st: 'pendiente', c: 'Sin modelo en campo', t: 'Sin modelo en campo: todavía no hay sensores en unidades piloto.' };
+    else if ((psi != null && psi > 0.2) || (V.exa != null && V.exa < 85 && V.exaSem >= 2)) modelo = { st: 'accion', c: 'Alertas suspendidas', t: `Alertas del modelo suspendidas: ${psi != null && psi > 0.2 ? 'la deriva supera 0.2' : 'la exactitud está bajo 85 % dos semanas seguidas'}. Se reentrena antes de seguir usando las alertas.` };
+    else if (g3.res !== 'Superada') modelo = { st: 'vigilancia', c: 'Solo apoyo', t: `Alertas solo como apoyo: no generan órdenes mientras la compuerta 3 no esté superada.${(psi != null && psi >= 0.1) || (V.exa != null && V.exa < 85) ? ' Hay indicadores técnicos en vigilancia.' : ''}` };
+    else if ((psi != null && psi >= 0.1) || (V.exa != null && V.exa < 85)) modelo = { st: 'vigilancia', c: 'Habilitado en vigilancia', t: 'Alertas habilitadas para generar órdenes, con un indicador técnico en vigilancia.' };
+    else modelo = { st: 'cumple', c: 'Habilitado', t: 'Alertas habilitadas para generar órdenes: compuerta 3 superada y sin deriva crítica.' };
+    return { modelo, gates: [Object.assign({ n: 'Compuerta 1 · registro digital (semana 24)' }, g1), Object.assign({ n: 'Compuerta 2 · datos piloto (mes 12)' }, g2), Object.assign({ n: 'Compuerta 3 · modelo en campo (mes 18)' }, g3), Object.assign({ n: 'Compuerta 4 · escala (meses 18–36)' }, g4)] };
+  }
+
+  // ---- indicadores ampliados del Anexo L (además de los seis) ----
+  const KP_NM = (et, nota) => () => kpPend(et, nota);
+  const KPX = [
+    { id: 'sens', lvl: 'tec', n: 'Sensibilidad para fuga severa', meta: '≥ 95 %', f: 'Fugas severas detectadas / fugas severas confirmadas × 100', fuente: 'Órdenes cerradas', frec: 'Mensual', resp: 'Analista de datos', lb: 'Pendiente', umbral: '< 95 % → bajar el umbral de probabilidad de la alerta roja y revisar variables', ref: 'Tabla L1', calc: KP_NM('No medible todavía', 'Requiere fugas severas confirmadas en las unidades piloto.') },
+    { id: 'cob', lvl: 'tec', n: 'Cobertura de datos', meta: '≥ 95 %', f: 'Ciclos con todos los sensores / ciclos esperados × 100', fuente: 'Telemetría', frec: 'Diaria', resp: 'Analista de datos', lb: 'Pendiente', umbral: '< 95 % durante 3 días → revisión de sensores y conectividad por el proveedor', ref: 'Tabla L1', calc: KP_NM('No medible todavía', 'El prototipo no tiene telemetría de sensores.') },
+    { id: 'adop', lvl: 'pro', n: 'Adopción', meta: '100 % al mes 3', f: 'Choferes que registraron al menos una orden / choferes activos × 100', fuente: 'Bot de órdenes', frec: 'Mensual', resp: 'Analista de datos', lb: 'Pendiente', umbral: '< 80 % → acompañamiento individual (acción Habilidad 1 del plan ADKAR)', ref: 'Tablas L2 y L5', calc: KP_NM('Datos insuficientes', 'Falta el padrón de choferes activos (denominador).') },
+    { id: 'act', lvl: 'pro', n: 'Activación', meta: '≥ 90 %', f: 'Órdenes sin campos obligatorios vacíos / órdenes registradas × 100', fuente: 'Bot de órdenes', frec: 'Semanal', resp: 'Analista de datos', lb: 'Pendiente', umbral: '< 90 % → simplificar el formulario con los usuarios referentes', ref: 'Tabla L2', calc: KP_NM('No medible todavía', 'Requiere el registro del bot de órdenes del MVP.') },
+    { id: 'ret', lvl: 'pro', n: 'Retención a 30 días', meta: '≥ 80 %', f: 'Choferes que reportan en el mes t y en el t + 1 / choferes que reportaron en t × 100', fuente: 'Bot de órdenes', frec: 'Mensual', resp: 'Analista de datos', lb: 'Pendiente', umbral: '< 80 % → entrevistar a quienes dejaron de reportar y corregir la causa', ref: 'Tabla L2', calc: KP_NM('No medible todavía', 'Requiere dos meses de reportes por chofer.') },
+    { id: 'acta', lvl: 'pro', n: 'Cumplimiento del acta de entrega-recepción', meta: '≥ 95 %', f: 'Salidas a ruta y cambios de unidad con acta completa / salidas y cambios registrados × 100', fuente: 'Módulo de actas y hoja de ruta', frec: 'Semanal', resp: 'Supervisor de rutas', lb: 'Línea base pendiente; no se dispone de registros municipales', umbral: '< 95 % → el supervisor verifica las salidas en la base y se refuerza la capacitación de los choferes', ref: 'Tablas L2 y L5', calc: () => kpPend('Datos insuficientes', `Falta la hoja de ruta con las salidas registradas (denominador).${(S.actas || []).length ? ` Actas registradas en el prototipo: ${(S.actas || []).length}.` : ''}`) },
+    { id: 'ipim', lvl: 'pro', n: 'Concordancia del IPIM', meta: '≥ 80 %', f: 'Decisiones en que la unidad programada primero por el taller es la primera según el IPIM / decisiones evaluadas con dos o más candidatas × 100', fuente: 'Acta de la reunión semanal', frec: 'Semanal', resp: 'Analista y jefe de taller', lb: 'Pendiente (piloto paralelo)', umbral: 'Criterio de la compuerta 4: < 80 % → el servicio no se ofrece a otras municipalidades', ref: 'Tabla L5', calc: KP_NM('No medible todavía', 'Requiere el piloto paralelo con el taller.') },
+    { id: 'util', lvl: 'pro', n: 'Utilidad de las decisiones sugeridas', meta: '≥ 70 %', f: 'Recomendaciones aceptadas o ejecutadas / recomendaciones emitidas × 100', fuente: 'Registro del motivo de cada decisión', frec: 'Mensual', resp: 'Jefe de taller', lb: 'Pendiente', umbral: 'El informe no define un umbral de acción', ref: 'Tabla L5', calc: KP_NM('No medible todavía', 'Requiere registrar el motivo de cada decisión.') },
+    { id: 'disp', lvl: 'neg', n: 'Disponibilidad de la flota (por horas)', meta: '≥ 90 %', f: '(Horas programadas − horas fuera de servicio) / horas programadas × 100', fuente: 'Órdenes y GPS', frec: 'Semanal', resp: 'Jefe de taller', lb: 'Pendiente (sprint 4)', umbral: '< 90 % dos semanas → análisis de causas de parada y priorización de repuestos', ref: 'Tablas L3 y L5',
+      calc: () => { if (modoCompartido) return kpPend('No medible todavía', 'La operación compartida informa unidades disponibles en un momento, no horas; no sirve para esta fórmula (Anexo L.1.1).', KPF.fb); const v = calc().disp; return { st: v >= 90 ? 'cumple' : 'vigilancia', val: kpPct(v, 1), v, fuente: KPF.loc, gap: v >= 90 ? 'Meta alcanzada' : `${kpNum(90 - v, 1)} pts bajo la meta`, acc: v >= 90 ? 'Sin acción.' : 'Vigilancia: la acción se activa con dos semanas bajo 90 %.', nota: 'Horas de parada simuladas del mes.' }; } },
+    { id: 'rutas', lvl: 'neg', n: 'Cobertura de rutas (continuidad del servicio)', meta: '≥ 98 %', f: 'Rutas atendidas / rutas programadas × 100', fuente: 'GPS y hoja de ruta', frec: 'Semanal (diaria en L5)', resp: 'Supervisor de rutas', lb: 'Pendiente (prototipo: 85.7 % en el paso 6, simulado)', umbral: '< 98 % → reasignar unidades y revisar las paradas de la semana', ref: 'Tablas L3 y L5',
+      calc: () => { const E = kpOrdenes(); if (!E.ok) return kpPend(E.et, E.nota, KPF.fb); const K = calc(), v = K.cub / UNITS.length * 100; return { st: v >= 98 ? 'cumple' : 'accion', val: kpPct(v, 1), v, fuente: E.fuente, gap: v >= 98 ? 'Meta alcanzada' : `${kpNum(98 - v, 1)} pts bajo la meta`, acc: v >= 98 ? 'Sin acción.' : 'Reasignar unidades y revisar las paradas de la semana.', nota: `${K.cub} de ${UNITS.length} rutas académicas en este momento (una por compactadora).` }; } },
+    { id: 'mtbf', lvl: 'neg', n: 'MTBF', meta: '+25 % frente a la línea base', f: 'Horas de operación / número de fallas', fuente: 'Hoja de vida', frec: 'Mensual', resp: 'Jefe de taller', lb: 'Pendiente', umbral: 'Sin mejora en dos meses → revisar el plan preventivo y el tiempo de espera de repuestos', ref: 'Tablas L3 y L5',
+      calc: () => { if (modoCompartido) return kpPend('No medible todavía', 'La operación compartida no tiene base de horas de operación.', KPF.fb); const v = calc().mtbf; return v == null ? kpPend('Datos insuficientes', 'No hay fallas registradas.', KPF.loc) : Object.assign(kpPend('Línea base municipal pendiente', 'Valor simulado; la meta se mide frente a la línea base.', KPF.loc), { val: kpNum(v, 0) + ' h' }); } },
+    { id: 'mttr', lvl: 'neg', n: 'MTTR', meta: '−20 % frente a la línea base', f: 'Horas de reparación / número de reparaciones', fuente: 'Órdenes de trabajo', frec: 'Mensual', resp: 'Jefe de taller', lb: 'Pendiente', umbral: 'Sin mejora en dos meses → revisar el plan preventivo y el tiempo de espera de repuestos', ref: 'Tablas L3 y L5',
+      calc: () => { const E = kpOrdenes(); if (!E.ok) return kpPend(E.et, E.nota, KPF.fb); const v = calc().mttr; return v == null ? kpPend('Datos insuficientes', 'No hay reparaciones cerradas con horas registradas.', E.fuente) : Object.assign(kpPend('Línea base municipal pendiente', 'La meta se mide frente a la línea base.', E.fuente), { val: kpNum(v, 1) + ' h' }); } },
+    { id: 'paradas', lvl: 'neg', n: 'Paradas no programadas', meta: '−30 %', f: 'Órdenes de prioridad alta no planificadas (n.° por mes)', fuente: 'Órdenes de trabajo', frec: 'Mensual', resp: 'Jefe de taller', lb: 'Pendiente', umbral: 'Sin reducción a 3 meses → revisar qué fallas no anticipó el plan preventivo', ref: 'Tabla L3',
+      calc: () => { const E = kpOrdenes(); if (!E.ok) return kpPend(E.et, E.nota, KPF.fb); const mes = new Date().toISOString().slice(0, 7), n = S.ots.filter(o => o.prioridad === 'alta' && String(o.creada || '').slice(0, 7) === mes).length; return Object.assign(kpPend('Línea base municipal pendiente', 'Órdenes altas del mes en curso; el prototipo no distingue si fueron planificadas.', E.fuente), { val: kpNum(n) + ' en el mes' }); } },
+    { id: 'puntos', lvl: 'neg', n: 'Puntos críticos de acumulación', meta: '−50 %', f: 'Puntos críticos activos (n.°); base: 16 identificados por el OEFA (Ramos, 2026)', fuente: 'Inspección y reportes vecinales', frec: 'Mensual', resp: 'Subgerencia de gestión ambiental', lb: '16 atribuidos al OEFA (dato de prensa; única referencia pública)', umbral: 'Sin reducción a los 6 meses → revisar frecuencias de recolección con fiscalización', ref: 'Tablas L3 y L5', calc: KP_NM('No medible todavía', 'El prototipo no registra puntos críticos.') },
+    { id: 'compras', lvl: 'neg', n: 'Compras de emergencia', meta: '−50 %', f: 'Órdenes de compra por emergencia (n.° por trimestre)', fuente: 'SEACE', frec: 'Trimestral', resp: 'Logística', lb: 'Pendiente', umbral: 'Sin reducción → ampliar el paquete de repuestos críticos del PAC', ref: 'Tabla L3', calc: KP_NM('No medible todavía', 'Requiere datos del SEACE.') },
+    { id: 'presup', lvl: 'neg', n: 'Ejecución del presupuesto de mantenimiento', meta: '≥ 90 %', f: 'Gasto devengado / presupuesto modificado × 100', fuente: 'Consulta Amigable del MEF', frec: 'Trimestral', resp: 'Planeamiento y logística', lb: 'Pendiente; el 60.15 % de 2024 corresponde a recolección y transporte y no es comparable', umbral: '< 75 % al tercer trimestre → reprogramar requerimientos pendientes', ref: 'Tabla L3', calc: KP_NM('No medible todavía', 'Requiere la Consulta Amigable con la meta de mantenimiento.') },
+    { id: 'diesel', lvl: 'neg', n: 'Diésel abastecido por tonelada', meta: '−10 %', f: 'Litros abastecidos / toneladas (registros compatibles del mismo turno)', fuente: 'Vales y pesaje', frec: 'Mensual', resp: 'Subgerencia de gestión ambiental', lb: 'Pendiente (prototipo: 1.33 L/t, simulado)', umbral: 'Una unidad > 10 % sobre la media → revisión mecánica de esa unidad', ref: 'Tablas L3 y L5',
+      calc: () => kpAmb(t => t.lpt == null ? null : kpNum(t.lpt, 2) + ' L/t') },
+    { id: 'gei', lvl: 'neg', n: 'Emisiones de GEI', meta: 'Reporte mensual', f: 'Litros abastecidos × 2.718 / 1 000', fuente: 'Vales de combustible', frec: 'Mensual', resp: 'Subgerencia de gestión ambiental', lb: 'Pendiente (prototipo: 53.3 t por trimestre, simulado)', umbral: 'El informe no define un umbral: la meta es reportar cada mes', ref: 'Tabla L5; Anexo M.1.3',
+      calc: () => kpAmb(t => t.cargas ? kpNum(t.co2e / 1000, 2) + ' t CO₂e' : null, true) },
+    { id: 'recl', lvl: 'neg', n: 'Reclamos vecinales', meta: '−40 %', f: 'Reclamos por falta de recolección (n.° por mes)', fuente: 'Mesa de partes y redes sociales', frec: 'Mensual', resp: 'Atención al ciudadano', lb: 'Pendiente', umbral: 'Sin reducción a 6 meses → cruzar reclamos con rutas no atendidas', ref: 'Tablas L3 y L5', calc: KP_NM('No medible todavía', 'El prototipo no registra reclamos.') },
+    { id: 'salidas', lvl: 'neg', n: 'Salidas con un punto crítico no conforme', meta: '0', f: 'Unidades que salieron a ruta con un punto crítico del acta marcado como no conforme (n.°)', fuente: 'Actas y hoja de ruta', frec: 'Semanal', resp: 'Supervisor de rutas', lb: 'Pendiente', umbral: '> 0 → la unidad se retira de inmediato, se investiga con el comité de seguridad y salud en el trabajo y se revisa la regla', ref: 'Tablas L3 y L5', calc: KP_NM('Datos insuficientes', 'Falta la hoja de ruta para confirmar qué unidades salieron.') },
+    { id: 'rrpp', lvl: 'neg', n: 'Residuos peligrosos entregados con manifiesto', meta: '100 %', f: 'Residuos peligrosos entregados a una EO-RS con manifiesto / residuos peligrosos generados × 100', fuente: 'Órdenes de trabajo y manifiestos', frec: 'Trimestral', resp: 'Jefe de taller', lb: 'Pendiente', umbral: '< 100 % → ubicar el residuo faltante, corregir el almacenamiento y revisar el servicio de la EO-RS', ref: 'Tablas L3 y L5', calc: KP_NM('No medible todavía', 'El campo de residuo generado se incorpora con el MVP; la V13.1 no lo incluye.') },
+    { id: 'docs', lvl: 'neg', n: 'Unidades con documento vencido', meta: '0', f: 'Unidades con SOAT, revisión técnica o extintor vencido (n.°)', fuente: 'Registro de vencimientos', frec: 'Semanal', resp: 'Logística', lb: 'Pendiente', umbral: '> 0 → la unidad no sale a ruta y se tramita la renovación; revisar por qué falló el aviso de 30 días', ref: 'Tablas L3 y L5',
+      calc: () => { const E = kpColeccion('documentos_unidad'); if (!E.ok) return kpPend(E.et, E.nota, KPF.fb); const v = VEH.filter(u => docVencido(u)).length; if (E.sinConfirmar) return Object.assign(kpPend('Pendiente de confirmación del servidor', 'El escritorio no recibe la marca servidor/caché de esta colección.', E.fuente), { val: kpNum(v) + ' (por confirmar)' }); return { st: v > 0 ? 'accion' : 'cumple', val: kpNum(v), v, fuente: E.fuente, gap: v > 0 ? `${v} unidad(es) sobre la meta` : 'Meta alcanzada', acc: v > 0 ? 'La unidad no sale a ruta y se tramita la renovación.' : 'Sin acción.', nota: `${VEH.length} unidades revisadas (SOAT, revisión técnica y extintor).` }; } },
+    { id: 'acci', lvl: 'neg', n: 'Accidentes e incidentes vinculados al estado de la unidad', meta: '0', f: 'Accidentes de trabajo e incidentes peligrosos cuya causa incluye una falla de la unidad (n.° por trimestre)', fuente: 'Registro de accidentes e incidentes (D. S. N.° 005-2012-TR)', frec: 'Trimestral', resp: 'Comité de seguridad y salud en el trabajo', lb: 'Pendiente', umbral: 'Cualquier caso → investigación de causas y actualización del IPERC y de la lista del acta', ref: 'Tablas L3 y L5', calc: KP_NM('No medible todavía', 'Requiere el registro oficial de accidentes e incidentes.') },
+    { id: 'conting', lvl: 'neg', n: 'Cobertura de rutas en contingencia', meta: '≥ 80 %', f: 'Rutas cubiertas con unidad o turno alternativo / rutas afectadas × 100', fuente: 'Registro de contingencias', frec: 'Mensual', resp: 'Supervisor de rutas', lb: 'Pendiente', umbral: 'El informe no define un umbral de acción', ref: 'Tabla L5', calc: KP_NM('No medible todavía', 'El gemelo solo simula hipótesis; no registra contingencias reales.') },
+    { id: 'benef', lvl: 'neg', n: 'Beneficio económico neto', meta: '≥ 0', f: 'Costos evitados atribuibles − costo anual de FlotaIA (solo intervenciones anticipadas vinculadas por las órdenes)', fuente: 'SEACE y Consulta Amigable', frec: 'Anual', resp: 'Logística', lb: 'Pendiente', umbral: 'El informe no define un umbral de acción', ref: 'Tabla L5', calc: KP_NM('No medible todavía', 'Los montos del informe son escenarios hipotéticos, no resultados.') }
+  ];
+  function kpAmb(valor, informativo) {
+    const E = kpColeccion('combustible'); if (!E.ok) return kpPend(E.et, E.nota, KPF.fb);
+    const filas = hcFilas(), origen = hcOrigenActivo(filas), base = AMB.filtrar(filas, { origen });
+    const meses = [...new Set(base.map(r => r.periodo))].filter(Boolean).sort(), per = meses[meses.length - 1];
+    const fuente = modoCompartido ? `${KPF.fb} · ${ORIGENES()[origen]}` : KPF.loc;
+    if (!per) return kpPend('Datos insuficientes', 'No hay cargas de combustible registradas.', fuente);
+    const t = AMB.resumen(base.filter(r => r.periodo === per), UNITS).tot, val = valor(t);
+    if (val == null) return kpPend('Datos insuficientes', 'Sin registros compatibles de diésel y toneladas del mismo turno.', fuente);
+    if (E.sinConfirmar) return Object.assign(kpPend('Pendiente de confirmación del servidor', `Periodo ${mesTxt(per)}.`, fuente), { val });
+    if (informativo) return { st: 'info', et: 'Informativo', val, v: null, fuente, gap: 'Sin meta numérica', acc: 'Reportar cada mes.', nota: `Periodo ${mesTxt(per)}.` };
+    return Object.assign(kpPend('Línea base municipal pendiente', `Periodo ${mesTxt(per)}. La meta se mide frente a la línea base.`, fuente), { val });
+  }
+
+  // ---- utilidades de presentación ----
+  const kpChip = r => `<span class="kp-chip s-${r.st}">${esc(r.st === 'pendiente' ? r.et : KPE[r.st])}</span>`;
+  const kpChipT = (st, t) => `<span class="kp-chip s-${st}">${esc(t)}</span>`;
+  const kpFiltro = (d, r) => (!kp.fN || d.lvl === kp.fN) && (!kp.fE || (kp.fE === 'pendiente' ? (r.st === 'pendiente' || r.st === 'info') : r.st === kp.fE));
+  function kpFicha(d) {
+    return `<details class="kp-ficha"><summary>Ficha técnica</summary><dl><dt>Fórmula</dt><dd>${esc(d.f)}</dd><dt>Meta</dt><dd>${esc(d.meta)}</dd><dt>Umbral → acción</dt><dd>${esc(d.umbral)}</dd><dt>Fuente</dt><dd>${esc(d.fuente)} · ${esc(d.frec)}</dd><dt>Responsable</dt><dd>${esc(d.resp)}</dd><dt>Línea base</dt><dd>${esc(d.lb)}</dd><dt>Referencia</dt><dd>Informe final, ${esc(d.ref)}</dd></dl></details>`;
+  }
+  function kpCtl(d) {
+    const V = kpV(); if (!V) return '';
+    const sl = (k, min, max, step, val, lab, fmtx) => `<label>${lab}<output data-kpo="${k}">${fmtx(val)}</output><input type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-kpin="${k}" aria-label="${esc(lab)}"></label>`;
+    if (d.id === 'exa') return V.exa == null ? '' : `<div class="kp-ctl">${sl('exa', 60, 100, 1, V.exa, 'Exactitud simulada', v => kpPct(v))}<label>Semanas consecutivas bajo 85 %<select data-kpin="exaSem"><option value="0"${V.exaSem == 0 ? ' selected' : ''}>0</option><option value="1"${V.exaSem == 1 ? ' selected' : ''}>1</option><option value="2"${V.exaSem >= 2 ? ' selected' : ''}>2 o más</option></select></label></div>`;
+    if (d.id === 'psi') return V.psiW == null ? '' : `<div class="kp-ctl">${sl('psiW', 0, 60, 1, V.psiW, 'Ciclos desplazados en la semana', v => kpPct(v))}</div>`;
+    if (d.id === 'dig') return `<div class="kp-ctl">${sl('dig', 40, 100, 1, V.dig, 'Órdenes digitales simuladas', v => kpPct(v))}</div>`;
+    if (d.id === 'a72') return `<div class="kp-ctl">${sl('a72', 40, 100, 1, V.a72, 'Alertas atendidas simuladas', v => kpPct(v))}</div>`;
+    if (d.id === 'p7') return `<div class="kp-ctl">${sl('p7', 0, 11, 1, V.p7, 'Pedidos simulados', v => kpNum(v))}</div>`;
+    return `<div class="kp-ctl">${V.emiVar == null ? '' : sl('emiVar', -20, 10, 1, V.emiVar, 'Variación vs. línea base', v => kpSig(v) + ' %')}${sl('emiUPct', 0, 30, 0.5, V.emiUPct == null ? 0 : V.emiUPct, `${V.emiU || 'C-03'}: % sobre la media`, v => kpSig(v, 1) + ' %')}</div>`;
+  }
+  function kpCardHtml(d, r, conCtl) {
+    const sub = r.sub ? `<div class="kp-sub">${r.sub.map(([a, b]) => `<span><b>${esc(a)}:</b> ${esc(b)}</span>`).join('')}</div>` : '';
+    return `<article class="kp-card s-${r.st}" id="kpc-${d.id}" data-kpid="${d.id}"${kpFiltro(d, r) ? '' : ' hidden'}><div class="kp-top"><span class="kp-src">${esc(r.fuente)}</span><span class="kp-st">${esc(r.st === 'pendiente' ? r.et : KPE[r.st])}</span></div><h3>${esc(d.n)}</h3><div class="kp-val">${esc(r.val)}</div><div class="kp-meta">Meta ${esc(d.meta)} · umbral: ${esc(d.umbral.split(' → ')[0])}</div><div class="kp-gap">Brecha: ${esc(r.gap)}</div>${r.nota ? `<div class="kp-note">${esc(r.nota)}</div>` : ''}${sub}<p class="kp-act"><b>Acción:</b> ${esc(r.acc || '—')}<small>Responsable: ${esc(d.resp)} · ${esc(d.frec)}</small></p>${conCtl ? `<div data-kpctlbox>${kpCtl(d)}</div>` : ''}${conCtl ? kpFicha(d) : ''}</article>`;
+  }
+  const kpNombreSrc = () => kp.src === 'proto' ? 'Situación inicial del prototipo' : kp.src === 'custom' ? `Personalizado (a partir de ${KP_ESC[kp.customBase].nombre})` : KP_ESC[kp.src].nombre;
+
+  // ---- render ----
+  function kpEstados() { return KP6.map(d => ({ d, r: kpEval(d) })); }
+  function kpTodos() { const E = kpEstados(); return kp.vista === 'ejecutiva' ? E : E.concat(KPX.map(d => ({ d, r: kpXEval(d) }))); }
+  function kpXEval(d) { if (d.id === 'sens' && kp.src !== 'proto') { const V = kpV(); if (V.sens == null) return kpPend('Indicador no aplicable en esta fase', 'Sin fugas severas confirmadas en campo.', KPF.esc); const ok = V.sens >= 95; return { st: ok ? 'cumple' : 'accion', val: kpPct(V.sens), v: V.sens, fuente: KPF.esc, gap: ok ? `Margen de ${kpNum(V.sens - 95)} pts` : `${kpNum(95 - V.sens)} pts bajo la meta`, acc: ok ? 'Sin acción.' : 'Bajar el umbral de probabilidad de la alerta roja y revisar variables.', nota: 'Valor del escenario simulado.' }; } return d.calc(); }
+  function kpResumen(L) {
+    const c = s => L.filter(x => x.r.st === s).length, pend = c('pendiente'), info = c('info'), ok = c('cumple'), vig = c('vigilancia'), ac = c('accion');
+    return { total: L.length, eval: L.length - pend, ok, no: vig + ac, vig, ac, pend, info };
+  }
+  function kpHeadHtml(R, C) {
+    const V = kpV(), sim = kp.src !== 'proto';
+    let fuente;
+    if (!sim) { const E = kpOrdenes(); fuente = !modoCompartido ? 'Demostración local: datos simulados en este navegador.' : E.ok ? 'Operación compartida: órdenes confirmadas por el servidor (registros académicos).' : `Operación compartida: ${E.et.toLowerCase()}.`; }
+    const g = C.gates.filter(x => x.st !== 'pendiente' || /No evaluable/.test(x.res)).map(x => `${x.n.split(' · ')[0]}: ${x.res.toLowerCase()}`).join('; ');
+    return `${sim ? '<span class="kp-simtag">Simulación académica · no son resultados municipales</span>' : ''}<span><b>${esc(kpNombreSrc())}.</b> ${esc(sim ? V.ctx : fuente)}</span><span>Resultado en la vista ${kp.vista}: <b>${R.ok}</b> cumplen, <b>${R.no}</b> no cumplen (${R.ac} con acción requerida y ${R.vig} en vigilancia)${R.info ? `, ${R.info} informativo(s)` : ''} y <b>${R.pend}</b> pendientes de datos o línea base.</span><span><b>Modelo:</b> ${esc(C.modelo.t)}${g ? ` <b>Compuertas:</b> ${esc(g)}.` : ''}</span>`;
+  }
+  function kpPintarPaneles() {
+    const L = kpTodos(), R = kpResumen(L), C = kpCompuertas(kpV());
+    $('kpHead').innerHTML = kpHeadHtml(R, C);
+    $('kpSum').innerHTML = `<div><b>${R.total}</b><span>Indicadores en la vista</span></div><div><b>${R.eval}</b><span>Evaluables</span></div><div class="ok"><b>${R.ok}</b><span>Cumplidos</span></div><div class="no"><b>${R.no}</b><span>Incumplidos (${R.ac} acción · ${R.vig} vigilancia)</span></div><div class="pe"><b>${R.pend}</b><span>Pendientes</span></div>`;
+    $('kpModel').className = 'kp-model s-' + C.modelo.st; $('kpModel').textContent = C.modelo.t;
+    $('kpGates').innerHTML = C.gates.map(g => `<div class="kp-gate"><b>${esc(g.n)} ${kpChipT(g.st, g.res)}</b>${g.crit.length ? `<ul>${g.crit.map(c => `<li>${c.ok == null ? '○' : c.ok ? '✓' : '✗'} ${esc(c.t)}</li>`).join('')}</ul>` : ''}${g.si ? `<p>${esc(g.si)}</p>` : ''}</div>`).join('') + '<p class="foot">Cumplir un KPI no basta para avanzar: cada compuerta exige todos sus criterios. Un incumplimiento fuera de las compuertas no detiene la fase; activa la acción de su propio indicador.</p>';
+    // gráfico de brechas
+    const E = L.filter(x => KP6.includes(x.d));
+    $('kpGap').innerHTML = E.map(({ d, r }) => {
+      if (r.v == null) return `<div class="kp-gp-row"><span>${esc(d.n)}</span><div class="kp-gp-tr"></div><small>${esc(r.st === 'pendiente' ? r.et : r.val)}</small></div>`;
+      const [a, b] = d.esc, pos = x => Math.max(0, Math.min(100, (x - a) / (b - a) * 100));
+      const col = r.st === 'cumple' ? 'var(--good)' : r.st === 'vigilancia' ? 'var(--warn)' : 'var(--crit)';
+      return `<div class="kp-gp-row"><span>${esc(d.n)}</span><div class="kp-gp-tr" role="img" aria-label="${esc(d.n)}: ${esc(r.val)}, meta ${esc(d.meta)}"><i style="left:${pos(d.meta0)}%"></i><em style="left:${pos(r.v)}%;background:${col}"></em></div><small>${esc(r.val)} · ${esc(r.gap)}</small></div>`;
+    }).join('');
+    // comparación entre escenarios
+    const cols = ['m6', 'm14', 'm18'].concat(kp.custom ? ['custom'] : []);
+    const nom = s => s === 'custom' ? 'Personalizado' : KP_ESC[s].nombre;
+    const VS = s => s === 'custom' ? kp.custom : KP_ESC[s];
+    $('kpCmp').innerHTML = `<thead><tr><th>Indicador</th>${cols.map(s => `<th>${esc(nom(s))}</th>`).join('')}</tr></thead><tbody>${KP6.map(d => `<tr><td>${esc(d.n)}</td>${cols.map(s => { const r = kpEval(d, s); return `<td>${esc(r.val)}<br>${kpChip(r)}</td>`; }).join('')}</tr>`).join('')}<tr><td>Estado del modelo</td>${cols.map(s => { const m = kpCompuertas(VS(s)).modelo; return `<td>${kpChipT(m.st, m.c)}<br><small>${esc(m.t)}</small></td>`; }).join('')}</tr>${[0, 1, 2].map(i => `<tr><td>${esc(kpCompuertas(KP_ESC.m18).gates[i].n)}</td>${cols.map(s => { const g = kpCompuertas(VS(s)).gates[i]; return `<td>${kpChipT(g.st, g.res)}</td>`; }).join('')}</tr>`).join('')}</tbody>`;
+    // acciones exigidas y registro local
+    const fuera = L.filter(x => x.r.st === 'accion' || x.r.st === 'vigilancia');
+    const log = kpLog(), reg = x => log.some(a => a.indicador === x.d.n && a.escenario === kpNombreSrc());
+    $('kpAcc').innerHTML = fuera.length ? fuera.map(x => `<div class="kp-arow"><span class="dot" style="background:var(${x.r.st === 'accion' ? '--crit' : '--warn'})"></span><div><b>${esc(x.d.n)} · ${esc(x.r.val)}</b><p>${esc(x.r.acc)} Responsable propuesto: ${esc(x.d.resp)}.</p></div><button type="button" class="btn sm sec" data-kpreg="${x.d.id}">${reg(x) ? 'Registrar otra' : 'Registrar acción simulada'}</button></div>`).join('') : '<div class="empty">Ningún indicador evaluable está fuera de su umbral en esta vista.</div>';
+    $('kpCount').textContent = fuera.length ? `KPI fuera de umbral con acción registrada: ${fuera.filter(reg).length} de ${fuera.length}.` : '';
+    $('kpLog').innerHTML = log.length ? `<thead><tr><th>Fecha</th><th>Indicador</th><th>Escenario</th><th>Responsable propuesto</th><th>Descripción</th><th>Estado</th><th></th></tr></thead><tbody>${log.map(a => `<tr><td>${esc(fechaHora(a.fecha))}</td><td>${esc(a.indicador)}</td><td>${esc(a.escenario)}</td><td>${esc(a.responsable)}</td><td>${esc(a.descripcion)}</td><td><select data-kplogst="${esc(a.id)}">${['Pendiente', 'En ejecución', 'Cerrada'].map(s => `<option${a.estado === s ? ' selected' : ''}>${s}</option>`).join('')}</select></td><td><button type="button" class="btn sm sec" data-kplogdel="${esc(a.id)}">Quitar</button></td></tr>`).join('')}</tbody>` : '<tbody><tr><td>Aún no hay acciones simuladas registradas en este navegador.</td></tr></tbody>';
+    if (kp.pres) kpPintarPres();
+  }
+  function kpPintarTarjetas() {
+    const E = kpEstados();
+    E.forEach(({ d, r }) => {
+      const el = $('kpc-' + d.id); if (!el) return;
+      const box = el.querySelector('[data-kpctlbox]'), ficha = el.querySelector('.kp-ficha'), abierta = ficha && ficha.open;
+      const tmp = document.createElement('div'); tmp.innerHTML = kpCardHtml(d, r, false); const nuevo = tmp.firstElementChild;
+      if (box) nuevo.appendChild(box); if (ficha) { nuevo.appendChild(ficha); ficha.open = abierta; }
+      el.replaceWith(nuevo);
+    });
+    if (kp.vista === 'ampliada') kpPintarTabla();
+    kpPintarPaneles();
+  }
+  function kpPintarTabla() {
+    const filas = [...KP6.map(d => ({ d, r: kpEval(d), p: true })), ...KPX.map(d => ({ d, r: kpXEval(d) }))];
+    $('kpTbl').innerHTML = `<thead><tr><th>Indicador</th><th>Dato</th><th>Estado</th><th>Brecha</th><th>Meta</th><th>Fuente del dato</th><th>Umbral → acción correctiva</th><th>Responsable · frecuencia</th></tr></thead><tbody>${['tec', 'pro', 'neg'].map(l => `<tr class="kp-grp"${kp.fN && kp.fN !== l ? ' hidden' : ''}><td colspan="8">${esc(KPL[l][0])}</td></tr>${filas.filter(x => x.d.lvl === l).map(({ d, r, p }) => `<tr${kpFiltro(d, r) ? '' : ' hidden'}><td><b>${esc(d.n)}</b>${p ? ' <span class="kp-chip">KPI ejecutivo</span>' : ''}<details class="kp-ficha"><summary>Ficha</summary><dl><dt>Fórmula</dt><dd>${esc(d.f)}</dd><dt>Línea base</dt><dd>${esc(d.lb)}</dd><dt>Referencia</dt><dd>${esc(d.ref)}</dd></dl></details></td><td>${esc(r.val)}${r.nota ? `<br><small>${esc(r.nota)}</small>` : ''}</td><td>${kpChip(r)}</td><td>${esc(r.gap || '—')}</td><td>${esc(d.meta)}</td><td>${esc(r.fuente)}</td><td>${esc(d.umbral)}${r.st === 'accion' || r.st === 'vigilancia' ? `<br><b>${esc(r.acc)}</b>` : ''}</td><td>${esc(d.resp)} · ${esc(d.frec)}</td></tr>`).join('')}`).join('')}</tbody>`;
+  }
+  function renderKPI() {
+    if (!$('kpGrid')) return;
+    document.querySelectorAll('[data-kpsrc]').forEach(b => { const on = b.dataset.kpsrc === kp.src; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    document.querySelectorAll('[data-kpvista]').forEach(b => { const on = b.dataset.kpvista === kp.vista; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    const ct = document.querySelector('[data-kpsrc="custom"]'); if (ct) { ct.hidden = !kp.custom; ct.textContent = kp.custom ? `Personalizado (desde ${KP_ESC[kp.customBase].nombre.split(' · ')[0]})` : 'Personalizado'; }
+    $('kpReset').disabled = kp.src === 'proto';
+    $('kpExec').hidden = kp.vista !== 'ejecutiva'; $('kpAmp').hidden = kp.vista !== 'ampliada';
+    const E = kpEstados(), conCtl = kp.src !== 'proto';
+    $('kpGrid').innerHTML = Object.keys(KPL).map(l => `<div class="kp-col"${kp.fN && kp.fN !== l ? ' hidden' : ''}><h2>${KPL[l][0]} <span>· ${KPL[l][1]}</span></h2>${E.filter(x => x.d.lvl === l).map(({ d, r }) => kpCardHtml(d, r, true)).join('')}</div>`).join('');
+    if (!conCtl) document.querySelectorAll('#kpGrid [data-kpctlbox]').forEach(b => b.remove());
+    if (kp.vista === 'ampliada') kpPintarTabla();
+    kpGateCtl();
+    kpPintarPaneles();
+  }
+
+  // ---- registro local de acciones simuladas (solo este navegador) ----
+  const KP_LOG_KEY = 'flotaia-kpi-acciones-v1'; let kpLogMem = [];
+  function kpLog() { try { const x = JSON.parse(localStorage.getItem(KP_LOG_KEY) || '[]'); return Array.isArray(x) ? x : []; } catch (e) { return kpLogMem; } }
+  function kpLogSet(l) { kpLogMem = l; try { localStorage.setItem(KP_LOG_KEY, JSON.stringify(l)); } catch (e) {} }
+
+  // ---- exportación CSV de la vista actual ----
+  function kpCSV() {
+    const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+    const L = kpTodos().filter(x => kpFiltro(x.d, x.r));
+    const filas = [['FlotaIA · Dashboard de KPIs'], ['Fuente', kpNombreSrc()], ['Vista', kp.vista], ['Exportado', fechaHora(new Date().toISOString())], ['Aviso', kp.src === 'proto' ? 'Datos del prototipo; no son datos municipales reales' : 'Simulación académica; no son resultados municipales'], [],
+      ['Indicador', 'Nivel', 'Valor', 'Meta', 'Estado', 'Brecha', 'Fuente del dato', 'Acción correctiva', 'Responsable', 'Frecuencia', 'Fórmula', 'Umbral', 'Línea base', 'Referencia del informe']];
+    L.forEach(({ d, r }) => filas.push([d.n, KPL[d.lvl][0], r.val, d.meta, r.st === 'pendiente' ? r.et : KPE[r.st], r.gap, r.fuente, r.acc, d.resp, d.frec, d.f, d.umbral, d.lb, d.ref]));
+    const csv = '﻿' + filas.map(f => f.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = `flotaia_kpis_${kp.src}_${kp.vista}_${new Date().toISOString().slice(0, 10)}.csv`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  // ---- modo sustentación ----
+  function kpPintarPres() {
+    const E = kpEstados(), C = kpCompuertas(kpV()), R = kpResumen(E);
+    $('kpPresHead').innerHTML = kpHeadHtml(R, C);
+    document.querySelectorAll('[data-kppres]').forEach(b => b.classList.toggle('on', b.dataset.kppres === kp.src));
+    $('kpPresGrid').innerHTML = Object.keys(KPL).map(l => `<div class="kp-col"><h2>${KPL[l][0]}</h2>${E.filter(x => x.d.lvl === l).map(({ d, r }) => kpCardHtml(d, r, false).replace(/ id="kpc-[a-z0-9]+"/, '').replace(' hidden>', '>')).join('')}</div>`).join('');
+  }
+  function kpAbrirPres() { if (kp.src === 'proto') kp.src = 'm14'; kp.pres = true; $('kpPres').hidden = false; renderKPI(); try { $('kpPres').requestFullscreen && $('kpPres').requestFullscreen().catch(() => {}); } catch (e) {} setTimeout(() => $('kpPresClose').focus(), 30); }
+  function kpCerrarPres() { kp.pres = false; $('kpPres').hidden = true; if (kpAnimStop()) renderKPI(); try { if (document.fullscreenElement === $('kpPres')) document.exitFullscreen(); } catch (e) {} }
+  function kpAnimStop() { if (kp.anim) { clearInterval(kp.anim); kp.anim = null; return true; } return false; }
+  function kpDeriva() {
+    kpAnimStop();
+    if (kp.src !== 'custom') { kpEditar(); }
+    kp.custom.psiW = 0; if (kp.custom.exa == null) Object.assign(kp.custom, { exa: KP_ESC.m14.exa, exaSem: KP_ESC.m14.exaSem });
+    renderKPI(); spot(kp.pres ? '#kpPresGrid' : '#kpc-psi');
+    kp.anim = setInterval(() => { kp.custom.psiW = Math.min(31, kp.custom.psiW + 1); const i = document.querySelector('[data-kpin="psiW"]'); if (i) i.value = kp.custom.psiW; kpSincOut(); kpPintarTarjetas(); if (kp.custom.psiW >= 31) { kpAnimStop(); if (!kp.pres) setTimeout(() => spot('#kpAccCard'), 300); } }, 90);
+  }
+  // Editar un escenario crea el escenario personalizado (los escenarios base no cambian).
+  function kpEditar() { if (kp.src === 'custom') return; const base = kp.src === 'proto' ? 'm14' : kp.src; kp.custom = structuredClone(KP_ESC[base]); kp.custom.nombre = 'Personalizado'; kp.customBase = base; kp.src = 'custom'; document.querySelectorAll('[data-kpsrc]').forEach(b => b.classList.toggle('on', b.dataset.kpsrc === 'custom')); const ct = document.querySelector('[data-kpsrc="custom"]'); if (ct) { ct.hidden = false; ct.textContent = `Personalizado (desde ${KP_ESC[base].nombre.split(' · ')[0]})`; } }
+  function kpSincOut() { const V = kpV(); if (!V) return; document.querySelectorAll('#kpGrid [data-kpo]').forEach(o => { const k = o.dataset.kpo, v = V[k]; o.textContent = k === 'p7' ? kpNum(v) : k === 'emiVar' ? kpSig(v) + ' %' : k === 'emiUPct' ? kpSig(v, 1) + ' %' : kpPct(v); }); }
+  function kpGateCtl() {
+    const V = kpV(); if (!V) { $('kpGateCtl').innerHTML = ''; return; }
+    $('kpGateCtl').innerHTML = `<div class="kp-ctl"><span class="kp-l">Parámetros de compuertas del escenario</span><label>Línea base de disponibilidad, MTBF y MTTR<select data-kpin="lb"><option value="1"${V.lb ? ' selected' : ''}>Disponible</option><option value="0"${V.lb ? '' : ' selected'}>Pendiente</option></select></label>${V.dias == null ? '' : `<label>Días completos y etiquetados (piloto)<output data-kpgo="dias">${kpPct(V.dias)}</output><input type="range" min="50" max="100" step="1" value="${V.dias}" data-kpin="dias"></label>`}${V.sens == null ? '' : `<label>Sensibilidad para fuga severa<output data-kpgo="sens">${kpPct(V.sens)}</output><input type="range" min="70" max="100" step="1" value="${V.sens}" data-kpin="sens"></label>`}</div>`;
+  }
+
+  // ---- eventos del módulo ----
+  document.addEventListener('click', ev => {
+    const s = ev.target.closest('[data-kpsrc]'); if (s) { kpAnimStop(); kp.src = s.dataset.kpsrc; renderKPI(); return; }
+    const v = ev.target.closest('[data-kpvista]'); if (v) { kp.vista = v.dataset.kpvista; renderKPI(); return; }
+    const p = ev.target.closest('[data-kppres]'); if (p) { kpAnimStop(); kp.src = p.dataset.kppres; renderKPI(); return; }
+    const r = ev.target.closest('[data-kpreg]');
+    if (r) { const x = kpTodos().find(y => y.d.id === r.dataset.kpreg); if (!x) return; const l = kpLog(); l.unshift({ id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), fecha: new Date().toISOString(), indicador: x.d.n, escenario: kpNombreSrc(), responsable: x.d.resp, descripcion: x.r.acc, estado: 'Pendiente' }); kpLogSet(l.slice(0, 200)); kpPintarPaneles(); return; }
+    const del = ev.target.closest('[data-kplogdel]'); if (del) { kpLogSet(kpLog().filter(a => a.id !== del.dataset.kplogdel)); kpPintarPaneles(); }
+  });
+  document.addEventListener('change', ev => {
+    const t = ev.target;
+    if (t.id === 'kpFNivel' || t.id === 'kpFEstado') { kp.fN = $('kpFNivel').value; kp.fE = $('kpFEstado').value; renderKPI(); return; }
+    if (t.matches && t.matches('[data-kplogst]')) { kpLogSet(kpLog().map(a => a.id === t.dataset.kplogst ? { ...a, estado: t.value } : a)); return; }
+    if (t.matches && t.matches('select[data-kpin]')) { kpAnimStop(); kpEditar(); const k = t.dataset.kpin; kp.custom[k] = k === 'lb' ? t.value === '1' : Number(t.value); kpPintarTarjetas(); }
+  });
+  document.addEventListener('input', ev => {
+    const t = ev.target; if (!t.matches || !t.matches('input[data-kpin]')) return;
+    kpAnimStop(); kpEditar(); kp.custom[t.dataset.kpin] = Number(t.value); kpSincOut();
+    const go = document.querySelector(`[data-kpgo="${t.dataset.kpin}"]`); if (go) go.textContent = kpPct(Number(t.value));
+    kpPintarTarjetas();
+  });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && kp.pres) kpCerrarPres(); });
+  // El escritorio actualiza el aviso #fuenteGlobal ante fallos, caché o datos del servidor; el tablero solo observa ese cambio.
+  setTimeout(() => { const f = $('fuenteGlobal'); if (f && window.MutationObserver) new MutationObserver(() => { if (vista === 'kpi' && $('kpc-exa')) kpPintarTarjetas(); }).observe(f, { childList: true, subtree: true, characterData: true }); }, 0);
+  $('kpReset').addEventListener('click', () => { kpAnimStop(); if (kp.src === 'custom') { kp.src = kp.customBase; kp.custom = null; kp.customBase = null; } renderKPI(); });
+  $('kpPresent').addEventListener('click', kpAbrirPres);
+  $('kpPresClose').addEventListener('click', kpCerrarPres);
+  $('kpPresDeriva').addEventListener('click', kpDeriva);
+  $('kpCsv').addEventListener('click', kpCSV);
+  $('kpFull').addEventListener('click', () => { const s = $('v-kpi'); try { if (document.fullscreenElement) document.exitFullscreen(); else if (s.requestFullscreen) s.requestFullscreen().catch(() => toast('El navegador no permitió la pantalla completa.', 'crit')); } catch (e) { toast('El navegador no permitió la pantalla completa.', 'crit'); } });
+  document.addEventListener('fullscreenchange', () => { const b = $('kpFull'); if (b) b.textContent = document.fullscreenElement === $('v-kpi') ? 'Salir de pantalla completa' : 'Pantalla completa'; if (!document.fullscreenElement && kp.pres) { /* el modo sustentación sigue visible aunque se salga de pantalla completa */ } });
+
   function renderStudio(K){
     const st=$('svStatus').value,unit=$('svUnit').value,txt=$('svSearch').value.trim().toLowerCase();
     const names=['Normal','Advertencia','Crítica'];
