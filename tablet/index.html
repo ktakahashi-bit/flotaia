@@ -811,6 +811,41 @@ async function crearAdaptadorFirestore() {
   const diag = (operacion, path, e, extra, nivel) => {
     try { console[nivel || "warn"]("[FlotaIA diagnóstico] " + JSON.stringify({ interfaz: diagInterfaz, vista: location.hash.slice(1) || "inicio", operacion, ruta: diagRuta(path), ...extra || {}, codigo: e && e.code || "sin-codigo" })); } catch (x) {}
   };
+  // Reabre una escucha de lectura una vez si Firebase rechaza la sesión.
+  let renovacionActiva = null;
+  function renovarCredencial(usuario) {
+    if (renovacionActiva?.usuario === usuario) return renovacionActiva.promesa;
+    const intento = { usuario, promesa: usuario.getIdToken(true) };
+    renovacionActiva = intento;
+    const limpiar = () => { if (renovacionActiva === intento) renovacionActiva = null; };
+    intento.promesa.then(limpiar, limpiar);
+    return intento.promesa;
+  }
+  function escucharConsulta(q, recibir, fallar, alReintentar) {
+    let cancelada = false, reintentada = false, detener = () => {};
+    const usuario = auth.currentUser;
+    const iniciar = () => {
+      detener = F2.onSnapshot(q, { includeMetadataChanges: true }, recibir, async (error) => {
+        if (cancelada) return;
+        if (!reintentada && usuario && auth.currentUser === usuario && navigator.onLine &&
+            ["permission-denied", "unauthenticated"].includes(error.code)) {
+          reintentada = true;
+          alReintentar(error);
+          try {
+            await renovarCredencial(usuario);
+          } catch (renovacion) {
+            if (!cancelada && auth.currentUser === usuario) fallar(renovacion);
+            return;
+          }
+          if (!cancelada && auth.currentUser === usuario) iniciar();
+          return;
+        }
+        fallar(error);
+      });
+    };
+    iniciar();
+    return () => { cancelada = true; detener(); };
+  }
   const avisar = () => conexionCbs.forEach((cb) => cb({ online: navigator.onLine }));
   window.addEventListener("online", avisar);
   window.addEventListener("offline", avisar);
@@ -822,7 +857,8 @@ async function crearAdaptadorFirestore() {
       await auth.authStateReady();
       const u = auth.currentUser;
       if (!u) throw Object.assign(new Error("La sesión terminó. Inicie sesión nuevamente."), { code: "auth/user-token-expired" });
-      await u.getIdToken(forzar);
+      if (forzar) await renovarCredencial(u);
+      else await u.getIdToken();
     },
     signIn: (email, pass) => A4.signInWithEmailAndPassword(auth, email, pass).then((c) => ({ uid: c.user.uid, email: c.user.email })),
     signInGoogle: async () => {
@@ -853,7 +889,7 @@ async function crearAdaptadorFirestore() {
       // Una comprobación directa si la suscripción solo ha entregado caché.
       // No se confirma caché ni se repite la consulta en un bucle.
       const demora = setTimeout(async () => {
-        if (!activo || confirmado || !navigator.onLine) return;
+        if (!activo || confirmado || renovando || !navigator.onLine) return;
         diag("escucha-sin-confirmar-10s", spec.path, { code: "solo-cache" }, diagConsulta(spec), "info");
         try {
           const snap = await Promise.race([
@@ -864,13 +900,14 @@ async function crearAdaptadorFirestore() {
             confirmado = true;
             onData(snap.docs.map(fromSnap), { fromCache: false, pendientes: snap.metadata.hasPendingWrites });
           }
-        } catch (e) { if (activo && !confirmado) { diag("comprobacion-servidor", spec.path, e, diagConsulta(spec)); if (onError) onError(e); } }
+        } catch (e) { if (activo && !confirmado && !renovando) { diag("comprobacion-servidor", spec.path, e, diagConsulta(spec)); if (onError) onError(e); } }
       }, 10000);
-      const dejar = F2.onSnapshot(q, { includeMetadataChanges: true }, (snap) => {
+      let renovando = false;
+      const dejar = escucharConsulta(q, (snap) => {
         if (!activo) return;
         if (!snap.metadata.fromCache) { confirmado = true; clearTimeout(demora); }
         onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites });
-      }, (e) => { if (activo) { clearTimeout(demora); diag("escucha", spec.path, e, diagConsulta(spec)); if(onError) onError(e); } });
+      }, (e) => { if (activo) { clearTimeout(demora); diag("escucha", spec.path, e, diagConsulta(spec)); if(onError) onError(e); } }, (e) => { renovando = true; diag("reintento-sesion-escucha", spec.path, e, diagConsulta(spec)); });
       return () => { activo = false; clearTimeout(demora); dejar(); };
     },
     watchDoc(path, onData, onError) {
