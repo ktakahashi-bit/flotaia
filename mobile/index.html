@@ -732,6 +732,14 @@ async function crearAdaptadorFirestore() {
     return o;
   };
   const conexionCbs = /* @__PURE__ */ new Set();
+  // Diagnóstico en consola: interfaz, vista, operación, ruta (sin identificadores) y código de error.
+  // No registra credenciales, valores de consulta, identificadores de documentos ni datos personales.
+  const diagInterfaz = /\/mobile\//.test(location.pathname) ? "celular" : /\/tablet\//.test(location.pathname) ? "tablet" : "escritorio";
+  const diagRuta = (path) => (path || []).map((p, i) => i % 2 ? "{id}" : p).join("/");
+  const diagConsulta = (spec) => ({ filtros: (spec.where || []).map(([f, op]) => `${f} ${op}`), orden: spec.orderBy ? spec.orderBy.join(" ") : null, limite: spec.limit || null });
+  const diag = (operacion, path, e, extra, nivel) => {
+    try { console[nivel || "warn"]("[FlotaIA diagnóstico]", { interfaz: diagInterfaz, vista: location.hash.slice(1) || "inicio", operacion, ruta: diagRuta(path), ...extra || {}, codigo: e && e.code || "sin-codigo" }); } catch (x) {}
+  };
   const avisar = () => conexionCbs.forEach((cb) => cb({ online: navigator.onLine }));
   window.addEventListener("online", avisar);
   window.addEventListener("offline", avisar);
@@ -754,12 +762,14 @@ async function crearAdaptadorFirestore() {
     },
     signOut: () => A4.signOut(auth),
     async getDoc(path) {
-      const s = await F2.getDoc(ref(path));
+      let s;
+      try { s = await F2.getDoc(ref(path)); } catch (e) { diag("lectura-documento", path, e); throw e; }
       return s.exists() ? fromSnap(s) : null;
     },
     // Lectura directa del servidor (nunca de la caché): falla si el servidor no responde.
     async getDocServidor(path) {
-      const s = await F2.getDocFromServer(ref(path));
+      let s;
+      try { s = await F2.getDocFromServer(ref(path)); } catch (e) { diag("lectura-servidor", path, e); throw e; }
       return s.exists() ? fromSnap(s) : null;
     },
     watch(spec, onData, onError) {
@@ -773,6 +783,7 @@ async function crearAdaptadorFirestore() {
       // No se confirma caché ni se repite la consulta en un bucle.
       const demora = setTimeout(async () => {
         if (!activo || confirmado || !navigator.onLine) return;
+        diag("escucha-sin-confirmar-10s", spec.path, { code: "solo-cache" }, diagConsulta(spec), "info");
         try {
           const snap = await Promise.race([
             F2.getDocsFromServer(q),
@@ -782,13 +793,13 @@ async function crearAdaptadorFirestore() {
             confirmado = true;
             onData(snap.docs.map(fromSnap), { fromCache: false, pendientes: snap.metadata.hasPendingWrites });
           }
-        } catch (e) { if (activo && !confirmado && onError) onError(e); }
+        } catch (e) { if (activo && !confirmado) { diag("comprobacion-servidor", spec.path, e, diagConsulta(spec)); if (onError) onError(e); } }
       }, 10000);
       const dejar = F2.onSnapshot(q, { includeMetadataChanges: true }, (snap) => {
         if (!activo) return;
         if (!snap.metadata.fromCache) { confirmado = true; clearTimeout(demora); }
         onData(snap.docs.map(fromSnap), { fromCache: snap.metadata.fromCache, pendientes: snap.metadata.hasPendingWrites });
-      }, (e) => { if (activo) { clearTimeout(demora); if(onError) onError(e); } });
+      }, (e) => { if (activo) { clearTimeout(demora); diag("escucha", spec.path, e, diagConsulta(spec)); if(onError) onError(e); } });
       return () => { activo = false; clearTimeout(demora); dejar(); };
     },
     watchDoc(path, onData, onError) {
@@ -796,7 +807,7 @@ async function crearAdaptadorFirestore() {
         ref(path),
         { includeMetadataChanges: true },
         (s) => onData(s.exists() ? fromSnap(s) : null, { fromCache: s.metadata.fromCache, pendientes: s.metadata.hasPendingWrites }),
-        (err2) => onError && onError(err2)
+        (err2) => { diag("escucha-documento", path, err2); if (onError) onError(err2); }
       );
     },
     newId: (path) => F2.doc(col(path)).id,
@@ -806,17 +817,19 @@ async function crearAdaptadorFirestore() {
         if (o.op === "set") b.set(ref(o.path), prep(o.data));
         else b.update(ref(o.path), prep(o.data));
       });
-      return b.commit();
+      return b.commit().catch((e) => { diag("escritura", null, e, { operaciones: ops.map((o) => `${o.op} ${diagRuta(o.path)}`) }); throw e; });
     },
     tx(fn) {
+      const rutas = [];
       return F2.runTransaction(db, async (t) => fn({
         get: async (p) => {
+          rutas.push("get " + diagRuta(p));
           const s = await t.get(ref(p));
           return s.exists() ? fromSnap(s) : null;
         },
-        set: (p, d) => t.set(ref(p), prep(d)),
-        update: (p, d) => t.update(ref(p), prep(d))
-      }));
+        set: (p, d) => { rutas.push("set " + diagRuta(p)); return t.set(ref(p), prep(d)); },
+        update: (p, d) => { rutas.push("update " + diagRuta(p)); return t.update(ref(p), prep(d)); }
+      })).catch((e) => { diag("transaccion", null, e, { operaciones: [...new Set(rutas)] }); throw e; });
     },
     // Alta de una cuenta por el administrador sin cerrar su propia sesión: se usa una instancia secundaria de Firebase.
     async crearCuenta(email, pass) {
